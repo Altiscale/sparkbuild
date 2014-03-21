@@ -19,10 +19,10 @@ if [ ! -e "$spark_spec" ] ; then
   exit -9
 fi
 
-if [ ! -x "/usr/bin/rpmdev-setuptree" -o ! -x "/usr/bin/rpmbuild" ] ; then
-  echo "fail - rpmdev-setuptree and rpmbuild in /usr/bin/ are both required to build RPMs"
-  exit -8
-fi
+#if [ ! -f "/usr/bin/rpmdev-setuptree" -o ! -f "/usr/bin/rpmbuild" ] ; then
+#  echo "fail - rpmdev-setuptree and rpmbuild in /usr/bin/ are both required to build RPMs"
+#  exit -8
+#fi
 
 # should switch to WORKSPACE
 # e.g. /mnt/ebs1/jenkins/workspace/spark_build_test-alee
