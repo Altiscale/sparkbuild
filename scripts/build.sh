@@ -15,17 +15,10 @@ if [ ! -e "$spark_spec" ] ; then
 fi
 
 pushd `pwd`
-cd ~
-# Cloning git repo to build Spark locally by 'root'
-if [ -d sparkbuild ] ; then
-  echo "deleting prev sparkbuild repo"
-  rm -rf sparkbuild
-fi
-git clone https://github.com/Altiscale/sparkbuild.git sparkbuild
 cd sparkbuild
 # Manual fix Git URL issue in submodule, safety net, just in case the git scheme doesn't work
-sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .gitmodules
-sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .git/config
+# sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .gitmodules
+# sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .git/config
 git submodule update --init --recursive
 pushd `pwd`
 cd spark
@@ -37,7 +30,6 @@ tar cvzf spark.tar.gz spark
 popd
 
 pushd `pwd`
-
 cd ~
 /usr/bin/rpmdev-setuptree
 

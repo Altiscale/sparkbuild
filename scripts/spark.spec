@@ -1,4 +1,4 @@
-%define major_ver 0.9.0
+%define major_ver %(echo {$SPARK_VERSION})
 %define service_name spark
 %define company_prefix altiscale
 %define pkg_name %{service_name}-%{major_ver}
@@ -58,10 +58,12 @@ echo "pkg_name = %{pkg_name}"
 %{__mkdir} -p $RPM_BUILD_ROOT%{spark}/
 %{__mkdir} -p $RPM_BUILD_ROOT%{spark}/lib
 cp -rp $RPM_BUILD_DIR/%{service_name}/assembly/target/scala-2.10/*.jar $RPM_BUILD_ROOT%{spark}/lib/
-# cp -rp $RPM_BUILD_DIR/%{service_name}/bin $RPM_BUILD_ROOT%{spark}/
-# cp -rp $RPM_BUILD_DIR/%{service_name}/sbin $RPM_BUILD_ROOT%{spark}/
 cp -rp $RPM_BUILD_DIR/%{service_name}/conf $RPM_BUILD_ROOT%{spark}/
-# cp -rp $RPM_BUILD_DIR/%{service_name}/python $RPM_BUILD_ROOT%{spark}/
+# The following folders involved other dependencies from python, etc
+# that will fail the RPM build. Comment out for now.
+cp -rp $RPM_BUILD_DIR/%{service_name}/bin $RPM_BUILD_ROOT%{spark}/
+cp -rp $RPM_BUILD_DIR/%{service_name}/sbin $RPM_BUILD_ROOT%{spark}/
+cp -rp $RPM_BUILD_DIR/%{service_name}/python $RPM_BUILD_ROOT%{spark}/
 
 echo "ok - creating user:group spark:spark"
 SPARK_GID=56789
@@ -73,8 +75,16 @@ getent passwd ${SPARK_USER} >/dev/null || useradd -g ${SPARK_GID} -c "creating s
 
 # Create a password, this should be disabled if you are automating this script
 # The build env should have these users created for you already
-echo "Create a password for the new created user ${SPARK_USER}"
+echo "ok - create a password for the new created user ${SPARK_USER}"
 echo "${SPARK_USER}:${SPARK_USER}" | chpasswd
+# create symlink under /opt/
+# if [ -x /opt/spark ] ; then
+#  echo "warn - detected potential existing link for /opt/spark, unlinking and relink"
+#  unlink /opt/spark
+#  ln -sf %{spark} /opt/spark
+#  echo "ok - /opt/spark created and pointing to %{spark}"
+# fi
+
 
 %clean
 echo "ok - cleaning up temporary files, deleting $RPM_BUILD_ROOT%{spark}"
