@@ -1,12 +1,17 @@
 #!/bin/bash
 
 curr_dir=`dirname $0`
-local_dir=`cd $curr_dir; pwd`
+curr_dir=`cd $curr_dir; pwd`
 
-spark_spec="$local_dir/spark.spec"
+setup_host="$curr_dir/setup_host.sh"
+spark_spec="$curr_dir/spark.spec"
 
-if [ -f "$local_dir/setup_env.sh" ]; then
-  source "$local_dir/setup_env.sh"
+if [ -f "$curr_dir/setup_env.sh" ]; then
+  source "$curr_dir/setup_env.sh"
+fi
+
+if [ ! -f "$curr_dir/setup_host.sh" ]; then
+  echo "warn - $setup_host does not exist, we may not need this if all the libs and RPMs are pre-installed"
 fi
 
 if [ ! -e "$spark_spec" ] ; then
@@ -14,32 +19,30 @@ if [ ! -e "$spark_spec" ] ; then
   exit -9
 fi
 
-pushd `pwd`
-cd sparkbuild
+if [ ! -x "/usr/bin/rpmdev-setuptree" -o ! -x "/usr/bin/rpmbuild" ] ; then
+  echo "fail - rpmdev-setuptree and rpmbuild in /usr/bin/ are both required to build RPMs"
+  exit -8
+fi
+
+# should switch to WORKSPACE
+# e.g. /mnt/ebs1/jenkins/workspace/spark_build_test-alee
+# If not, you will be in the $WORKSPACE/spark folder already, just go ahead and work on the submodule
+
 # Manual fix Git URL issue in submodule, safety net, just in case the git scheme doesn't work
 # sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .gitmodules
 # sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .git/config
-git submodule update --init --recursive
-pushd `pwd`
-cd spark
-echo "switching to spark branch-0.9 and refetch the files"
+echo "ok - switching to spark branch-0.9 and refetch the files"
 git checkout branch-0.9
 git fetch --all
-popd
 tar cvzf spark.tar.gz spark
-popd
 
-pushd `pwd`
-cd ~
 /usr/bin/rpmdev-setuptree
 
 cp "$spark_spec" ~/rpmbuild/SPECS/
 cp -r ~/sparkbuild/spark.tar.gz ~/rpmbuild/SOURCES/
-rpmbuild -vv -ba ~/rpmbuild/SPECS/spark.spec
+rpmbuild -vv -ba --clean ~/rpmbuild/SPECS/spark.spec
 
-echo "Build Completed successfully!"
-
-popd
+echo "ok - build Completed successfully!"
 
 exit 0
 

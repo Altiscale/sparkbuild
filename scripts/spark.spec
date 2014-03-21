@@ -77,19 +77,14 @@ getent passwd ${SPARK_USER} >/dev/null || useradd -g ${SPARK_GID} -c "creating s
 # The build env should have these users created for you already
 echo "ok - create a password for the new created user ${SPARK_USER}"
 echo "${SPARK_USER}:${SPARK_USER}" | chpasswd
-# create symlink under /opt/
-# if [ -x /opt/spark ] ; then
-#  echo "warn - detected potential existing link for /opt/spark, unlinking and relink"
-#  unlink /opt/spark
-#  ln -sf %{spark} /opt/spark
-#  echo "ok - /opt/spark created and pointing to %{spark}"
-# fi
-
 
 %clean
 echo "ok - cleaning up temporary files, deleting $RPM_BUILD_ROOT%{spark}"
 if [ -d "$RPM_BUILD_ROOT%{spark}" ] ; then
   rm -rf "$RPM_BUILD_ROOT%{spark}"
+fi
+if [ -d "$RPM_BUILD_DIR%{service_name}" ] ; then
+  rm -rf "$RPM_BUILD_DIR%{service_name}"
 fi
 
 %files
