@@ -24,9 +24,13 @@ fi
 #  exit -8
 #fi
 
-# should switch to WORKSPACE
-# e.g. /mnt/ebs1/jenkins/workspace/spark_build_test-alee
+# should switch to WORKSPACE, current folder will be in WORKSPACE/spark due to 
+# hadoop_ecosystem_component_build.rb => this script will change directory into your submodule dir
+# WORKSPACE is the default path when jenkin launches e.g. /mnt/ebs1/jenkins/workspace/spark_build_test-alee
 # If not, you will be in the $WORKSPACE/spark folder already, just go ahead and work on the submodule
+# The path in the following is all relative, if the parent jenkin config is changed, things may break here.
+pushd `pwd`
+cd $WORKSPACE/spark
 
 # Manual fix Git URL issue in submodule, safety net, just in case the git scheme doesn't work
 # sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .gitmodules
@@ -34,15 +38,35 @@ fi
 echo "ok - switching to spark branch-0.9 and refetch the files"
 git checkout branch-0.9
 git fetch --all
+
+cd $WORKSPACE
+
 tar cvzf spark.tar.gz spark
 
-/usr/bin/rpmdev-setuptree
+rpmdev-setuptree
 
-cp "$spark_spec" ~/rpmbuild/SPECS/
-cp -r ~/sparkbuild/spark.tar.gz ~/rpmbuild/SOURCES/
-rpmbuild -vv -ba --clean ~/rpmbuild/SPECS/spark.spec
+cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
+cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
+rpmbuild -vv -ba --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
+
+if [ $? -ne "0" ] ; then
+  echo "fail - RPM build failed"
+fi
+  
+popd
 
 echo "ok - build Completed successfully!"
 
 exit 0
+
+
+
+
+
+
+
+
+
+
+
 
