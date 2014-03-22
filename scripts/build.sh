@@ -49,7 +49,7 @@ mkdir -p $WORKSPACE/rpmbuild/{BUILD,RPMS,SPECS,SOURCES,SRPMS}/
 
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
-rpmbuild -vv -ba --buildroot=$WORKSPACE/rpmbuild --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
+rpmbuild -vv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot=$WORKSPACE/rpmbuild --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"

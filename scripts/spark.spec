@@ -12,7 +12,7 @@ License: Copyright (C) 2014 Altiscale. All rights reserved.
 Packager: Altiscale alee@altiscale.com
 Group: Applications
 Source: %{service_name}.tar.gz
-# BuildRoot: %{_tmppath}/build-root-%{service_name}
+BuildRoot: %{_tmppath}/build-root-%{service_name}
 Requires: scala-2.10.3 >= 2.10.3
 
 Prefix: /spark
