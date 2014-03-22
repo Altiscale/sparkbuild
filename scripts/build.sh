@@ -46,7 +46,7 @@ tar cvzf $WORKSPACE/spark.tar.gz spark
 # Looks like this is not installed on all machines
 # rpmdev-setuptree
 mkdir -p $WORKSPACE/rpmbuild/{BUILD,RPMS,SPECS,SOURCES,SRPMS}/
-
+export SCALA_HOME=$WORKSPACE/rpmbuild/BUILD/scala
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
 rpmbuild -vv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot=$WORKSPACE/rpmbuild --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
