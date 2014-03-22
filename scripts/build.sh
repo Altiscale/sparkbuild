@@ -41,7 +41,7 @@ git fetch --all
 
 cd $WORKSPACE
 
-tar cvzf spark.tar.gz spark
+tar cvzf $WORKSPACE/spark.tar.gz spark
 
 # Looks like this is not installed on all machines
 # rpmdev-setuptree
