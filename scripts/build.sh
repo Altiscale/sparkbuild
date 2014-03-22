@@ -43,11 +43,13 @@ cd $WORKSPACE
 
 tar cvzf spark.tar.gz spark
 
-rpmdev-setuptree
+# Looks like this is not installed on all machines
+# rpmdev-setuptree
+mkdir -p $WORKSPACE/rpmbuild/{BUILD,RPMS,SPECS,SOURCES,SRPMS}/
 
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
-rpmbuild -vv -ba --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
+rpmbuild -vv -ba --buildroot=$WORKSPACE/rpmbuild --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"
