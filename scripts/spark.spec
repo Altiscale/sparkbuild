@@ -23,15 +23,7 @@ Url: http://www.altiscale.com/
 with YARN enabled. This package should work with Altiscale Hadoop.
 
 %prep
-echo "ok - building %{pkg_name}, installing scala first"
-wget --quiet --output-document=scala.tgz  "http://www.scala-lang.org/files/archive/scala-2.10.3.tgz"
-tar xvf scala.tgz
-if [ -d $RPM_BUILD_DIR/scala ] ; then
-  echo "deleting prev installed scala"
-  rm -rf $RPM_BUILD_DIR/scala
-fi
-mv scala-* $RPM_BUILD_DIR/scala
-export SCALA_HOME=$RPM_BUILD_DIR/scala
+echo "ok - building %{pkg_name}"
 
 %setup -q -n %{service_name}
 

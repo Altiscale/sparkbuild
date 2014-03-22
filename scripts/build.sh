@@ -6,6 +6,8 @@ curr_dir=`cd $curr_dir; pwd`
 setup_host="$curr_dir/setup_host.sh"
 spark_spec="$curr_dir/spark.spec"
 
+env | sort
+
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
 fi
@@ -18,6 +20,15 @@ if [ ! -e "$spark_spec" ] ; then
   echo "fail - missing $spark_spec file, can't continue, exiting"
   exit -9
 fi
+
+wget --quiet --output-document=scala.tgz  "http://www.scala-lang.org/files/archive/scala-2.10.3.tgz"
+tar xvf scala.tgz
+if [ -d $WORKSPACE/scala ] ; then
+  echo "deleting prev installed scala"
+  rm -rf $WORKSPACE/scala
+fi
+mv scala-* $WORKSPACE/scala
+export SCALA_HOME=$WORKSPACE/scala
 
 #if [ ! -f "/usr/bin/rpmdev-setuptree" -o ! -f "/usr/bin/rpmbuild" ] ; then
 #  echo "fail - rpmdev-setuptree and rpmbuild in /usr/bin/ are both required to build RPMs"
@@ -49,7 +60,7 @@ mkdir -p $WORKSPACE/rpmbuild/{BUILD,RPMS,SPECS,SOURCES,SRPMS}/
 export SCALA_HOME=$WORKSPACE/rpmbuild/BUILD/scala
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
-rpmbuild -vv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot=$WORKSPACE/rpmbuild --clean $WORKSPACE/rpmbuild/SPECS/spark.spec
+rpmbuild -vv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot=$WORKSPACE/rpmbuild $WORKSPACE/rpmbuild/SPECS/spark.spec
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"
