@@ -5,6 +5,7 @@ curr_dir=`cd $curr_dir; pwd`
 
 setup_host="$curr_dir/setup_host.sh"
 spark_spec="$curr_dir/spark.spec"
+spark_rc_macros="$curr_dir/spark_rpm_macros"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
@@ -20,6 +21,11 @@ fi
 
 if [ ! -e "$spark_spec" ] ; then
   echo "fail - missing $spark_spec file, can't continue, exiting"
+  exit -9
+fi
+
+if [ ! -e "$spark_rc_macros" ] ; then
+  echo "fail - missing $spark_rc_macros file to override rpmbuild folders, can't continue, exiting"
   exit -9
 fi
 
@@ -63,17 +69,19 @@ git checkout branch-0.9
 git fetch --all
 popd
 
+echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
 pushd `pwd`
-cd $WORKSPACE/
+# spark is located at $WORKSPACE/spark
+cd $WORKSPACE
 tar cvzf $WORKSPACE/spark.tar.gz spark
 popd
 
 # Looks like this is not installed on all machines
 # rpmdev-setuptree
-mkdir -p $WORKSPACE/rpmbuild/{BUILD,RPMS,SPECS,SOURCES,SRPMS}/
+mkdir -p $WORKSPACE/rpmbuild/{BUILD,BUILDROOT,RPMS,SPECS,SOURCES,SRPMS}/
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
-SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec
+SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --rcfile=$spark_rc_macros --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"
