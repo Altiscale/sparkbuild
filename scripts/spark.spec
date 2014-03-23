@@ -64,26 +64,26 @@ cp -rp %{_builddir}/%{service_name}/python %{buildroot}%{install_spark_dest}/
 
 # haven't heard any negative feedback by embedding user creation in RPM spec
 # during test installation
-if [ "x%{spark_user}" = "x" ] ; then
-  echo "ok - applying default spark user 'spark'"
-  echo "to override default user, UID, and GID, set env for SPARK_USER, SPARK_GID, SPARK_UID"
-  echo "ok - creating 56789:56789 spark"
-  getent group spark >/dev/null || groupadd  -g 56789 spark
-  getent passwd spark >/dev/null || useradd -g 56789 -c "creating spark account to run spark later" spark
-  echo "ok - create a password for the new created user spark"
-  echo "spark:spark" | chpasswd
-elif [ "x%{spark_uid}" = "x" -o "x%{spark_gid}" = "x" ] ; then
-  echo "fatal - spark user specified, but missing uid or gid definition. Specify them all in SPARK_USER, SPARK_UID, SPARK_GID"
-  exit -5
-else
-  echo "ok - creating %{spark_uid}:%{spark_gid} %{spark_user}"
-  getent group %{spark_user} >/dev/null || groupadd  -g %{spark_gid} %{spark_user}
-  getent passwd %{spark_user} >/dev/null || useradd -g %{spark_gid} -c "creating spark account to run spark later" %{spark_user}
+# if [ "x%{spark_user}" = "x" ] ; then
+#  echo "ok - applying default spark user 'spark'"
+#  echo "to override default user, UID, and GID, set env for SPARK_USER, SPARK_GID, SPARK_UID"
+#  echo "ok - creating 56789:56789 spark"
+#  getent group spark >/dev/null || groupadd  -g 56789 spark
+#  getent passwd spark >/dev/null || useradd -g 56789 -c "creating spark account to run spark later" spark
+#  echo "ok - create a password for the new created user spark"
+#  echo "spark:spark" | chpasswd
+#elif [ "x%{spark_uid}" = "x" -o "x%{spark_gid}" = "x" ] ; then
+#  echo "fatal - spark user specified, but missing uid or gid definition. Specify them all in SPARK_USER, SPARK_UID, SPARK_GID"
+#  exit -5
+#else
+#  echo "ok - creating %{spark_uid}:%{spark_gid} %{spark_user}"
+#  getent group %{spark_user} >/dev/null || groupadd  -g %{spark_gid} %{spark_user}
+#  getent passwd %{spark_user} >/dev/null || useradd -g %{spark_gid} -c "creating spark account to run spark later" %{spark_user}
   # Create a password, this should be disabled if you are automating this script
   # The build env should have these users created for you already
-  echo "ok - create a password for the new created user %{spark_user}"
-  echo "%{spark_user}:%{spark_user}" | chpasswd
-fi
+#  echo "ok - create a password for the new created user %{spark_user}"
+#  echo "%{spark_user}:%{spark_user}" | chpasswd
+#fi
 
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
