@@ -79,8 +79,6 @@ if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"
 fi
   
-popd
-
 echo "ok - build Completed successfully!"
 
 exit 0
