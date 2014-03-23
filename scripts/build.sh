@@ -6,10 +6,12 @@ curr_dir=`cd $curr_dir; pwd`
 setup_host="$curr_dir/setup_host.sh"
 spark_spec="$curr_dir/spark.spec"
 
-env | sort
-
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
+fi
+
+if [ "x${WORKSPACE}" = "x" ] ; then
+  WORKSPACE="$curr_dir/../"
 fi
 
 if [ ! -f "$curr_dir/setup_host.sh" ]; then
@@ -21,14 +23,24 @@ if [ ! -e "$spark_spec" ] ; then
   exit -9
 fi
 
-wget --quiet --output-document=scala.tgz  "http://www.scala-lang.org/files/archive/scala-2.10.3.tgz"
-tar xvf scala.tgz
-if [ -d $WORKSPACE/scala ] ; then
-  echo "deleting prev installed scala"
-  rm -rf $WORKSPACE/scala
+env | sort
+
+echo "checking if scala is installed on the system"
+# this chk can be smarter, however, the build script will re-download the scala libs again during build process
+# we can save some build time if we can just re-use the pre-installed scala
+chk_scala_rpm=`rpm -qa | grep scala`
+if [ "x${chk_scala_rpm}" = "x" -o ! -d "${SCALA_HOME}" ] ; then
+  echo "warn - SCALA_HOME may or may not be defined, however, $SCALA_HOME folder doesn't exist, re-downloading scala and install scala temporarily"
+  wget --quiet --output-document=scala.tgz  "http://www.scala-lang.org/files/archive/scala-2.10.3.tgz"
+  tar xvf scala.tgz
+  if [ -d $WORKSPACE/scala ] ; then
+    echo "deleting prev installed scala"
+    rm -rf $WORKSPACE/scala
+  fi
+  mv scala-* $WORKSPACE/scala
+  SCALA_HOME=$WORKSPACE/scala
+  echo "scala downloaded completed, and put to $SCALA_HOME"
 fi
-mv scala-* $WORKSPACE/scala
-export SCALA_HOME=$WORKSPACE/scala
 
 #if [ ! -f "/usr/bin/rpmdev-setuptree" -o ! -f "/usr/bin/rpmbuild" ] ; then
 #  echo "fail - rpmdev-setuptree and rpmbuild in /usr/bin/ are both required to build RPMs"
@@ -49,18 +61,19 @@ cd $WORKSPACE/spark
 echo "ok - switching to spark branch-0.9 and refetch the files"
 git checkout branch-0.9
 git fetch --all
+popd
 
-cd $WORKSPACE
-
+pushd `pwd`
+cd $WORKSPACE/
 tar cvzf $WORKSPACE/spark.tar.gz spark
+popd
 
 # Looks like this is not installed on all machines
 # rpmdev-setuptree
 mkdir -p $WORKSPACE/rpmbuild/{BUILD,RPMS,SPECS,SOURCES,SRPMS}/
-export SCALA_HOME=$WORKSPACE/rpmbuild/BUILD/scala
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 cp -r $WORKSPACE/spark.tar.gz $WORKSPACE/rpmbuild/SOURCES/
-rpmbuild -vv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot=$WORKSPACE/rpmbuild $WORKSPACE/rpmbuild/SPECS/spark.spec
+SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"

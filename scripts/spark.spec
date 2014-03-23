@@ -1,21 +1,23 @@
-%define major_ver %(echo {$SPARK_VERSION})
+%define major_ver %(echo ${SPARK_VERSION})
 %define service_name spark
 %define company_prefix altiscale
 %define pkg_name %{service_name}-%{major_ver}
-%define spark /opt/%{pkg_name}
+%define install_spark_dest /opt/%{pkg_name}
+%define packager %(echo ${PKGER})
+%define spark_user %(echo ${SPARK_USER})
+%define spark_gid %(echo ${SPARK_GID})
+%define spark_uid %(echo ${SPARK_UID})
 
 Name: %{service_name}
 Summary: %{pkg_name} RPM Installer
 Version: %{major_ver}
-Release: 20140320%{dist}
+Release: 1%{?dist}
 License: Copyright (C) 2014 Altiscale. All rights reserved.
-Packager: Altiscale alee@altiscale.com
-Group: Applications
-Source: %{service_name}.tar.gz
-BuildRoot: %{_tmppath}/build-root-%{service_name}
+# Packager: %{packager}
+Source: %{_sourcedir}/%{service_name}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{service_name}
 Requires: scala-2.10.3 >= 2.10.3
 
-Prefix: /spark
 Url: http://www.altiscale.com/
 
 %description
@@ -23,20 +25,20 @@ Url: http://www.altiscale.com/
 with YARN enabled. This package should work with Altiscale Hadoop.
 
 %prep
-echo "ok - building %{pkg_name}"
+# copying files into BUILD/spark/ e.g. BUILD/spark/* 
+echo "ok - copying files from %{_sourcedir} to folder  %{_builddir}/%{service_name}"
 
 %setup -q -n %{service_name}
 
 %build
-echo $JAVA_HOME
-echo $MAVEN_HOME
-echo $ANT_HOME
-echo $M2_HOME
-echo $MAVEN_HOME
-echo $MAVEN_OPTS
-echo $SCALA_HOME
+echo "ANT_HOME=$ANT_HOME"
+echo "JAVA_HOME=$JAVA_HOME"
+echo "MAVEN_HOME=$MAVEN_HOME"
+echo "MAVEN_OPTS=$MAVEN_OPTS"
+echo "M2_HOME=$M2_HOME"
+echo "SCALA_HOME=$SCALA_HOME"
 
-echo "build - spark core"
+echo "build - spark core in %{_builddir}"
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
 SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
@@ -44,45 +46,52 @@ SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 echo "Build Completed successfully!"
 
 %install
-echo "RPM_BUILD_DIR = $RPM_BUILD_DIR"
-echo "RPM_BUILD_ROOT = $RPM_BUILD_ROOT"
-echo "spark = %{spark}"
-echo "pkg_name = %{pkg_name}"
-%{__mkdir} -p $RPM_BUILD_ROOT%{spark}/
-%{__mkdir} -p $RPM_BUILD_ROOT%{spark}/lib
-cp -rp $RPM_BUILD_DIR/%{service_name}/assembly/target/scala-2.10/*.jar $RPM_BUILD_ROOT%{spark}/lib/
-cp -rp $RPM_BUILD_DIR/%{service_name}/conf $RPM_BUILD_ROOT%{spark}/
-# The following folders involved other dependencies from python, etc
-# that will fail the RPM build. Comment out for now.
-cp -rp $RPM_BUILD_DIR/%{service_name}/bin $RPM_BUILD_ROOT%{spark}/
-cp -rp $RPM_BUILD_DIR/%{service_name}/sbin $RPM_BUILD_ROOT%{spark}/
-cp -rp $RPM_BUILD_DIR/%{service_name}/python $RPM_BUILD_ROOT%{spark}/
+# manual cleanup for compatibility, and to be safe if the %clean isn't implemented
+rm -rf %{buildroot}%{install_spark_dest}
+# re-create installed dest folders
+mkdir -p %{buildroot}%{install_spark_dest}
+echo "compiled/built folder is (not the same as buildroot) RPM_BUILD_DIR = %{_builddir}"
+echo "test installtion folder (aka buildroot) is RPM_BUILD_ROOT = %{buildroot}"
+echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
+echo "test install spark label pkg_name = %{pkg_name}"
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib
+cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/lib/
+cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{service_name}/python %{buildroot}%{install_spark_dest}/
 
-echo "ok - creating user:group spark:spark"
-SPARK_GID=56789
-SPARK_UID=56789
-SPARK_USER=spark
-
-getent group ${SPARK_USER} >/dev/null || groupadd  -g ${SPARK_GID} ${SPARK_USER}
-getent passwd ${SPARK_USER} >/dev/null || useradd -g ${SPARK_GID} -c "creating spark account to run spark later" ${SPARK_USER}
-
-# Create a password, this should be disabled if you are automating this script
-# The build env should have these users created for you already
-echo "ok - create a password for the new created user ${SPARK_USER}"
-echo "${SPARK_USER}:${SPARK_USER}" | chpasswd
+# haven't heard any negative feedback by embedding user creation in RPM spec
+# during test installation
+if [ "x%{spark_user}" = "x" ] ; then
+  echo "ok - applying default spark user 'spark'"
+  echo "to override default user, UID, and GID, set env for SPARK_USER, SPARK_GID, SPARK_UID"
+  echo "ok - creating 56789:56789 spark"
+  getent group spark >/dev/null || groupadd  -g 56789 spark
+  getent passwd spark >/dev/null || useradd -g 56789 -c "creating spark account to run spark later" spark
+  echo "ok - create a password for the new created user spark"
+  echo "spark:spark" | chpasswd
+elif [ "x%{spark_uid}" = "x" -o "x%{spark_gid}" = "x" ] ; then
+  echo "fatal - spark user specified, but missing uid or gid definition. Specify them all in SPARK_USER, SPARK_UID, SPARK_GID"
+  exit -5
+else
+  echo "ok - creating %{spark_uid}:%{spark_gid} %{spark_user}"
+  getent group %{spark_user} >/dev/null || groupadd  -g %{spark_gid} %{spark_user}
+  getent passwd %{spark_user} >/dev/null || useradd -g %{spark_gid} -c "creating spark account to run spark later" %{spark_user}
+  # Create a password, this should be disabled if you are automating this script
+  # The build env should have these users created for you already
+  echo "ok - create a password for the new created user %{spark_user}"
+  echo "%{spark_user}:%{spark_user}" | chpasswd
+fi
 
 %clean
-echo "ok - cleaning up temporary files, deleting $RPM_BUILD_ROOT%{spark}"
-if [ -d "$RPM_BUILD_ROOT%{spark}" ] ; then
-  rm -rf "$RPM_BUILD_ROOT%{spark}"
-fi
-if [ -d "$RPM_BUILD_DIR%{service_name}" ] ; then
-  rm -rf "$RPM_BUILD_DIR%{service_name}"
-fi
+echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
+rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,root,root,0755)
-%{spark}
+%{install_spark_dest}
 
 %changelog
 * Wed Mar 19 2014 Andrew Lee 20140319
