@@ -16,7 +16,7 @@ License: Copyright (C) 2014 Altiscale. All rights reserved.
 # Packager: %{packager}
 Source: %{_sourcedir}/%{service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{service_name}
-Requires: scala-2.10.3 >= 2.10.3
+# Requires: scala-2.10.3 >= 2.10.3
 
 Url: http://www.altiscale.com/
 
