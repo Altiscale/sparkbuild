@@ -56,6 +56,7 @@ echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
 echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/lib
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/work
 cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/lib/
 cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
