@@ -39,7 +39,8 @@ if [ "x${SPARK_VERSION}" = "x" ] ; then
   export SPARK_VERSION=0.9.0
 fi
 
-
+# Customize build OPTS for MVN
+export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
 
 

@@ -1,6 +1,6 @@
 diff -uNr spark/bin/compute-classpath.sh spark/bin/compute-classpath.sh
---- spark/bin/compute-classpath.sh	2014-03-27 18:27:34.673813230 +0000
-+++ spark/bin/compute-classpath.sh	2014-03-27 18:31:16.882675151 +0000
+--- spark/bin/compute-classpath.sh	2014-03-27 14:04:52.000000000 -0700
++++ spark/bin/compute-classpath.sh	2014-03-27 14:08:02.000000000 -0700
 @@ -64,6 +64,11 @@
    CLASSPATH="$CLASSPATH:$FWDIR/streaming/target/scala-$SCALA_VERSION/test-classes"
  fi
@@ -14,8 +14,8 @@ diff -uNr spark/bin/compute-classpath.sh spark/bin/compute-classpath.sh
  # Note, this assumes that there is either a HADOOP_CONF_DIR or YARN_CONF_DIR which hosts
  # the configurtion files.
 diff -uNr spark/bin/spark-class spark/bin/spark-class
---- spark/bin/spark-class	2014-03-27 18:27:34.674813206 +0000
-+++ spark/bin/spark-class	2014-03-27 18:31:12.607763213 +0000
+--- spark/bin/spark-class	2014-03-27 14:04:52.000000000 -0700
++++ spark/bin/spark-class	2014-03-27 14:08:02.000000000 -0700
 @@ -87,6 +87,8 @@
  SPARK_MEM=${SPARK_MEM:-512m}
  export SPARK_MEM
@@ -25,9 +25,24 @@ diff -uNr spark/bin/spark-class spark/bin/spark-class
  # Set JAVA_OPTS to be able to load native libraries and to set heap size
  JAVA_OPTS="$OUR_JAVA_OPTS"
  JAVA_OPTS="$JAVA_OPTS -Djava.library.path=$SPARK_LIBRARY_PATH"
+diff -uNr spark/pom.xml spark/pom.xml
+--- spark/pom.xml	2014-03-27 14:04:52.000000000 -0700
++++ spark/pom.xml	2014-03-27 14:07:41.000000000 -0700
+@@ -393,6 +393,11 @@
+         <scope>test</scope>
+       </dependency>
+       <dependency>
++        <groupId>junit</groupId>
++        <artifactId>junit</artifactId>
++        <version>4.11</version>
++      </dependency> 
++      <dependency>
+         <groupId>org.apache.zookeeper</groupId>
+         <artifactId>zookeeper</artifactId>
+         <version>3.4.5</version>
 diff -uNr spark/project/SparkBuild.scala spark/project/SparkBuild.scala
---- spark/project/SparkBuild.scala	2014-03-27 18:27:34.798810334 +0000
-+++ spark/project/SparkBuild.scala	2014-03-27 18:30:40.861502328 +0000
+--- spark/project/SparkBuild.scala	2014-03-27 14:04:52.000000000 -0700
++++ spark/project/SparkBuild.scala	2014-03-27 14:08:02.000000000 -0700
 @@ -28,13 +28,13 @@
    // Hadoop version to build against. For example, "1.0.4" for Apache releases, or
    // "2.0.0-mr1-cdh4.2.0" for Cloudera Hadoop. Note that these variables can be set

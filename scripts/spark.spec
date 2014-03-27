@@ -46,7 +46,25 @@ pushd `pwd`
 cd %{_builddir}/%{service_name}/
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
+echo "build - assebly"
 SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
+
+echo "MAVEN_OPTS => $MAVEN_OPTS"
+echo "build - core, this is prerequisite for mllib"
+cd core
+mvn -X package
+cd ..
+
+echo "build - mllib"
+cd mllib
+mvn -X package
+cd ..
+
+echo "build -  graphx"
+cd graphx
+mvn -X package
+cd ..
+
 popd
 echo "Build Completed successfully!"
 
