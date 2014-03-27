@@ -14,9 +14,11 @@ Version: %{major_ver}
 Release: 1%{?dist}
 License: Copyright (C) 2014 Altiscale. All rights reserved.
 # Packager: %{packager}
-Source: %{_sourcedir}/%{service_name}.tar.gz
+Source: %{_sourcedir}/%{service_name}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{service_name}
 # Requires: scala-2.10.3 >= 2.10.3
+# Apply all patches to fix CLASSPATH and java lib issues
+Patch1: %{_sourcedir}/patch.spark
 
 Url: http://www.altiscale.com/
 
@@ -27,8 +29,9 @@ with YARN enabled. This package should work with Altiscale Hadoop.
 %prep
 # copying files into BUILD/spark/ e.g. BUILD/spark/* 
 echo "ok - copying files from %{_sourcedir} to folder  %{_builddir}/%{service_name}"
+cp -r %{_sourcedir}/%{service_name} %{_builddir}/
 
-%setup -q -n %{service_name}
+%patch1 -p0
 
 %build
 echo "ANT_HOME=$ANT_HOME"
@@ -39,10 +42,12 @@ echo "M2_HOME=$M2_HOME"
 echo "SCALA_HOME=$SCALA_HOME"
 
 echo "build - spark core in %{_builddir}"
+pushd `pwd`
+cd %{_builddir}/%{service_name}/
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
 SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
-
+popd
 echo "Build Completed successfully!"
 
 %install
