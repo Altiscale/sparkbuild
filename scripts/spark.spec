@@ -49,22 +49,6 @@ export SPARK_YARN=true
 echo "build - assebly"
 SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
-echo "MAVEN_OPTS => $MAVEN_OPTS"
-echo "build - core, this is prerequisite for mllib"
-cd core
-mvn -X package
-cd ..
-
-echo "build - mllib"
-cd mllib
-mvn -X package
-cd ..
-
-echo "build -  graphx"
-cd graphx
-mvn -X package
-cd ..
-
 popd
 echo "Build Completed successfully!"
 
@@ -78,9 +62,12 @@ echo "test installtion folder (aka buildroot) is RPM_BUILD_ROOT = %{buildroot}"
 echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
 echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
+# work folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/work
-cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/lib/
+cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
+cp -rp %{_builddir}/%{service_name}/examples/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
 cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/

@@ -44,7 +44,7 @@ if [ "x${chk_scala_rpm}" = "x" -o ! -d "${SCALA_HOME}" ] ; then
     rm -rf $WORKSPACE/scala
   fi
   mv scala-* $WORKSPACE/scala
-  SCALA_HOME=$WORKSPACE/scala
+  export SCALA_HOME=$WORKSPACE/scala
   echo "scala downloaded completed, and put to $SCALA_HOME"
 fi
 
@@ -84,6 +84,7 @@ cp -r $WORKSPACE/spark $WORKSPACE/rpmbuild/SOURCES/
 cp $WORKSPACE/patches/* $WORKSPACE/rpmbuild/SOURCES/
 # SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --rcfile=$spark_rc_macros --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
+
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"
