@@ -11,7 +11,7 @@
 Name: %{service_name}
 Summary: %{pkg_name} RPM Installer
 Version: %{major_ver}
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: Copyright (C) 2014 Altiscale. All rights reserved.
 # Packager: %{packager}
 Source: %{_sourcedir}/%{service_name}
@@ -64,12 +64,14 @@ echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/scala-2.10/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/
 # work folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/work
 cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 cp -rp %{_builddir}/%{service_name}/examples/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
+cp -rp %{_builddir}/%{service_name}/tools/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/tools/target/scala-2.10/
 cp -rp %{_builddir}/%{service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
 cp -rp %{_builddir}/%{service_name}/graphx/data %{buildroot}%{install_spark_dest}/graphx/
 cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
