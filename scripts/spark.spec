@@ -116,6 +116,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 * Wed Apr 2 2014 Andrew Lee 20140402
 - Rename Spark pkg name to vcc-spark so we can identify our own build
 * Wed Mar 19 2014 Andrew Lee 20140319
-- Initial Creation of spec file for Spark 0.9.0
+- Initial Creation of spec file for Spark 0.9.1
 
 

@@ -36,7 +36,7 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=0.9.0
+  export SPARK_VERSION=0.9.1
 fi
 
 # Customize build OPTS for MVN
