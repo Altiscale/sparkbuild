@@ -11,7 +11,7 @@
 Name: %{service_name}
 Summary: %{pkg_name} RPM Installer
 Version: %{major_ver}
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: Copyright (C) 2014 Altiscale. All rights reserved.
 # Packager: %{packager}
 Source: %{_sourcedir}/%{service_name}
@@ -49,6 +49,16 @@ export SPARK_YARN=true
 echo "build - assebly"
 SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
+#echo "build - mllib"
+#cd mllib
+#mvn -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests clean package
+#cd ..
+
+#echo "build - graphX"
+#cd graphx
+#mvn -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests clean package
+#cd ..
+
 popd
 echo "Build Completed successfully!"
 
@@ -65,15 +75,17 @@ echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target
 # work folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/work
 cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 cp -rp %{_builddir}/%{service_name}/examples/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
 cp -rp %{_builddir}/%{service_name}/tools/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/tools/target/scala-2.10/
 cp -rp %{_builddir}/%{service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
+cp -rp %{_builddir}/%{service_name}/mllib/target %{buildroot}%{install_spark_dest}/mllib/target/
 cp -rp %{_builddir}/%{service_name}/graphx/data %{buildroot}%{install_spark_dest}/graphx/
+cp -rp %{_builddir}/%{service_name}/graphx/target %{buildroot}%{install_spark_dest}/graphx/target/
 cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/
@@ -112,7 +124,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %changelog
 * Fri Apr 4 2014 Andrew Lee 20140404
-- Change UID to 411460024, and rename it back to alti-spark
+- Change UID to 411460024, and rename it back to alti-spark, add missing JARs for mllib and graphx
 * Wed Apr 2 2014 Andrew Lee 20140402
 - Rename Spark pkg name to vcc-spark so we can identify our own build
 * Wed Mar 19 2014 Andrew Lee 20140319
