@@ -1,5 +1,5 @@
 %define major_ver %(echo ${SPARK_VERSION})
-%define service_name vcc-spark
+%define service_name alti-spark
 %define company_prefix altiscale
 %define pkg_name %{service_name}-%{major_ver}
 %define install_spark_dest /opt/%{pkg_name}
@@ -112,7 +112,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %changelog
 * Fri Apr 4 2014 Andrew Lee 20140404
-- Change UID to 411460024
+- Change UID to 411460024, and rename it back to alti-spark
 * Wed Apr 2 2014 Andrew Lee 20140402
 - Rename Spark pkg name to vcc-spark so we can identify our own build
 * Wed Mar 19 2014 Andrew Lee 20140319

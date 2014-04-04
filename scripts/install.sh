@@ -15,7 +15,7 @@ fi
 env | sort
 
 # TBD: Verification on the RPM should be performed
-rpm_file=(`find $WORKSPACE/rpmbuild/RPMS/x86_64/ -type f -name "vcc-spark-0.9.*-*.el6.x86_64.rpm" | sort -r | head -n 1`)
+rpm_file=(`find $WORKSPACE/rpmbuild/RPMS/x86_64/ -type f -name "alti-spark-0.9.*-*.el6.x86_64.rpm" | sort -r | head -n 1`)
 if [ ! -f "$rpm_file" ] ; then
   echo "fatal - can't find RPM $rpm_file to install, can't continue, exiting"
   exit -5
