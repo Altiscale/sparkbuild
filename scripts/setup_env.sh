@@ -30,10 +30,10 @@ if [ "x${SPARK_USER}" = "x" ] ; then
   export SPARK_USER=spark
 fi
 if [ "x${SPARK_GID}" = "x" ] ; then
-  export SPARK_GID=56789
+  export SPARK_GID=411460000
 fi
 if [ "x${SPARK_UID}" = "x" ] ; then
-  export SPARK_UID=56789
+  export SPARK_UID=411460033
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
   export SPARK_VERSION=0.9.0

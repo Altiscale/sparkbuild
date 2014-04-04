@@ -80,7 +80,7 @@ popd
 # rpmdev-setuptree
 mkdir -p $WORKSPACE/rpmbuild/{BUILD,BUILDROOT,RPMS,SPECS,SOURCES,SRPMS}/
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
-cp -r $WORKSPACE/spark $WORKSPACE/rpmbuild/SOURCES/
+cp -r $WORKSPACE/spark $WORKSPACE/rpmbuild/SOURCES/vcc-spark
 cp $WORKSPACE/patches/* $WORKSPACE/rpmbuild/SOURCES/
 # SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --rcfile=$spark_rc_macros --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/

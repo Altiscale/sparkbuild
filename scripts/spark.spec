@@ -1,5 +1,5 @@
 %define major_ver %(echo ${SPARK_VERSION})
-%define service_name spark
+%define service_name vcc-spark
 %define company_prefix altiscale
 %define pkg_name %{service_name}-%{major_ver}
 %define install_spark_dest /opt/%{pkg_name}
@@ -11,7 +11,7 @@
 Name: %{service_name}
 Summary: %{pkg_name} RPM Installer
 Version: %{major_ver}
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: Copyright (C) 2014 Altiscale. All rights reserved.
 # Packager: %{packager}
 Source: %{_sourcedir}/%{service_name}
@@ -111,6 +111,8 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}
 
 %changelog
+* Wed Apr 2 2014 Andrew Lee 20140402
+- Rename Spark pkg name to vcc-spark so we can identify our own build
 * Wed Mar 19 2014 Andrew Lee 20140319
 - Initial Creation of spec file for Spark 0.9.0
 
