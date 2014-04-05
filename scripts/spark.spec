@@ -57,7 +57,7 @@ echo "build - assembly"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
 # PURGE LOCAL CACHE for clean build
-mvn dependency:purge-local-repository
+# mvn dependency:purge-local-repository
 
 ########################
 # BUILD ENTIRE PACKAGE #
