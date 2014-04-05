@@ -75,7 +75,7 @@ diff -uNar spark/core/pom.xml alti-spark/core/pom.xml
  
 diff -uNar spark/examples/pom.xml alti-spark/examples/pom.xml
 --- alti-spark/examples/pom.xml	2014-03-29 08:30:03.000000000 -0700
-+++ alti-spark/examples/pom.xml	2014-04-04 21:51:43.000000000 -0700
++++ alti-spark/examples/pom.xml	2014-04-05 00:45:40.000000000 -0700
 @@ -21,7 +21,7 @@
    <parent>
      <groupId>org.apache.spark</groupId>
@@ -85,32 +85,6 @@ diff -uNar spark/examples/pom.xml alti-spark/examples/pom.xml
      <relativePath>../pom.xml</relativePath>
    </parent>
  
-@@ -84,25 +84,10 @@
-     </dependency>
-     <dependency>
-       <groupId>org.apache.spark</groupId>
--      <artifactId>spark-streaming-kafka_${scala.binary.version}</artifactId>
--      <version>${project.version}</version>
--    </dependency>
--    <dependency>
--      <groupId>org.apache.spark</groupId>
-       <artifactId>spark-streaming-flume_${scala.binary.version}</artifactId>
-       <version>${project.version}</version>
-     </dependency>
-     <dependency>
--      <groupId>org.apache.spark</groupId>
--      <artifactId>spark-streaming-zeromq_${scala.binary.version}</artifactId>
--      <version>${project.version}</version>
--    </dependency>
--    <dependency>
--      <groupId>org.apache.spark</groupId>
--      <artifactId>spark-streaming-mqtt_${scala.binary.version}</artifactId>
--      <version>${project.version}</version>
--    </dependency>
--    <dependency>
-       <groupId>org.apache.hbase</groupId>
-       <artifactId>hbase</artifactId>
-       <version>0.94.6</version>
 diff -uNar spark/external/flume/pom.xml alti-spark/external/flume/pom.xml
 --- alti-spark/external/flume/pom.xml	2014-03-29 08:30:03.000000000 -0700
 +++ alti-spark/external/flume/pom.xml	2014-04-04 16:40:04.000000000 -0700
@@ -197,7 +171,7 @@ diff -uNar spark/mllib/pom.xml alti-spark/mllib/pom.xml
  
 diff -uNar spark/pom.xml alti-spark/pom.xml
 --- alti-spark/pom.xml	2014-03-29 08:30:03.000000000 -0700
-+++ alti-spark/pom.xml	2014-04-04 19:21:49.000000000 -0700
++++ alti-spark/pom.xml	2014-04-05 00:36:23.000000000 -0700
 @@ -25,7 +25,7 @@
    </parent>
    <groupId>org.apache.spark</groupId>
@@ -207,18 +181,7 @@ diff -uNar spark/pom.xml alti-spark/pom.xml
    <packaging>pom</packaging>
    <name>Spark Project Parent POM</name>
    <url>http://spark.incubator.apache.org/</url>
-@@ -94,10 +94,7 @@
-     <module>repl</module>
-     <module>assembly</module>
-     <module>external/twitter</module>
--    <module>external/kafka</module>
-     <module>external/flume</module>
--    <module>external/zeromq</module>
--    <module>external/mqtt</module>
-     <module>examples</module>
-   </modules>
- 
-@@ -374,12 +371,6 @@
+@@ -374,12 +374,6 @@
          <version>3.1</version>
          <scope>test</scope>
        </dependency>
@@ -231,7 +194,7 @@ diff -uNar spark/pom.xml alti-spark/pom.xml
        <dependency>
          <groupId>org.scalacheck</groupId>
          <artifactId>scalacheck_${scala.binary.version}</artifactId>
-@@ -393,6 +384,11 @@
+@@ -393,6 +387,11 @@
          <scope>test</scope>
        </dependency>
        <dependency>
