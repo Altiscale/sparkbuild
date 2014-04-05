@@ -47,8 +47,25 @@ cd %{_builddir}/%{service_name}/
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
 echo "build - assebly"
-SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
+# SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
+########################
+# BUILD ENTIRE PACKAGE #
+########################
+# This will build the overall JARs we need in each folder
+# and install them locally for further reference. We assume the build
+# environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
+mvn -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+
+#if [ "x${SPARK_YARN}" = "xtrue" ] ; then
+#  ./make-distribution.sh --hadoop $SPARK_HADOOP_VERSION --with-yarn
+#else
+#  ./make-distribution.sh --hadoop $SPARK_HADOOP_VERSION
+#fi
+
+######################################
+# BUILD INDIVIDUAL JARS if necessary #
+######################################
 #echo "build - mllib"
 #cd mllib
 #mvn -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests clean package
@@ -73,19 +90,24 @@ echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
 echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target
-# work folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
+# work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
+# logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/work
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/logs
+# copy all necessary jars
 cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-cp -rp %{_builddir}/%{service_name}/examples/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/examples/target/scala-2.10/
-cp -rp %{_builddir}/%{service_name}/tools/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/tools/target/scala-2.10/
+cp -rp %{_builddir}/%{service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
+cp -rp %{_builddir}/%{service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
 cp -rp %{_builddir}/%{service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
-cp -rp %{_builddir}/%{service_name}/mllib/target %{buildroot}%{install_spark_dest}/mllib/target/
+cp -rp %{_builddir}/%{service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
 cp -rp %{_builddir}/%{service_name}/graphx/data %{buildroot}%{install_spark_dest}/graphx/
-cp -rp %{_builddir}/%{service_name}/graphx/target %{buildroot}%{install_spark_dest}/graphx/target/
+cp -rp %{_builddir}/%{service_name}/graphx/target/*.jar %{buildroot}%{install_spark_dest}/graphx/target/
+cp -rp %{_builddir}/%{service_name}/streaming/target/*.jar %{buildroot}%{install_spark_dest}/streaming/target/
 cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/
