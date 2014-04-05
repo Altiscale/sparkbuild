@@ -9,10 +9,10 @@
 %define spark_uid %(echo ${SPARK_UID})
 
 Name: %{service_name}
-Summary: %{pkg_name} RPM Installer
+Summary: %{pkg_name} RPM Installer AE-576
 Version: %{major_ver}
 Release: 6%{?dist}
-License: Copyright (C) 2014 Altiscale. All rights reserved.
+License: ASL 2.0
 # Packager: %{packager}
 Source: %{_sourcedir}/%{service_name}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{service_name}
@@ -20,7 +20,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{service_name}
 # Apply all patches to fix CLASSPATH and java lib issues
 Patch1: %{_sourcedir}/patch.spark
 
-Url: http://www.altiscale.com/
+Url: http://spark.apache.org/
 
 %description
 %{pkg_name} is a repackaged spark distro that is compiled against Hadoop 2.2.x
@@ -44,9 +44,16 @@ echo "SCALA_HOME=$SCALA_HOME"
 echo "build - spark core in %{_builddir}"
 pushd `pwd`
 cd %{_builddir}/%{service_name}/
+
+# clean up for *NIX environment only, deleting window's cmd
+find %{_builddir}/%{service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
+
+# Remove launch script AE-579
+find %{_builddir}/%{service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
+
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
-echo "build - assebly"
+echo "build - assembly"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
 # PURGE LOCAL CACHE for clean build
@@ -116,6 +123,8 @@ cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/python %{buildroot}%{install_spark_dest}/
+
+echo "Currently, cluster mode NOT supported due to resource isolation/utilization, and interference, and SPOF on master node without Zookeepr" >  %{buildroot}%{install_spark_dest}/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
 # haven't heard any negative feedback by embedding user creation in RPM spec
 # during test installation
