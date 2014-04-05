@@ -49,7 +49,8 @@ cd %{_builddir}/%{service_name}/
 find %{_builddir}/%{service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
 
 # Remove launch script AE-579
-find %{_builddir}/%{service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
+find %{_builddir}/%{service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
+find %{_builddir}/%{service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
 
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
@@ -124,7 +125,7 @@ cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{service_name}/python %{buildroot}%{install_spark_dest}/
 
-echo "Currently, cluster mode NOT supported due to resource isolation/utilization, and interference, and SPOF on master node without Zookeepr" >  %{buildroot}%{install_spark_dest}/CLUSTER_MODE_NOT_SUPPORTED.why.txt
+echo "Currently, cluster mode NOT supported due to resource isolation/utilization, and interference, and SPOF on master node without Zookeepr" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
 # haven't heard any negative feedback by embedding user creation in RPM spec
 # during test installation
