@@ -75,7 +75,7 @@ diff -uNar spark/core/pom.xml alti-spark/core/pom.xml
  
 diff -uNar spark/examples/pom.xml alti-spark/examples/pom.xml
 --- alti-spark/examples/pom.xml	2014-03-29 08:30:03.000000000 -0700
-+++ alti-spark/examples/pom.xml	2014-04-04 16:23:48.000000000 -0700
++++ alti-spark/examples/pom.xml	2014-04-04 21:51:43.000000000 -0700
 @@ -21,7 +21,7 @@
    <parent>
      <groupId>org.apache.spark</groupId>
@@ -85,6 +85,32 @@ diff -uNar spark/examples/pom.xml alti-spark/examples/pom.xml
      <relativePath>../pom.xml</relativePath>
    </parent>
  
+@@ -84,25 +84,10 @@
+     </dependency>
+     <dependency>
+       <groupId>org.apache.spark</groupId>
+-      <artifactId>spark-streaming-kafka_${scala.binary.version}</artifactId>
+-      <version>${project.version}</version>
+-    </dependency>
+-    <dependency>
+-      <groupId>org.apache.spark</groupId>
+       <artifactId>spark-streaming-flume_${scala.binary.version}</artifactId>
+       <version>${project.version}</version>
+     </dependency>
+     <dependency>
+-      <groupId>org.apache.spark</groupId>
+-      <artifactId>spark-streaming-zeromq_${scala.binary.version}</artifactId>
+-      <version>${project.version}</version>
+-    </dependency>
+-    <dependency>
+-      <groupId>org.apache.spark</groupId>
+-      <artifactId>spark-streaming-mqtt_${scala.binary.version}</artifactId>
+-      <version>${project.version}</version>
+-    </dependency>
+-    <dependency>
+       <groupId>org.apache.hbase</groupId>
+       <artifactId>hbase</artifactId>
+       <version>0.94.6</version>
 diff -uNar spark/external/flume/pom.xml alti-spark/external/flume/pom.xml
 --- alti-spark/external/flume/pom.xml	2014-03-29 08:30:03.000000000 -0700
 +++ alti-spark/external/flume/pom.xml	2014-04-04 16:40:04.000000000 -0700
