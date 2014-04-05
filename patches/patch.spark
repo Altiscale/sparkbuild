@@ -171,7 +171,7 @@ diff -uNar spark/mllib/pom.xml alti-spark/mllib/pom.xml
  
 diff -uNar spark/pom.xml alti-spark/pom.xml
 --- alti-spark/pom.xml	2014-03-29 08:30:03.000000000 -0700
-+++ alti-spark/pom.xml	2014-04-04 16:23:24.000000000 -0700
++++ alti-spark/pom.xml	2014-04-04 19:21:49.000000000 -0700
 @@ -25,7 +25,7 @@
    </parent>
    <groupId>org.apache.spark</groupId>
@@ -181,7 +181,18 @@ diff -uNar spark/pom.xml alti-spark/pom.xml
    <packaging>pom</packaging>
    <name>Spark Project Parent POM</name>
    <url>http://spark.incubator.apache.org/</url>
-@@ -374,12 +374,6 @@
+@@ -94,10 +94,7 @@
+     <module>repl</module>
+     <module>assembly</module>
+     <module>external/twitter</module>
+-    <module>external/kafka</module>
+     <module>external/flume</module>
+-    <module>external/zeromq</module>
+-    <module>external/mqtt</module>
+     <module>examples</module>
+   </modules>
+ 
+@@ -374,12 +371,6 @@
          <version>3.1</version>
          <scope>test</scope>
        </dependency>
@@ -194,7 +205,7 @@ diff -uNar spark/pom.xml alti-spark/pom.xml
        <dependency>
          <groupId>org.scalacheck</groupId>
          <artifactId>scalacheck_${scala.binary.version}</artifactId>
-@@ -393,6 +387,11 @@
+@@ -393,6 +384,11 @@
          <scope>test</scope>
        </dependency>
        <dependency>
