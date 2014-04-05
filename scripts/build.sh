@@ -88,6 +88,7 @@ SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --d
 
 if [ $? -ne "0" ] ; then
   echo "fail - RPM build failed"
+  exit -99
 fi
   
 echo "ok - build Completed successfully!"

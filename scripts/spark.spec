@@ -49,13 +49,16 @@ export SPARK_YARN=true
 echo "build - assebly"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
+# PURGE LOCAL CACHE for clean build
+mvn dependency:purge-local-repository
+
 ########################
 # BUILD ENTIRE PACKAGE #
 ########################
 # This will build the overall JARs we need in each folder
 # and install them locally for further reference. We assume the build
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
-mvn -X -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+mvn -U -X -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
 # mvn -Pyarn -Dmaven.repo.remote=http://repo.maven.apache.org/maven2,http://repository.jboss.org/nexus/content/repositories/releases -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
 
 #if [ "x${SPARK_YARN}" = "xtrue" ] ; then
