@@ -11,7 +11,7 @@
 Name: %{service_name}
 Summary: %{pkg_name} RPM Installer AE-576
 Version: %{major_ver}
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: ASL 2.0
 # Packager: %{packager}
 Source: %{_sourcedir}/%{service_name}
@@ -159,6 +159,8 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}
 
 %changelog
+* Sun Apr 6 2014 Andrew Lee 20140406
+- Added KMean test data, and run-example2 to locate default classpath for SPARK_JAR and SPARK_YARN_APP_JAR
 * Fri Apr 4 2014 Andrew Lee 20140404
 - Change UID to 411460024, and rename it back to alti-spark, add missing JARs for mllib and graphx
 * Wed Apr 2 2014 Andrew Lee 20140402
