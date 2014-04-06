@@ -127,29 +127,6 @@ cp -rp %{_builddir}/%{service_name}/python %{buildroot}%{install_spark_dest}/
 
 echo "Currently, cluster mode NOT supported due to resource isolation/utilization, and interference, and SPOF on master node without Zookeepr" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
-# haven't heard any negative feedback by embedding user creation in RPM spec
-# during test installation
-# if [ "x%{spark_user}" = "x" ] ; then
-#  echo "ok - applying default spark user 'spark'"
-#  echo "to override default user, UID, and GID, set env for SPARK_USER, SPARK_GID, SPARK_UID"
-#  echo "ok - creating 56789:56789 spark"
-#  getent group spark >/dev/null || groupadd  -g 56789 spark
-#  getent passwd spark >/dev/null || useradd -g 56789 -c "creating spark account to run spark later" spark
-#  echo "ok - create a password for the new created user spark"
-#  echo "spark:spark" | chpasswd
-#elif [ "x%{spark_uid}" = "x" -o "x%{spark_gid}" = "x" ] ; then
-#  echo "fatal - spark user specified, but missing uid or gid definition. Specify them all in SPARK_USER, SPARK_UID, SPARK_GID"
-#  exit -5
-#else
-#  echo "ok - creating %{spark_uid}:%{spark_gid} %{spark_user}"
-#  getent group %{spark_user} >/dev/null || groupadd  -g %{spark_gid} %{spark_user}
-#  getent passwd %{spark_user} >/dev/null || useradd -g %{spark_gid} -c "creating spark account to run spark later" %{spark_user}
-  # Create a password, this should be disabled if you are automating this script
-  # The build env should have these users created for you already
-#  echo "ok - create a password for the new created user %{spark_user}"
-#  echo "%{spark_user}:%{spark_user}" | chpasswd
-#fi
-
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
 rm -rf %{buildroot}%{install_spark_dest}
@@ -157,6 +134,10 @@ rm -rf %{buildroot}%{install_spark_dest}
 %files
 %defattr(0755,root,root,0755)
 %{install_spark_dest}
+%dir %{install_spark_dest}/work
+%dir %{install_spark_dest}/logs
+%attr(0777,root,root) %{install_spark_dest}/work
+%attr(0777,root,root) %{install_spark_dest}/logs
 
 %changelog
 * Sun Apr 6 2014 Andrew Lee 20140406
