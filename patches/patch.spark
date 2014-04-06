@@ -260,6 +260,16 @@ diff -uNar spark/graphx/pom.xml alti-spark/graphx/pom.xml
      <relativePath>../pom.xml</relativePath>
    </parent>
  
+diff -uNar spark/mllib/data/kmeans/kmeans_data.txt alti-spark/mllib/data/kmeans/kmeans_data.txt
+--- alti-spark/mllib/data/kmeans/kmeans_data.txt	1969-12-31 16:00:00.000000000 -0800
++++ alti-spark/mllib/data/kmeans/kmeans_data.txt	2014-04-06 12:53:27.000000000 -0700
+@@ -0,0 +1,6 @@
++0.0 0.0 0.0
++0.1 0.1 0.1
++0.2 0.2 0.2
++9.0 9.0 9.0
++9.1 9.1 9.1
++9.2 9.2 9.2
 diff -uNar spark/mllib/pom.xml alti-spark/mllib/pom.xml
 --- alti-spark/mllib/pom.xml	2014-03-29 08:30:03.000000000 -0700
 +++ alti-spark/mllib/pom.xml	2014-04-04 16:24:01.000000000 -0700
