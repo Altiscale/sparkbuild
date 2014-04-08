@@ -1,4 +1,4 @@
-%define altiscale_major_ver %(echo ${ALTISCALE_RELEASE})
+%define spark_major_ver %(echo ${SPARK_VERSION})
 %define rpm_package_name %(echo alti-spark-${SPARK_VERSION})
 %define spark_version %(echo ${SPARK_VERSION})
 %define build_service_name alti-spark
@@ -10,7 +10,7 @@
 
 Name: %{rpm_package_name}
 Summary: %{spark_folder_name} RPM Installer AE-576
-Version: %{altiscale_major_ver}
+Version: %{spark_major_ver}
 Release: %{build_release}%{?dist}
 License: ASL 2.0
 # Packager: %{packager}
