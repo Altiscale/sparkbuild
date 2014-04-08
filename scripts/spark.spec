@@ -1,14 +1,15 @@
 %define altiscale_major_ver %(echo ${ALTISCALE_RELEASE})
-%define rpm_file_name %(echo alti-spark-${SPARK_VERSION})
+%define rpm_package_name %(echo alti-spark-${SPARK_VERSION})
+%define spark_version %(echo ${SPARK_VERSION})
 %define build_service_name alti-spark
-%define pkg_name %{rpm_file_name}-%{altiscale_major_ver}
-%define install_spark_dest /opt/%{pkg_name}
-%define install_spark_conf /etc/%{pkg_name}
+%define spark_folder_name %{rpm_package_name}
+%define install_spark_dest /opt/%{spark_folder_name}
+%define install_spark_conf /etc/%{spark_folder_name}
 # %define packager %(echo ${PKGER})
 %define build_release %(echo ${BUILD_TIME})
 
-Name: %{rpm_file_name}
-Summary: %{pkg_name} RPM Installer AE-576
+Name: %{rpm_package_name}
+Summary: %{spark_folder_name} RPM Installer AE-576
 Version: %{altiscale_major_ver}
 Release: %{build_release}%{?dist}
 License: ASL 2.0
@@ -22,7 +23,7 @@ Patch1: %{_sourcedir}/patch.spark
 Url: http://spark.apache.org/
 
 %description
-%{pkg_name} is a repackaged spark distro that is compiled against Hadoop 2.2.x
+%{spark_folder_name} is a repackaged spark distro that is compiled against Hadoop 2.2.x
 with YARN enabled. This package should work with Altiscale Hadoop.
 
 %prep
@@ -98,7 +99,7 @@ mkdir -p %{buildroot}%{install_spark_dest}
 echo "compiled/built folder is (not the same as buildroot) RPM_BUILD_DIR = %{_builddir}"
 echo "test installtion folder (aka buildroot) is RPM_BUILD_ROOT = %{buildroot}"
 echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
-echo "test install spark label pkg_name = %{pkg_name}"
+echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}/etc/%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
