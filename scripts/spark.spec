@@ -1,21 +1,20 @@
-%define major_ver %(echo ${SPARK_VERSION})
-%define service_name alti-spark
-%define company_prefix altiscale
-%define pkg_name %{service_name}-%{major_ver}
+%define altiscale_major_ver %(echo ${ALTISCALE_RELEASE})
+%define rpm_file_name %(echo alti-spark-${SPARK_VERSION})
+%define build_service_name alti-spark
+%define pkg_name %{rpm_file_name}-%{altiscale_major_ver}
 %define install_spark_dest /opt/%{pkg_name}
-%define packager %(echo ${PKGER})
-%define spark_user %(echo ${SPARK_USER})
-%define spark_gid %(echo ${SPARK_GID})
-%define spark_uid %(echo ${SPARK_UID})
+%define install_spark_conf /etc/%{pkg_name}
+# %define packager %(echo ${PKGER})
+%define build_release %(echo ${BUILD_TIME})
 
-Name: %{service_name}
+Name: %{rpm_file_name}
 Summary: %{pkg_name} RPM Installer AE-576
-Version: %{major_ver}
-Release: 7%{?dist}
+Version: %{altiscale_major_ver}
+Release: %{build_release}%{?dist}
 License: ASL 2.0
 # Packager: %{packager}
-Source: %{_sourcedir}/%{service_name}
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{service_name}
+Source: %{_sourcedir}/%{build_service_name}
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{build_service_name}
 # Requires: scala-2.10.3 >= 2.10.3
 # Apply all patches to fix CLASSPATH and java lib issues
 Patch1: %{_sourcedir}/patch.spark
@@ -28,8 +27,8 @@ with YARN enabled. This package should work with Altiscale Hadoop.
 
 %prep
 # copying files into BUILD/spark/ e.g. BUILD/spark/* 
-echo "ok - copying files from %{_sourcedir} to folder  %{_builddir}/%{service_name}"
-cp -r %{_sourcedir}/%{service_name} %{_builddir}/
+echo "ok - copying files from %{_sourcedir} to folder  %{_builddir}/%{build_service_name}"
+cp -r %{_sourcedir}/%{build_service_name} %{_builddir}/
 
 %patch1 -p0
 
@@ -43,14 +42,14 @@ echo "SCALA_HOME=$SCALA_HOME"
 
 echo "build - spark core in %{_builddir}"
 pushd `pwd`
-cd %{_builddir}/%{service_name}/
+cd %{_builddir}/%{build_service_name}/
 
 # clean up for *NIX environment only, deleting window's cmd
-find %{_builddir}/%{service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
+find %{_builddir}/%{build_service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
 
 # Remove launch script AE-579
-find %{_builddir}/%{service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
-find %{_builddir}/%{service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
+find %{_builddir}/%{build_service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
+find %{_builddir}/%{build_service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
 
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
@@ -101,6 +100,7 @@ echo "test installtion folder (aka buildroot) is RPM_BUILD_ROOT = %{buildroot}"
 echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
 echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
+%{__mkdir} -p %{buildroot}/etc/%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
@@ -112,20 +112,23 @@ echo "test install spark label pkg_name = %{pkg_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/work
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/logs
 # copy all necessary jars
-cp -rp %{_builddir}/%{service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-cp -rp %{_builddir}/%{service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
-cp -rp %{_builddir}/%{service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
-cp -rp %{_builddir}/%{service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
-cp -rp %{_builddir}/%{service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
-cp -rp %{_builddir}/%{service_name}/graphx/data %{buildroot}%{install_spark_dest}/graphx/
-cp -rp %{_builddir}/%{service_name}/graphx/target/*.jar %{buildroot}%{install_spark_dest}/graphx/target/
-cp -rp %{_builddir}/%{service_name}/streaming/target/*.jar %{buildroot}%{install_spark_dest}/streaming/target/
-cp -rp %{_builddir}/%{service_name}/conf %{buildroot}%{install_spark_dest}/
-cp -rp %{_builddir}/%{service_name}/bin %{buildroot}%{install_spark_dest}/
-cp -rp %{_builddir}/%{service_name}/sbin %{buildroot}%{install_spark_dest}/
-cp -rp %{_builddir}/%{service_name}/python %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
+cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
+cp -rp %{_builddir}/%{build_service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
+cp -rp %{_builddir}/%{build_service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
+cp -rp %{_builddir}/%{build_service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
+cp -rp %{_builddir}/%{build_service_name}/graphx/data %{buildroot}%{install_spark_dest}/graphx/
+cp -rp %{_builddir}/%{build_service_name}/graphx/target/*.jar %{buildroot}%{install_spark_dest}/graphx/target/
+cp -rp %{_builddir}/%{build_service_name}/streaming/target/*.jar %{buildroot}%{install_spark_dest}/streaming/target/
+cp -rp %{_builddir}/%{build_service_name}/bin %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/sbin %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_dest}/
 
-echo "Currently, cluster mode NOT supported due to resource isolation/utilization, and interference, and SPOF on master node without Zookeepr" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
+# test deploy the config folder
+cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
+
+# add dummy file to warn user that CLUSTER mode is not for Production
+echo "Currently, cluster mode NOT supported, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
@@ -136,10 +139,14 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}
 %dir %{install_spark_dest}/work
 %dir %{install_spark_dest}/logs
+%dir %{install_spark_conf}
 %attr(0777,root,root) %{install_spark_dest}/work
 %attr(0777,root,root) %{install_spark_dest}/logs
+%attr(0755,root,root) %{install_spark_conf}
 
 %changelog
+* Mon Apr 7 2014 Andrew Lee 20140407
+- Added log4j settings, and create /etc/spark-0.9.1 for Chef to pick up in post-installation
 * Sun Apr 6 2014 Andrew Lee 20140406
 - Added KMean test data, and run-example2 to locate default classpath for SPARK_JAR and SPARK_YARN_APP_JAR
 * Fri Apr 4 2014 Andrew Lee 20140404

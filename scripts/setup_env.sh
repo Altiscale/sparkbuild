@@ -30,7 +30,7 @@ if [ "x${SPARK_USER}" = "x" ] ; then
   export SPARK_USER=spark
 fi
 if [ "x${SPARK_GID}" = "x" ] ; then
-  export SPARK_GID=411460000
+  export SPARK_GID=411460017
 fi
 if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
@@ -38,6 +38,14 @@ fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
   export SPARK_VERSION=0.9.1
 fi
+if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
+  export ALTISCALE_RELEASE=2.0.0
+else
+  export ALTISCALE_RELEASE
+fi
+
+BUILD_TIME=$(date +%Y%m%d%H%M)
+export BUILD_TIME
 
 # Customize build OPTS for MVN
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
