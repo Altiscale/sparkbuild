@@ -51,6 +51,7 @@ find %{_builddir}/%{build_service_name}/bin -type f -name '*.cmd' -exec rm -f {}
 # Remove launch script AE-579
 find %{_builddir}/%{build_service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
 find %{_builddir}/%{build_service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
+rm -f %{_builddir}/%{build_service_name}/sbin/slaves.sh
 
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
