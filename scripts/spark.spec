@@ -9,7 +9,7 @@
 %define build_release %(echo ${BUILD_TIME})
 
 Name: %{rpm_package_name}
-Summary: %{spark_folder_name} RPM Installer AE-576
+Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with warnings
 Version: %{spark_version}
 Release: %{altiscale_release_ver}.%{build_release}%{?dist}
 License: ASL 2.0
@@ -130,6 +130,7 @@ cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf
 
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, cluster mode NOT supported, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
+echo "Your log shouldn't go here, please configure log4j.properties correctly, logs should go to /var/log/spark/ by default if log4j.properties is configured correctly" >  %{buildroot}%{install_spark_dest}/logs/YOUR_LOG_SHOULDNT_COME_HERE.why.txt
 
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
@@ -139,7 +140,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %defattr(0755,root,root,0755)
 %{install_spark_dest}
 %dir %{install_spark_dest}/work
-%dir %{install_spark_dest}/logs
 %dir %{install_spark_conf}
 %attr(0777,root,root) %{install_spark_dest}/work
 %attr(0777,root,root) %{install_spark_dest}/logs
