@@ -2,7 +2,7 @@
 %define rpm_package_name alti-spark
 %define spark_version %(echo ${SPARK_VERSION})
 %define build_service_name alti-spark
-%define spark_folder_name %{rpm_package_name}
+%define spark_folder_name %{rpm_package_name}-%{spark_version}
 %define install_spark_dest /opt/%{spark_folder_name}
 %define install_spark_conf /etc/%{spark_folder_name}
 # %define packager %(echo ${PKGER})
