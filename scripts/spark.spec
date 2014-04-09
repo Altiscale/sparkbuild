@@ -137,7 +137,7 @@ echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_des
 rm -rf %{buildroot}%{install_spark_dest}
 
 %files
-%defattr(0755,root,root,0755)
+%defattr(0755,spark,spark,0755)
 %{install_spark_dest}
 %dir %{install_spark_dest}/work
 %dir %{install_spark_conf}
