@@ -133,7 +133,7 @@ mkdir -p "$WORKSPACE/var/cache/mock"
 chmod 2755 "$WORKSPACE/var/cache/mock"
 sed "s:BASEDIR:$WORKSPACE:g" "$mock_cfg" > "$curr_dir/$mock_cfg_runtime"
 echo "ok - applying mock config $curr_dir/$mock_cfg_runtime"
-cat "$mock_cfg_runtime"
+cat "$curr_dir/$mock_cfg_runtime"
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
 if [ $? -ne "0" ] ; then
