@@ -121,8 +121,8 @@ if [ $? -ne "0" ] ; then
   exit -98
 fi
 
-stat "$WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${BUILD_TIME}.el6.src.rpm"
-rpm -ivvv "$WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${BUILD_TIME}.el6.src.rpm"
+stat "$WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm"
+rpm -ivvv "$WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm"
 
 echo "ok - applying $WORKSPACE for the new BASEDIR for mock, pattern delimiter here should be :"
 # the path includeds /, so we need a diff pattern delimiter
