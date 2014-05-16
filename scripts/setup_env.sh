@@ -44,6 +44,10 @@ else
   export ALTISCALE_RELEASE
 fi
 
+if [ "x${BRANCH_NAME}" = "x" ] ; then
+  export BRANCH_NAME=altiscale-branch-1.0
+fi
+
 BUILD_TIME=$(date +%Y%m%d%H%M)
 export BUILD_TIME
 

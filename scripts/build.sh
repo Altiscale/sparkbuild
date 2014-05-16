@@ -65,8 +65,12 @@ cd $WORKSPACE/spark
 # Manual fix Git URL issue in submodule, safety net, just in case the git scheme doesn't work
 # sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .gitmodules
 # sed -i 's/git\@github.com:Altiscale\/spark.git/https:\/\/github.com\/Altiscale\/spark.git/g' .git/config
-echo "ok - switching to spark branch-0.9 and refetch the files"
-git checkout altiscale-branch-1.0
+if [ "x${BRANCH_NAME}" = "x" ] ; then
+  echo "error - BRANCH_NAME is not defined, even though, you may checkout the code from hadoop_ecosystem_component_build, this does not gurantee you have the right branch. Please specify the BRANCH_NAME explicitly. Exiting!"
+  exit -9
+fi
+echo "ok - switching to spark branch $BRANCH_NAME and refetch the files"
+git checkout $BRANCH_NAME
 git fetch --all
 popd
 
