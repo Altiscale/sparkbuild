@@ -72,6 +72,7 @@ fi
 echo "ok - switching to spark branch $BRANCH_NAME and refetch the files"
 git checkout $BRANCH_NAME
 git fetch --all
+cat pom.xml
 popd
 
 echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
