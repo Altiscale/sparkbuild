@@ -9,7 +9,6 @@ spark_rc_macros="$curr_dir/spark_rpm_macros"
 mock_cfg="$curr_dir/altiscale-spark-centos-6-x86_64.cfg"
 mock_cfg_name=$(basename "$mock_cfg")
 mock_cfg_runtime=`echo $mock_cfg_name | sed "s/.cfg/.runtime.cfg/"`
-scala_tgz="$curr_dir/scala.tgz"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
@@ -40,31 +39,12 @@ echo "checking if scala is installed on the system"
 # we can save some build time if we can just re-use the pre-installed scala
 chk_scala_rpm=$(rpm -qa *scala*)
 if [ "x${chk_scala_rpm}" = "x" -o ! -d "${SCALA_HOME}" ] ; then
-  echo "warn - SCALA_HOME may or may not be defined, however, $SCALA_HOME folder doesn't exist, re-validating $scala_tgz file or re-downloading scala and install scala temporarily"
-  if [ -f "$scala_tgz" ] ; then
-    echo "ok - found existing $scala_tgz, verifying integrity."
-    fhash=$(md5sum "$scala_tgz" | cut -d" " -f1)
-    if [ "x${fhash}" = "x7665a125ceb38c1ba32cbb9acba9070f" ] ; then
-      echo "ok - md5 hash  matched, file is the same, no need to re-download again, use current one on disk"
-    else
-      echo "warn - previous file hash $fhash <> 7665a125ceb38c1ba32cbb9acba9070f , does not match , deleting and re-download again"
-      echo "ok - deleting previous stale/corrupted file $scala_tgz"
-      stat "$scala_tgz"
-      rm -f "$scala_tgz"
-      wget --output-document=$scala_tgz "http://www.scala-lang.org/files/archive/scala-2.10.3.tgz"
-    fi
+  echo "warn - SCALA_HOME may or may not be defined, however, $SCALA_HOME folder doesn't exist."
+  if [ ! -d "/opt/scala/" ] ; then
+    echo "warn - scala isn't installed on the system?"
   else
-    echo "ok - download fresh scala binaries 2.10.3"
-    wget --output-document=$scala_tgz "http://www.scala-lang.org/files/archive/scala-2.10.3.tgz"
+    export SCALA_HOME=/opt/scala
   fi
-  tar xvf $scala_tgz
-  if [ -d $WORKSPACE/scala ] ; then
-    echo "deleting prev installed scala localtion $WORKSPACE/scala"
-    rm -rf $WORKSPACE/scala
-  fi
-  mv scala-* $WORKSPACE/scala
-  export SCALA_HOME=$WORKSPACE/scala
-  echo "ok - scala update or re-downloaded completed, and put to $SCALA_HOME"
 else
   echo "ok - detected installed scala, SCALA_HOME=$SCALA_HOME"
 fi
@@ -91,19 +71,23 @@ git fetch --all
 popd
 
 echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
-pushd `pwd`
 # spark is located at $WORKSPACE/spark
-cd $WORKSPACE
 # tar cvzf $WORKSPACE/spark.tar.gz spark
-popd
 
 # Looks like this is not installed on all machines
 # rpmdev-setuptree
 mkdir -p $WORKSPACE/rpmbuild/{BUILD,BUILDROOT,RPMS,SPECS,SOURCES,SRPMS}/
 cp "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
-cp -r $WORKSPACE/spark $WORKSPACE/rpmbuild/SOURCES/alti-spark
+pushd $WORKSPACE/
+tar --exclude .git --exclude .gitignore -cf $WORKSPACE/rpmbuild/SOURCES/spark.tar spark
+popd
 pushd "$WORKSPACE/rpmbuild/SOURCES/"
-tar --exclude .git -czf alti-spark.tar.gz alti-spark
+tar -xf spark.tar
+if [ -d alti-spark ] ; then
+  rm -rf alti-spark
+fi
+mv spark alti-spark
+tar --exclude .git --exclude .gitignore -czf alti-spark.tar.gz alti-spark
 popd
 
 # The patches is no longer needed since we merge the results into a branch on github.

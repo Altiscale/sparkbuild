@@ -51,6 +51,8 @@ if [ "x${SCALA_HOME}" = "x" ] ; then
   export SCALA_HOME=/opt/scala/
 fi
 
+export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
+
 echo "build - spark core in %{_builddir}"
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/
