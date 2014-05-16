@@ -9,6 +9,7 @@ spark_rc_macros="$curr_dir/spark_rpm_macros"
 mock_cfg="$curr_dir/altiscale-spark-centos-6-x86_64.cfg"
 mock_cfg_name=$(basename "$mock_cfg")
 mock_cfg_runtime=`echo $mock_cfg_name | sed "s/.cfg/.runtime.cfg/"`
+maven_setting="$HOME/.m2/settings.xml"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
@@ -20,6 +21,11 @@ fi
 
 if [ ! -f "$curr_dir/setup_host.sh" ]; then
   echo "warn - $setup_host does not exist, we may not need this if all the libs and RPMs are pre-installed"
+fi
+
+if [ ! -f "$maven_setting" ]; then
+  echo "fatal - $maven_setting DOES NOT EXIST!!!! YOU MAY PULLING IN UNTRUSTED artifact and BREACH SECURITY!!!!!!"
+  exit -9
 fi
 
 if [ ! -e "$spark_spec" ] ; then
@@ -123,6 +129,12 @@ chmod 2755 "$WORKSPACE/var/cache/mock"
 sed "s:BASEDIR:$WORKSPACE:g" "$mock_cfg" > "$curr_dir/$mock_cfg_runtime"
 echo "ok - applying mock config $curr_dir/$mock_cfg_runtime"
 cat "$curr_dir/$mock_cfg_runtime"
+
+# The following initialization is not cool and secure, need a better way to manage this
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --init --no-cleanup-after
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --shell "mkdir builddir/.m2/" --no-cleanup-after
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --copyin "$maven_setting" "builddir/.m2/" --no-cleanup-after
+
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
 if [ $? -ne "0" ] ; then
