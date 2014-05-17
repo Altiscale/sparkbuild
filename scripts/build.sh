@@ -145,6 +145,8 @@ cat "$curr_dir/$mock_cfg_runtime"
 
 # The following initialization is not cool and secure, need a better way to manage this
 
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
+
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --rpmbuild_timeout=$build_timeout --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
 rm -f $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
