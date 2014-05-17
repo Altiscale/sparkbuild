@@ -37,6 +37,14 @@ if [ ! -e "$spark_spec" ] ; then
   exit -9
 fi
 
+cleanup_secrets()
+{
+  # Erase our track for any sensitive credentials if necessary
+  rm -f $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings*.rpm
+  rm -f $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings*.src.rpm
+  rm -rf $WORKSPACE/rpmbuild/SOURCES/alti-maven-settings*
+}
+
 env | sort
 
 echo "checking if scala is installed on the system"
@@ -110,6 +118,7 @@ popd
 rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/alti-maven-settings.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 if [ $? -ne "0" ] ; then
   echo "fail - alti-maven-settings SRPM build failed"
+  cleanup_secrets
   exit -95
 fi
 
@@ -124,6 +133,7 @@ SCALA_HOME=$SCALA_HOME rpmbuild -vv -bs $WORKSPACE/rpmbuild/SPECS/spark.spec --d
 
 if [ $? -ne "0" ] ; then
   echo "fail - spark SRPM build failed"
+  cleanup_secrets
   exit -98
 fi
 
@@ -152,12 +162,11 @@ mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-
 
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
+  cleanup_secrets
   exit -99
 fi
 
-# Erase our track for any sensitive credentials if necessary
-rm -f $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings-1.0-1.el6.noarch.rpm
-rm -rf $WORKSPACE/rpmbuild/SOURCES/alti-maven-settings*
+cleanup_secrets
 
 echo "ok - build Completed successfully!"
 

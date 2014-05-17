@@ -15,9 +15,10 @@ fi
 env | sort
 
 # TBD: Verification on the RPM should be performed
-rpm_file=(`find $WORKSPACE/rpmbuild/RPMS/ -type f -name "alti-spark-1.0.*-*.el6.x86_64.rpm" | sort -r | head -n 1`)
+rpm_file=(`find $WORKSPACE/rpmbuild/RPMS/ -type f -name "alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.*.el6.x86_64.rpm" | sort -r | head -n 1`)
 if [ ! -f "$rpm_file" ] ; then
   echo "fatal - can't find RPM $rpm_file to install, can't continue, exiting"
+
   exit -5
 else
   echo "ok - $rpm_file test installed successfully. Basically, this is already covered in the RPM spec file, this file $0 is redundant"
