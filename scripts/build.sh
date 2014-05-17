@@ -135,7 +135,7 @@ mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --res
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --shell "mkdir builddir/.m2/" --no-cleanup-after
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --copyin "$maven_setting" "builddir/.m2/" --no-cleanup-after
 
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm --no-clean
 
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
