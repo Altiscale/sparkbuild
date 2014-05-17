@@ -13,6 +13,7 @@ mock_cfg_runtime=`echo $mock_cfg_name | sed "s/.cfg/.runtime.cfg/"`
 build_timeout=14400
 
 maven_settings="$HOME/.m2/settings.xml"
+maven_settings_spec="$curr_dir/alti-maven-settings.spec"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
@@ -107,17 +108,25 @@ if [ -d alti-spark ] ; then
   rm -rf alti-spark
 fi
 mv spark alti-spark
-if [ -f "$maven_settings" ] ; then
-  mkdir -p  alti-spark/alti-maven-settings/
-  cp "$maven_settings" alti-spark/alti-maven-settings/
-fi
 tar --exclude .git --exclude .gitignore -czf alti-spark.tar.gz alti-spark
+if [ -f "$maven_settings" ] ; then
+  mkdir -p  alti-maven-settings
+  cp "$maven_settings" alti-maven-settings/
+  tar -cvzf alti-maven-settings.tar.gz alti-maven-settings
+  cp "$maven_settings_spec" $WORKSPACE/rpmbuild/SPECS/
+fi
 popd
+
+# Build alti-maven-settings RPM separately so it doesn't get exposed to spark's SRPM or any external trace
+rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/alti-maven-settings.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
+if [ $? -ne "0" ] ; then
+  echo "fail - alti-maven-settings SRPM build failed"
+  exit -95
+fi
 
 # The patches is no longer needed since we merge the results into a branch on github.
 # cp $WORKSPACE/patches/* $WORKSPACE/rpmbuild/SOURCES/
 
-# SCALA_HOME=$SCALA_HOME rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --rcfile=$spark_rc_macros --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 echo "ok - applying version number $SPARK_VERSION and release number $BUILD_TIME, the pattern delimiter is / here"
 sed -i "s/SPARK_VERSION/$SPARK_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/BUILD_TIME/$BUILD_TIME/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
@@ -143,19 +152,23 @@ sed "s:BASEDIR:$WORKSPACE:g" "$mock_cfg" > "$curr_dir/$mock_cfg_runtime"
 echo "ok - applying mock config $curr_dir/$mock_cfg_runtime"
 cat "$curr_dir/$mock_cfg_runtime"
 
-# The following initialization is not cool and secure, need a better way to manage this
+# The following initialization is not cool, need a better way to manage this
+# mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --init
 
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-clean --no-cleanup-after --install $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings-1.0-1.el6.noarch.rpm
 
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --rpmbuild_timeout=$build_timeout --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-clean --rpmbuild_timeout=$build_timeout --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
-rm -f $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
   exit -99
 fi
 
+# Erase our track for any sensitive credentials if necessary
+rm -f $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings-1.0-1.el6.noarch.rpm
+rm -rf $WORKSPACE/rpmbuild/SOURCES/alti-maven-settings*
 
 echo "ok - build Completed successfully!"
 
