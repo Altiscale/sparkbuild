@@ -79,7 +79,13 @@ echo "build - assembly"
 # This will build the overall JARs we need in each folder
 # and install them locally for further reference. We assume the build
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
-mvn -U -X -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+if [ -f alti-maven-settings/settings.xml ] ; then
+  echo "ok - applying local maven repo settings.xml for first priority"
+  mvn -U -X -Pyarn --settings alti-maven-settings/settings.xml --global-settings alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+else
+  echo "ok - applying default repository form pom.xml"
+  mvn -U -X -Pyarn -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+fi
 # mvn -Pyarn -Dmaven.repo.remote=http://repo.maven.apache.org/maven2,http://repository.jboss.org/nexus/content/repositories/releases -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
 
 #if [ "x${SPARK_YARN}" = "xtrue" ] ; then

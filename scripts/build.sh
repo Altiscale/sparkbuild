@@ -6,13 +6,22 @@ curr_dir=`cd $curr_dir; pwd`
 setup_host="$curr_dir/setup_host.sh"
 spark_spec="$curr_dir/spark.spec"
 spark_rc_macros="$curr_dir/spark_rpm_macros"
+
 mock_cfg="$curr_dir/altiscale-spark-centos-6-x86_64.cfg"
 mock_cfg_name=$(basename "$mock_cfg")
 mock_cfg_runtime=`echo $mock_cfg_name | sed "s/.cfg/.runtime.cfg/"`
-maven_setting="$HOME/.m2/settings.xml"
+build_timeout=14400
+
+maven_settings="$HOME/.m2/settings.xml"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
   source "$curr_dir/setup_env.sh"
+fi
+
+if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
+  build_timeout=14400
+else
+  build_timeout=$BUILD_TIMEOUT
 fi
 
 if [ "x${WORKSPACE}" = "x" ] ; then
@@ -23,8 +32,8 @@ if [ ! -f "$curr_dir/setup_host.sh" ]; then
   echo "warn - $setup_host does not exist, we may not need this if all the libs and RPMs are pre-installed"
 fi
 
-if [ ! -f "$maven_setting" ]; then
-  echo "fatal - $maven_setting DOES NOT EXIST!!!! YOU MAY PULLING IN UNTRUSTED artifact and BREACH SECURITY!!!!!!"
+if [ ! -f "$maven_settings" ]; then
+  echo "fatal - $maven_settings DOES NOT EXIST!!!! YOU MAY PULLING IN UNTRUSTED artifact and BREACH SECURITY!!!!!!"
   exit -9
 fi
 
@@ -98,6 +107,10 @@ if [ -d alti-spark ] ; then
   rm -rf alti-spark
 fi
 mv spark alti-spark
+if [ -f "$maven_settings" ] ; then
+  mkdir -p  alti-spark/alti-maven-settings/
+  cp "$maven_settings" alti-spark/alti-maven-settings/
+fi
 tar --exclude .git --exclude .gitignore -czf alti-spark.tar.gz alti-spark
 popd
 
@@ -112,7 +125,7 @@ sed -i "s/ALTISCALE_RELEASE/$ALTISCALE_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spa
 SCALA_HOME=$SCALA_HOME rpmbuild -vv -bs $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 
 if [ $? -ne "0" ] ; then
-  echo "fail - RPM build failed"
+  echo "fail - spark SRPM build failed"
   exit -98
 fi
 
@@ -131,16 +144,16 @@ echo "ok - applying mock config $curr_dir/$mock_cfg_runtime"
 cat "$curr_dir/$mock_cfg_runtime"
 
 # The following initialization is not cool and secure, need a better way to manage this
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --init --no-cleanup-after
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --shell "mkdir builddir/.m2/" --no-cleanup-after
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --copyin "$maven_setting" "builddir/.m2/" --no-cleanup-after
 
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm --no-clean
+mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --rpmbuild_timeout=$build_timeout --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
+
+rm -f $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
   exit -99
 fi
+
 
 echo "ok - build Completed successfully!"
 
