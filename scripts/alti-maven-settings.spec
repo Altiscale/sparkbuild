@@ -1,10 +1,13 @@
+%global mavenname alti-maven-settings
+%global confdir   %{_sysconfdir}/%{name}
+
 Name:		alti-maven-settings
 Version:	1.0
 Release:	1%{?dist}
 Summary:	A RPM wrapper for maven settings.xml
 
 BuildArch:      noarch
-Group:		N/A
+Group:		Development/Tools
 License:	N/A
 URL:		N/A
 Source0:	%{_sourcedir}/%{name}.tar.gz
@@ -23,15 +26,15 @@ Just a RPM wrapper to deploy the maven settings into mock environment
 
 %install
 rm -rf %{buildroot}
-%{__mkdir} -p %{buildroot}/etc/%{name}/
-install -m 644 %{_builddir}/%{name}/settings.xml %{buildroot}/etc/%{name}/
+install -dm 755 %{buildroot}/%{confdir}
+install -m 644 %{_builddir}/%{name}/settings.xml %{buildroot}/%{confdir}/
 
 %clean
-rm -rf %{buildroot}/etc/%{name}
+rm -rf %{buildroot}/%{confdir}
 
 %files
 %defattr(755,root,root,755)
-/etc/%{name}/settings.xml
+%config(noreplace) %{confdir}
 
 
 %changelog
