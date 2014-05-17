@@ -3,9 +3,7 @@
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 
-setup_host="$curr_dir/setup_host.sh"
 spark_spec="$curr_dir/spark.spec"
-spark_rc_macros="$curr_dir/spark_rpm_macros"
 
 mock_cfg="$curr_dir/altiscale-spark-centos-6-x86_64.cfg"
 mock_cfg_name=$(basename "$mock_cfg")
@@ -29,10 +27,6 @@ if [ "x${WORKSPACE}" = "x" ] ; then
   WORKSPACE="$curr_dir/../"
 fi
 
-if [ ! -f "$curr_dir/setup_host.sh" ]; then
-  echo "warn - $setup_host does not exist, we may not need this if all the libs and RPMs are pre-installed"
-fi
-
 if [ ! -f "$maven_settings" ]; then
   echo "fatal - $maven_settings DOES NOT EXIST!!!! YOU MAY PULLING IN UNTRUSTED artifact and BREACH SECURITY!!!!!!"
   exit -9
@@ -40,11 +34,6 @@ fi
 
 if [ ! -e "$spark_spec" ] ; then
   echo "fail - missing $spark_spec file, can't continue, exiting"
-  exit -9
-fi
-
-if [ ! -e "$spark_rc_macros" ] ; then
-  echo "fail - missing $spark_rc_macros file to override rpmbuild folders, can't continue, exiting"
   exit -9
 fi
 
