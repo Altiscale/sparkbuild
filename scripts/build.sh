@@ -42,6 +42,7 @@ cleanup_secrets()
   # Erase our track for any sensitive credentials if necessary
   rm -f $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings*.rpm
   rm -f $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings*.src.rpm
+  rm -f $WORKSPACE/rpmbuild/SRPMS/alti-maven-settings*.src.rpm
   rm -rf $WORKSPACE/rpmbuild/SOURCES/alti-maven-settings*
 }
 
