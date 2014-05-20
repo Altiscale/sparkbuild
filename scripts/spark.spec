@@ -1,4 +1,6 @@
 %global apache_name           spark
+%global spark_uid             411460024
+%global spark_gid             411460017
 
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
@@ -18,6 +20,7 @@ License: ASL 2.0
 # Packager: %{packager}
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{build_service_name}
+Requires(pre): shadow-utils
 Requires: scala >= 2.10.3
 Requires: jre >= 1.7
 BuildRequires: scala = 2.10.3
@@ -31,6 +34,18 @@ Url: http://spark.apache.org/
 %description
 %{spark_folder_name} is a repackaged spark distro that is compiled against Hadoop 2.2.x
 with YARN enabled. This package should work with Altiscale Hadoop 2.2.
+
+%pre
+# Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
+# Should be harmless. MAKE SURE UID and GID is correct FIRST!!!!!!
+getent group %{apache_name} >/dev/null || groupadd -f -g %{spark_gid} -r %{apache_name}
+if ! getent passwd %{apache_name} >/dev/null ; then
+    if ! getent passwd %{spark_uid} >/dev/null ; then
+      useradd -r -u %{spark_uid} -g %{apache_name} -c "Soft creation of user and group of spark for manual deployment" %{apache_name}
+    else
+      useradd -r -g %{apache_name} -c "Soft adding user spark to group spark for manual deployment" %{apache_name}
+    fi
+fi
 
 %prep
 # copying files into BUILD/spark/ e.g. BUILD/spark/* 
