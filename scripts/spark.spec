@@ -1,12 +1,14 @@
+%global apache_name           spark
+
 %define altiscale_release_ver ALTISCALE_RELEASE
-%define rpm_package_name alti-spark
-%define spark_version SPARK_VERSION
-%define build_service_name alti-spark
-%define spark_folder_name %{rpm_package_name}-%{spark_version}
-%define install_spark_dest /opt/%{spark_folder_name}
-%define install_spark_conf /etc/%{spark_folder_name}
-# %define packager %(echo ${PKGER})
-%define build_release BUILD_TIME
+%define rpm_package_name      alti-spark
+%define spark_version         SPARK_VERSION
+%define build_service_name    alti-spark
+%define spark_folder_name     %{rpm_package_name}-%{spark_version}
+%define install_spark_dest    /opt/%{spark_folder_name}
+%define install_spark_conf    /etc/%{spark_folder_name}
+%define install_spark_logs    /var/log/%{apache_name}
+%define build_release         BUILD_TIME
 
 Name: %{rpm_package_name}
 Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with warnings
@@ -130,7 +132,7 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/work
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/logs
+%{__mkdir} -p %{buildroot}%{install_spark_logs}
 # copy all necessary jars
 cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
@@ -149,7 +151,6 @@ cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf
 
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, cluster mode NOT supported, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
-echo "Your log shouldn't go here, please configure log4j.properties correctly, logs should go to /var/log/spark/ by default if log4j.properties is configured correctly" >  %{buildroot}%{install_spark_dest}/logs/YOUR_LOG_SHOULDNT_COME_HERE.why.txt
 
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
@@ -160,11 +161,18 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}
 %dir %{install_spark_dest}/work
 %dir %{install_spark_conf}
-%attr(0777,root,root) %{install_spark_dest}/work
-%attr(0777,root,root) %{install_spark_dest}/logs
-%attr(0755,root,root) %{install_spark_conf}
+%attr(0777,spark,spark) %{install_spark_dest}/work
+%attr(0755,spark,spark) %{install_spark_conf}
+%attr(0755,spark,spark) %{install_spark_logs}
+
+%post
+ln -sf %{install_spark_dest} /opt/%{apache_name}
+ln -sf %{install_spark_conf} /etc/%{apache_name}
+ln -sf %{install_spark_logs} /opt/%{apache_name}/logs
 
 %changelog
+* Tue May 20 2014 Andrew Lee 20140520
+- Update log folder macro, added %post section, fix build command for hadoop 2.2
 * Tue May 13 2014 Andrew Lee 20140513
 - Commented out patch, no need for patch. Patch is now merged into git during Spark checkout.
 * Mon Apr 7 2014 Andrew Lee 20140407
