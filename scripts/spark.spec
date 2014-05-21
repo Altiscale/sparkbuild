@@ -179,11 +179,17 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0777,spark,spark) %{install_spark_dest}/work
 %attr(0755,spark,spark) %{install_spark_conf}
 %attr(0755,spark,spark) %{install_spark_logs}
+%config(noreplace) %{install_spark_conf}
 
 %post
 ln -sf %{install_spark_dest} /opt/%{apache_name}
 ln -sf %{install_spark_conf} /etc/%{apache_name}
 ln -sf %{install_spark_logs} /opt/%{apache_name}/logs
+
+%postun
+rm -f /opt/%{apache_name}/logs
+rm -f /opt/%{apache_name}
+rm -f /etc/%{apache_name}
 
 %changelog
 * Tue May 20 2014 Andrew Lee 20140520
