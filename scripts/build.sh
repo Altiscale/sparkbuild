@@ -167,6 +167,9 @@ if [ $? -ne "0" ] ; then
   exit -99
 fi
 
+# Delete all src.rpm in the RPMS folder since this is redundant and copied by the mock process
+rm -f $WORKSPACE/rpmbuild/RPMS/*.src.rpm
+
 cleanup_secrets
 
 echo "ok - build Completed successfully!"
