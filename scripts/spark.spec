@@ -184,10 +184,12 @@ rm -rf %{buildroot}%{install_spark_dest}
 %post
 ln -sf %{install_spark_dest} /opt/%{apache_name}
 ln -sf %{install_spark_conf} /etc/%{apache_name}
+ln -sf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -sf %{install_spark_logs} /opt/%{apache_name}/logs
 
 %postun
 rm -f /opt/%{apache_name}/logs
+rm -f /opt/%{apache_name}/conf
 rm -f /opt/%{apache_name}
 rm -f /etc/%{apache_name}
 
