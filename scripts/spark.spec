@@ -21,7 +21,7 @@ Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.3
-Requires: java
+# Requires: java
 BuildRequires: scala = 2.10.3
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: java-1.7.0-openjdk-devel >= 1.7.0.51
