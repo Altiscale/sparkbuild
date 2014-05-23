@@ -17,12 +17,11 @@ Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with
 Version: %{spark_version}
 Release: %{altiscale_release_ver}.%{build_release}%{?dist}
 License: ASL 2.0
-# Packager: %{packager}
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.3
-# Requires: jre >= 1.7
+Requires: java
 BuildRequires: scala = 2.10.3
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: java-1.7.0-openjdk-devel >= 1.7.0.51
@@ -81,6 +80,7 @@ find %{_builddir}/%{build_service_name}/bin -type f -name '*.cmd' -exec rm -f {}
 find %{_builddir}/%{build_service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
 find %{_builddir}/%{build_service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
 rm -f %{_builddir}/%{build_service_name}/sbin/slaves.sh
+rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
 export SPARK_HADOOP_VERSION=2.2.0 
 export SPARK_YARN=true
