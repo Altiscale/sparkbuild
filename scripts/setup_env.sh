@@ -36,7 +36,7 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.0.0
+  export SPARK_VERSION=1.0.11
 fi
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
   export ALTISCALE_RELEASE=2.0.0
@@ -45,7 +45,7 @@ else
 fi
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.0
+  export BRANCH_NAME=altiscale-branch-1.0-rc
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then

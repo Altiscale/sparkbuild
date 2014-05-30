@@ -21,10 +21,10 @@ Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.3
-# Requires: java
+# Requires: jdk
 BuildRequires: scala = 2.10.3
 BuildRequires: apache-maven >= 3.2.1
-BuildRequires: java-1.7.0-openjdk-devel >= 1.7.0.51
+BuildRequires: jdk >= 1.7.0.51
 # Apply all patches to fix CLASSPATH and java lib issues
 # Patch1: %{_sourcedir}/patch.spark
 
@@ -195,7 +195,7 @@ rm -f /etc/%{apache_name}
 
 %changelog
 * Fri May 23 2014 Andrew Lee 20140523
-- Removed Require tag for java. Update %install macro to include more sample data for mllib/data
+- Removed Require tag for java. Update install macro to include more sample data for mllib/data
 * Tue May 20 2014 Andrew Lee 20140520
 - Update log folder macro, added %post section, fix build command for hadoop 2.2
 * Tue May 13 2014 Andrew Lee 20140513
