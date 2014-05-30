@@ -161,12 +161,16 @@ mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-
 
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-clean --rpmbuild_timeout=$build_timeout --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
-
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
   cleanup_secrets
+  mock --clean
+  mock --scrub=all
   exit -99
 fi
+
+mock --clean
+mock --scrub=all
 
 # Delete all src.rpm in the RPMS folder since this is redundant and copied by the mock process
 rm -f $WORKSPACE/rpmbuild/RPMS/*.src.rpm
