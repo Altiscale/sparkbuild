@@ -149,6 +149,7 @@ chmod 2755 "$WORKSPACE/var/lib/mock"
 mkdir -p "$WORKSPACE/var/cache/mock"
 chmod 2755 "$WORKSPACE/var/cache/mock"
 sed "s:BASEDIR:$WORKSPACE:g" "$mock_cfg" > "$curr_dir/$mock_cfg_runtime"
+sed -i "s:SPARK_VERSION:$SPARK_VERSION:g" "$curr_dir/$mock_cfg_runtime"
 echo "ok - applying mock config $curr_dir/$mock_cfg_runtime"
 cat "$curr_dir/$mock_cfg_runtime"
 
