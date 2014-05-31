@@ -164,12 +164,12 @@ mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
   cleanup_secrets
-  mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --clean
+  # mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --clean
   mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
   exit -99
 fi
 
-mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --clean
+# mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --clean
 mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
 
 # Delete all src.rpm in the RPMS folder since this is redundant and copied by the mock process
