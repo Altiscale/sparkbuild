@@ -1,0 +1,7 @@
+%{_topdir}            %{getenv:WORKSPACE}/rpmbuild
+%{_builddir}          %{_topdir}/BUILD
+%{_rpmdir}            %{_topdir}/RPMS
+%{_sourcedir}         %{_topdir}/SOURCES
+%{_specdir}           %{_topdir}/SPECS
+%{_srcrpmdir}         %{_topdir}/SRPMS
+%{_buildrootdir}      %{_topdir}/BUILDROOT

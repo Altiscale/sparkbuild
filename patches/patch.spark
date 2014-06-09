@@ -1,0 +1,400 @@
+diff -uNar spark/assembly/pom.xml alti-spark/assembly/pom.xml
+--- alti-spark/assembly/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/assembly/pom.xml	2014-04-04 16:23:35.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/bagel/pom.xml alti-spark/bagel/pom.xml
+--- alti-spark/bagel/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/bagel/pom.xml	2014-04-04 16:34:09.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/bin/compute-classpath.sh alti-spark/bin/compute-classpath.sh
+--- alti-spark/bin/compute-classpath.sh	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/bin/compute-classpath.sh	2014-04-04 16:23:03.000000000 -0700
+@@ -64,6 +64,11 @@
+   CLASSPATH="$CLASSPATH:$FWDIR/streaming/target/scala-$SCALA_VERSION/test-classes"
+ fi
+ 
++if [ -d "$HADOOP_HOME/share/hadoop/mapreduce/lib/" ] ; then
++  HADOOP_MR_LZO_JAR=`ls $HADOOP_HOME/share/hadoop/mapreduce/lib/*lzo*.jar`
++  CLASSPATH=$CLASSPATH:$HADOOP_MR_LZO_JAR
++fi
++
+ # Add hadoop conf dir if given -- otherwise FileSystem.*, etc fail !
+ # Note, this assumes that there is either a HADOOP_CONF_DIR or YARN_CONF_DIR which hosts
+ # the configurtion files.
+diff -uNar spark/bin/run-example alti-spark/bin/run-example
+--- alti-spark/bin/run-example	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/bin/run-example	2014-04-04 16:23:03.000000000 -0700
+@@ -76,6 +76,8 @@
+   fi
+ fi
+ 
++SPARK_LIBRARY_PATH=$HADOOP_HOME/lib/native/:$SPARK_LIBRARY_PATH
++
+ # Set JAVA_OPTS to be able to load native libraries and to set heap size
+ JAVA_OPTS="$SPARK_JAVA_OPTS"
+ JAVA_OPTS="$JAVA_OPTS -Djava.library.path=$SPARK_LIBRARY_PATH"
+diff -uNar spark/bin/run-example2 alti-spark/bin/run-example2
+--- alti-spark/bin/run-example2	1969-12-31 16:00:00.000000000 -0800
++++ alti-spark/bin/run-example2	2014-04-06 12:50:44.000000000 -0700
+@@ -0,0 +1,99 @@
++#!/usr/bin/env bash
++
++#
++# Licensed to the Apache Software Foundation (ASF) under one or more
++# contributor license agreements.  See the NOTICE file distributed with
++# this work for additional information regarding copyright ownership.
++# The ASF licenses this file to You under the Apache License, Version 2.0
++# (the "License"); you may not use this file except in compliance with
++# the License.  You may obtain a copy of the License at
++#
++#    http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++#
++
++cygwin=false
++case "`uname`" in
++    CYGWIN*) cygwin=true;;
++esac
++
++SCALA_VERSION=2.10
++
++# Figure out where the Scala framework is installed
++FWDIR="$(cd `dirname $0`/..; pwd)"
++
++# Export this as SPARK_HOME
++export SPARK_HOME="$FWDIR"
++
++# Load environment variables from conf/spark-env.sh, if it exists
++if [ -e "$FWDIR/conf/spark-env.sh" ] ; then
++  . $FWDIR/conf/spark-env.sh
++fi
++
++if [ -z "$1" ]; then
++  echo "Usage: run-example <example-class> [<args>]" >&2
++  exit 1
++fi
++
++# Figure out the JAR file that our examples were packaged into. This includes a bit of a hack
++# to avoid the -sources and -doc packages that are built by publish-local.
++EXAMPLES_DIR="$FWDIR"/examples
++SPARK_EXAMPLES_JAR=""
++if [ -e "$EXAMPLES_DIR"/target/*examples*[0-9Tg].jar ]; then
++  export SPARK_EXAMPLES_JAR=`ls "$EXAMPLES_DIR"/target/*examples*[0-9Tg].jar`
++fi
++if [[ -z $SPARK_EXAMPLES_JAR ]]; then
++  echo "Failed to find Spark examples JARs in $FWDIR/examples/target" >&2
++  exit 1
++fi
++
++SPARK_JAR=""
++export SPARK_JAR=`ls "$FWDIR"/assembly/target/scala-$SCALA_VERSION/spark-assembly*hadoop*.jar`
++export SPARK_YARN_APP_JAR=$SPARK_EXAMPLES_JAR
++
++# Since the examples JAR ideally shouldn't include spark-core (that dependency should be
++# "provided"), also add our standard Spark classpath, built using compute-classpath.sh.
++CLASSPATH=`$FWDIR/bin/compute-classpath.sh`
++CLASSPATH="$SPARK_EXAMPLES_JAR:$CLASSPATH"
++
++if $cygwin; then
++    CLASSPATH=`cygpath -wp $CLASSPATH`
++    export SPARK_EXAMPLES_JAR=`cygpath -w $SPARK_EXAMPLES_JAR`
++fi
++
++# Find java binary
++if [ -n "${JAVA_HOME}" ]; then
++  RUNNER="${JAVA_HOME}/bin/java"
++else
++  if [ `command -v java` ]; then
++    RUNNER="java"
++  else
++    echo "JAVA_HOME is not set" >&2
++    exit 1
++  fi
++fi
++
++SPARK_LIBRARY_PATH=$HADOOP_HOME/lib/native/:$SPARK_LIBRARY_PATH
++
++# Set JAVA_OPTS to be able to load native libraries and to set heap size
++JAVA_OPTS="$SPARK_JAVA_OPTS"
++JAVA_OPTS="$JAVA_OPTS -Djava.library.path=$SPARK_LIBRARY_PATH"
++# Load extra JAVA_OPTS from conf/java-opts, if it exists
++if [ -e "$FWDIR/conf/java-opts" ] ; then
++  JAVA_OPTS="$JAVA_OPTS `cat $FWDIR/conf/java-opts`"
++fi
++export JAVA_OPTS
++
++if [ "$SPARK_PRINT_LAUNCH_COMMAND" == "1" ]; then
++  echo -n "Spark Command: "
++  echo "$RUNNER" -cp "$CLASSPATH" $JAVA_OPTS "$@"
++  echo "========================================"
++  echo
++fi
++
++exec "$RUNNER" -cp "$CLASSPATH" $JAVA_OPTS "$@"
+diff -uNar spark/bin/spark-class alti-spark/bin/spark-class
+--- alti-spark/bin/spark-class	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/bin/spark-class	2014-04-04 16:23:03.000000000 -0700
+@@ -87,6 +87,8 @@
+ SPARK_MEM=${SPARK_MEM:-512m}
+ export SPARK_MEM
+ 
++SPARK_LIBRARY_PATH=$HADOOP_HOME/lib/native/:$SPARK_LIBRARY_PATH
++
+ # Set JAVA_OPTS to be able to load native libraries and to set heap size
+ JAVA_OPTS="$OUR_JAVA_OPTS"
+ JAVA_OPTS="$JAVA_OPTS -Djava.library.path=$SPARK_LIBRARY_PATH"
+diff -uNar spark/core/pom.xml alti-spark/core/pom.xml
+--- alti-spark/core/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/core/pom.xml	2014-04-04 16:33:44.000000000 -0700
+@@ -21,7 +21,7 @@
+     <parent>
+         <groupId>org.apache.spark</groupId>
+         <artifactId>spark-parent</artifactId>
+-        <version>0.9.1-incubating-SNAPSHOT</version>
++        <version>0.9.1-incubating</version>
+         <relativePath>../pom.xml</relativePath>
+     </parent>
+ 
+diff -uNar spark/examples/pom.xml alti-spark/examples/pom.xml
+--- alti-spark/examples/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/examples/pom.xml	2014-04-05 00:45:40.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/external/flume/pom.xml alti-spark/external/flume/pom.xml
+--- alti-spark/external/flume/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/external/flume/pom.xml	2014-04-04 16:40:04.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/external/kafka/pom.xml alti-spark/external/kafka/pom.xml
+--- alti-spark/external/kafka/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/external/kafka/pom.xml	2014-04-04 16:40:15.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/external/mqtt/pom.xml alti-spark/external/mqtt/pom.xml
+--- alti-spark/external/mqtt/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/external/mqtt/pom.xml	2014-04-04 16:40:27.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/external/twitter/pom.xml alti-spark/external/twitter/pom.xml
+--- alti-spark/external/twitter/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/external/twitter/pom.xml	2014-04-04 16:40:37.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/external/zeromq/pom.xml alti-spark/external/zeromq/pom.xml
+--- alti-spark/external/zeromq/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/external/zeromq/pom.xml	2014-04-04 16:40:47.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/graphx/pom.xml alti-spark/graphx/pom.xml
+--- alti-spark/graphx/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/graphx/pom.xml	2014-04-04 16:24:11.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/mllib/data/kmeans/kmeans_data.txt alti-spark/mllib/data/kmeans/kmeans_data.txt
+--- alti-spark/mllib/data/kmeans/kmeans_data.txt	1969-12-31 16:00:00.000000000 -0800
++++ alti-spark/mllib/data/kmeans/kmeans_data.txt	2014-04-06 12:53:27.000000000 -0700
+@@ -0,0 +1,6 @@
++0.0 0.0 0.0
++0.1 0.1 0.1
++0.2 0.2 0.2
++9.0 9.0 9.0
++9.1 9.1 9.1
++9.2 9.2 9.2
+diff -uNar spark/mllib/pom.xml alti-spark/mllib/pom.xml
+--- alti-spark/mllib/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/mllib/pom.xml	2014-04-04 16:24:01.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/pom.xml alti-spark/pom.xml
+--- alti-spark/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/pom.xml	2014-04-05 00:36:23.000000000 -0700
+@@ -25,7 +25,7 @@
+   </parent>
+   <groupId>org.apache.spark</groupId>
+   <artifactId>spark-parent</artifactId>
+-  <version>0.9.1-incubating-SNAPSHOT</version>
++  <version>0.9.1-incubating</version>
+   <packaging>pom</packaging>
+   <name>Spark Project Parent POM</name>
+   <url>http://spark.incubator.apache.org/</url>
+@@ -374,12 +374,6 @@
+         <version>3.1</version>
+         <scope>test</scope>
+       </dependency>
+-     <dependency>
+-        <groupId>org.mockito</groupId>
+-        <artifactId>mockito-all</artifactId>
+-        <version>1.8.5</version>
+-        <scope>test</scope>
+-      </dependency>
+       <dependency>
+         <groupId>org.scalacheck</groupId>
+         <artifactId>scalacheck_${scala.binary.version}</artifactId>
+@@ -393,6 +387,11 @@
+         <scope>test</scope>
+       </dependency>
+       <dependency>
++        <groupId>junit</groupId>
++        <artifactId>junit</artifactId>
++        <version>4.11</version>
++      </dependency> 
++      <dependency>
+         <groupId>org.apache.zookeeper</groupId>
+         <artifactId>zookeeper</artifactId>
+         <version>3.4.5</version>
+diff -uNar spark/project/SparkBuild.scala alti-spark/project/SparkBuild.scala
+--- alti-spark/project/SparkBuild.scala	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/project/SparkBuild.scala	2014-04-04 16:23:03.000000000 -0700
+@@ -28,13 +28,13 @@
+   // Hadoop version to build against. For example, "1.0.4" for Apache releases, or
+   // "2.0.0-mr1-cdh4.2.0" for Cloudera Hadoop. Note that these variables can be set
+   // through the environment variables SPARK_HADOOP_VERSION and SPARK_YARN.
+-  val DEFAULT_HADOOP_VERSION = "1.0.4"
++  val DEFAULT_HADOOP_VERSION = "2.2.0"
+ 
+   // Whether the Hadoop version to build against is 2.2.x, or a variant of it. This can be set
+   // through the SPARK_IS_NEW_HADOOP environment variable.
+   val DEFAULT_IS_NEW_HADOOP = false
+ 
+-  val DEFAULT_YARN = false
++  val DEFAULT_YARN = true
+ 
+   // HBase version; set as appropriate.
+   val HBASE_VERSION = "0.94.6"
+diff -uNar spark/repl/pom.xml alti-spark/repl/pom.xml
+--- alti-spark/repl/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/repl/pom.xml	2014-04-04 16:34:39.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/streaming/pom.xml alti-spark/streaming/pom.xml
+--- alti-spark/streaming/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/streaming/pom.xml	2014-04-04 16:27:29.000000000 -0700
+@@ -21,7 +21,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/tools/pom.xml alti-spark/tools/pom.xml
+--- alti-spark/tools/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/tools/pom.xml	2014-04-04 16:34:19.000000000 -0700
+@@ -20,7 +20,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/yarn/pom.xml alti-spark/yarn/pom.xml
+--- alti-spark/yarn/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/yarn/pom.xml	2014-04-04 16:34:28.000000000 -0700
+@@ -20,7 +20,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>spark-parent</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
+diff -uNar spark/yarn/stable/pom.xml alti-spark/yarn/stable/pom.xml
+--- alti-spark/yarn/stable/pom.xml	2014-03-29 08:30:03.000000000 -0700
++++ alti-spark/yarn/stable/pom.xml	2014-04-04 16:41:08.000000000 -0700
+@@ -20,7 +20,7 @@
+   <parent>
+     <groupId>org.apache.spark</groupId>
+     <artifactId>yarn-parent_2.10</artifactId>
+-    <version>0.9.1-incubating-SNAPSHOT</version>
++    <version>0.9.1-incubating</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+ 
