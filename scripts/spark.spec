@@ -77,9 +77,17 @@ cd %{_builddir}/%{build_service_name}/
 find %{_builddir}/%{build_service_name}/bin -type f -name '*.cmd' -exec rm -f {} \;
 
 # Remove launch script AE-579
-find %{_builddir}/%{build_service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
-find %{_builddir}/%{build_service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
+# find %{_builddir}/%{build_service_name}/sbin -type f -name 'start-*.sh' -exec rm -f {} \;
+# find %{_builddir}/%{build_service_name}/sbin -type f -name 'stop-*.sh' -exec rm -f {} \;
+rm -f %{_builddir}/%{build_service_name}/sbin/start-slave*
+rm -f %{_builddir}/%{build_service_name}/sbin/start-master.sh
+rm -f %{_builddir}/%{build_service_name}/sbin/start-all.sh
+rm -f %{_builddir}/%{build_service_name}/sbin/stop-slaves.sh
+rm -f %{_builddir}/%{build_service_name}/sbin/stop-master.sh
+rm -f %{_builddir}/%{build_service_name}/sbin/stop-all.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/slaves.sh
+rm -f %{_builddir}/%{build_service_name}/sbin/spark-daemons.sh
+rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
 export SPARK_HADOOP_VERSION=2.2.0 
