@@ -191,22 +191,33 @@ rm -rf %{buildroot}%{install_spark_dest}
 %config(noreplace) %{install_spark_conf}
 
 %post
-rm -f /opt/%{apache_name}/logs
-rm -f /opt/%{apache_name}/conf
-rm -f /opt/%{apache_name}
-rm -f /etc/%{apache_name}
-ln -sf %{install_spark_dest} /opt/%{apache_name}
-ln -sf %{install_spark_conf} /etc/%{apache_name}
-ln -sf %{install_spark_conf} /opt/%{apache_name}/conf
-ln -sf %{install_spark_logs} /opt/%{apache_name}/logs
+if [ "$1" = "1" ]; then
+  echo "ok - performing fresh installation"
+elif [ "$1" = "2" ]; then
+  echo "ok - upgrading system"
+fi
+rm -vf /opt/%{apache_name}/logs
+rm -vf /opt/%{apache_name}/conf
+rm -vf /opt/%{apache_name}
+rm -vf /etc/%{apache_name}
+ln -vsf %{install_spark_dest} /opt/%{apache_name}
+ln -vsf %{install_spark_conf} /etc/%{apache_name}
+ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
+ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
 
 %postun
-rm -f /opt/%{apache_name}/logs
-rm -f /opt/%{apache_name}/conf
-rm -f /opt/%{apache_name}
-rm -f /etc/%{apache_name}
+if [ "$1" = "0" ]; then
+  echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
+  rm -vf /opt/%{apache_name}/logs
+  rm -vf /opt/%{apache_name}/conf
+  rm -vf /opt/%{apache_name}
+  rm -vf /etc/%{apache_name}
+fi
+# Don't delete the users after uninstallation.
 
 %changelog
+* Mon Jun 23 2014 Andrew Lee 20140623
+- Update pre macro to identify update versus fresh installation
 * Fri May 23 2014 Andrew Lee 20140523
 - Removed Require tag for java. Update install macro to include more sample data for mllib/data
 * Tue May 20 2014 Andrew Lee 20140520
