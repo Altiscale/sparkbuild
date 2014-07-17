@@ -21,6 +21,12 @@ fi
 if [ "x${SCALA_HOME}" = "x" ] ; then
   export SCALA_HOME=/opt/scala
 fi
+if [ "x${HADOOP_VERSION}" = "x" ] ; then
+  export HADOOP_VERSION=2.2.0
+fi
+if [ "x${HIVE_VERSION}" = "x" ] ; then
+  export HIVE_VERSION=0.12.0
+fi
 
 export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin
 
@@ -36,7 +42,7 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.0.11
+  export SPARK_VERSION=1.0.1
 fi
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
   export ALTISCALE_RELEASE=2.0.0
@@ -45,7 +51,7 @@ else
 fi
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.0-rc
+  export BRANCH_NAME=altiscale-branch-1.0.1-rc3
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then

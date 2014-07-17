@@ -1,6 +1,6 @@
-%global apache_name           spark
-%global spark_uid             411460024
-%global spark_gid             411460017
+%global apache_name           SPARK_USER
+%global spark_uid             SPARK_UID
+%global spark_gid             SPARK_GID
 
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
@@ -12,17 +12,17 @@
 %define install_spark_logs    /var/log/%{apache_name}
 %define build_release         BUILD_TIME
 
-Name: %{rpm_package_name}
+Name: %{rpm_package_name}-%{spark_version}
 Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with warnings
 Version: %{spark_version}
 Release: %{altiscale_release_ver}.%{build_release}%{?dist}
 License: ASL 2.0
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%{build_service_name}
+BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
-Requires: scala >= 2.10.3
+Requires: scala >= 2.10.4
 # Requires: jdk
-BuildRequires: scala = 2.10.3
+BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
 # Apply all patches to fix CLASSPATH and java lib issues
@@ -90,7 +90,18 @@ rm -f %{_builddir}/%{build_service_name}/sbin/spark-daemons.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
-export SPARK_HADOOP_VERSION=2.2.0 
+if [ "x${HADOOP_VERSION}" = "x" ] ; then
+  export SPARK_HADOOP_VERSION=2.2.0
+else
+  export SPARK_HADOOP_VERSION=$HADOOP_VERSION
+  echo "ok - applying customized hadoop version $SPARK_HADOOP_VERSION"
+fi
+if [ "x${HIVE_VERSION}" = "x" ] ; then
+  export SPARK_HIVE_VERSION=0.12.0
+else
+  export SPARK_HIVE_VERSION=$HIVE_VERSION
+  echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
+fi
 export SPARK_YARN=true
 echo "build - assembly"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
@@ -106,10 +117,10 @@ echo "build - assembly"
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
-  mvn -U -X -Phadoop-2.2 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+  mvn -U -X -Phadoop-2.2 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
 else
   echo "ok - applying default repository form pom.xml"
-  mvn -U -X -Phadoop-2.2 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
+  mvn -U -X -Phadoop-2.2 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
 fi
 # mvn -Pyarn -Dmaven.repo.remote=http://repo.maven.apache.org/maven2,http://repository.jboss.org/nexus/content/repositories/releases -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
 
