@@ -184,8 +184,13 @@ cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_des
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
 
+# Inherit license, readme, etc
+cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
+
 # add dummy file to warn user that CLUSTER mode is not for Production
-echo "Currently, cluster mode NOT supported, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
+echo "Currently, cluster mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
