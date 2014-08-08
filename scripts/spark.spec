@@ -220,6 +220,9 @@ ln -vsf %{install_spark_dest} /opt/%{apache_name}
 ln -vsf %{install_spark_conf} /etc/%{apache_name}
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
+mkdir -p /home/spark/logs
+chown %{spark_uid}:%{spark_gid} /home/spark/logs
+chmod 1777 /home/spark/logs
 
 %postun
 if [ "$1" = "0" ]; then
@@ -232,12 +235,14 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Fri Aug 8 2014 Andrew Lee 20140808
+- Add new statement to post installation section, creating log directory
 * Mon Jun 23 2014 Andrew Lee 20140623
 - Update pre macro to identify update versus fresh installation
 * Fri May 23 2014 Andrew Lee 20140523
 - Removed Require tag for java. Update install macro to include more sample data for mllib/data
 * Tue May 20 2014 Andrew Lee 20140520
-- Update log folder macro, added %post section, fix build command for hadoop 2.2
+- Update log folder macro, added post section, fix build command for hadoop 2.2
 * Tue May 13 2014 Andrew Lee 20140513
 - Commented out patch, no need for patch. Patch is now merged into git during Spark checkout.
 * Mon Apr 7 2014 Andrew Lee 20140407
