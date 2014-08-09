@@ -222,6 +222,7 @@ ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
 mkdir -p /home/spark/logs
 chmod -R 1777 /home/spark/logs
+chown %{spark_uid}:%{spark_gid} /home/spark/
 chown %{spark_uid}:%{spark_gid} /home/spark/logs
 
 %postun
