@@ -42,7 +42,7 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.1.0
+  export SPARK_VERSION=1.1.1
 fi
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
   export ALTISCALE_RELEASE=2.0.0
