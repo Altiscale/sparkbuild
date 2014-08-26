@@ -91,17 +91,20 @@ rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
-  export SPARK_HADOOP_VERSION=2.2.0
+  echo "fatal - HADOOP_VERSION needs to be set, can't build anything, exiting"
+  exit -8
 else
   export SPARK_HADOOP_VERSION=$HADOOP_VERSION
   echo "ok - applying customized hadoop version $SPARK_HADOOP_VERSION"
 fi
 if [ "x${HIVE_VERSION}" = "x" ] ; then
-  export SPARK_HIVE_VERSION=0.12.0
+  echo "fatal - HIVE_VERSION needs to be set, can't build anything, exiting"
+  exit -8
 else
   export SPARK_HIVE_VERSION=$HIVE_VERSION
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
+# Always build with YARN
 export SPARK_YARN=true
 echo "build - assembly"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
@@ -117,10 +120,24 @@ echo "build - assembly"
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
-  mvn -U -X -Phadoop-2.2 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
+    mvn -U -X -Phadoop-2.2 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
+    mvn -U -X -Phadoop-2.4 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  else
+    echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
+    exit -9
+  fi
 else
   echo "ok - applying default repository form pom.xml"
-  mvn -U -X -Phadoop-2.2 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
+    mvn -U -X -Phadoop-2.2 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
+    mvn -U -X -Phadoop-2.4 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  else
+    echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
+    exit -9
+  fi
 fi
 # mvn -Pyarn -Dmaven.repo.remote=http://repo.maven.apache.org/maven2,http://repository.jboss.org/nexus/content/repositories/releases -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install
 
