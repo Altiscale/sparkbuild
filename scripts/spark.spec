@@ -182,7 +182,6 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/work
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
 # copy all necessary jars
 cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
@@ -216,9 +215,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %files
 %defattr(0755,spark,spark,0755)
 %{install_spark_dest}
-%dir %{install_spark_dest}/work
 %dir %{install_spark_conf}
-%attr(0777,spark,spark) %{install_spark_dest}/work
 %attr(0755,spark,spark) %{install_spark_conf}
 %attr(0775,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
