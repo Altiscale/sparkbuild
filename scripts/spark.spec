@@ -5,6 +5,8 @@
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
 %define spark_version         SPARK_VERSION
+%define hadoop_version        HADOOP_VERSION_REPLACE
+%define hive_version          HIVE_VERSION_REPLACE
 %define build_service_name    alti-spark
 %define spark_folder_name     %{rpm_package_name}-%{spark_version}
 %define install_spark_dest    /opt/%{spark_folder_name}
@@ -90,18 +92,18 @@ rm -f %{_builddir}/%{build_service_name}/sbin/spark-daemons.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
-if [ "x${HADOOP_VERSION}" = "x" ] ; then
+if [ "x%{hadoop_version}" = "xHADOOP_VERSION_REPLACE" ] ; then
   echo "fatal - HADOOP_VERSION needs to be set, can't build anything, exiting"
   exit -8
 else
-  export SPARK_HADOOP_VERSION=$HADOOP_VERSION
+  export SPARK_HADOOP_VERSION=%{hadoop_version}
   echo "ok - applying customized hadoop version $SPARK_HADOOP_VERSION"
 fi
-if [ "x${HIVE_VERSION}" = "x" ] ; then
+if [ "x%{hive_version}" = "xHIVE_VERSION_REPLACE" ] ; then
   echo "fatal - HIVE_VERSION needs to be set, can't build anything, exiting"
   exit -8
 else
-  export SPARK_HIVE_VERSION=$HIVE_VERSION
+  export SPARK_HIVE_VERSION=%{hive_version}
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
 # Always build with YARN

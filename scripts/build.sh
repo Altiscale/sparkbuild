@@ -14,7 +14,9 @@ maven_settings="$HOME/.m2/settings.xml"
 maven_settings_spec="$curr_dir/alti-maven-settings.spec"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
+  set +a
   source "$curr_dir/setup_env.sh"
+  set -a
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
