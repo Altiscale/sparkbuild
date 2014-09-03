@@ -58,12 +58,6 @@ fi
 %setup -q -n %{build_service_name}
 
 %build
-echo "ANT_HOME=$ANT_HOME"
-echo "JAVA_HOME=$JAVA_HOME"
-echo "MAVEN_HOME=$MAVEN_HOME"
-echo "MAVEN_OPTS=$MAVEN_OPTS"
-echo "M2_HOME=$M2_HOME"
-echo "SCALA_HOME=$SCALA_HOME"
 if [ "x${SCALA_HOME}" = "x" ] ; then
   echo "ok - SCALA_HOME not defined, trying to set SCALA_HOME to default location /opt/scala/"
   export SCALA_HOME=/opt/scala/
@@ -92,23 +86,27 @@ rm -f %{_builddir}/%{build_service_name}/sbin/spark-daemons.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
-if [ "x%{hadoop_version}" = "xHADOOP_VERSION_REPLACE" ] ; then
+if [ "x%{hadoop_version}" = "x" ] ; then
   echo "fatal - HADOOP_VERSION needs to be set, can't build anything, exiting"
   exit -8
 else
   export SPARK_HADOOP_VERSION=%{hadoop_version}
   echo "ok - applying customized hadoop version $SPARK_HADOOP_VERSION"
 fi
-if [ "x%{hive_version}" = "xHIVE_VERSION_REPLACE" ] ; then
+if [ "x%{hive_version}" = "x" ] ; then
   echo "fatal - HIVE_VERSION needs to be set, can't build anything, exiting"
   exit -8
 else
   export SPARK_HIVE_VERSION=%{hive_version}
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
+
 # Always build with YARN
 export SPARK_YARN=true
-echo "build - assembly"
+
+env | sort
+
+echo "ok - building assembly"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
 # PURGE LOCAL CACHE for clean build
