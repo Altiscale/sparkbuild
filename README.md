@@ -6,7 +6,9 @@ This branch tracks the upstream branch-1.1.0 branch.
 
 How to Install Spark RPM for this build
 ==========
+```
 yum install --enablerepo=verticloud-test alti-spark-1.1.1
+```
 
 How to Install via Chef and mkcluster
 ==========
