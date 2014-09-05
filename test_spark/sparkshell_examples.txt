@@ -1,0 +1,217 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.classification.SVMWithSGD
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+
+// Load and parse the data file
+val data = sc.textFile("spark/test/svm/sample_svm_data.txt")
+val parsedData = data.map { line =>
+  val parts = line.split(' ')
+  LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(x => x.toDouble).toArray))
+}
+
+// Run training algorithm to build the model
+val numIterations = 20
+val model = SVMWithSGD.train(parsedData, numIterations)
+
+// Evaluate model on training examples and compute training error
+val labelAndPreds = parsedData.map { point =>
+  val prediction = model.predict(point.features)
+  (point.label, prediction)
+}
+val trainErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / parsedData.count
+println("Training Error = " + trainErr)
+
+
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.regression.LinearRegressionWithSGD
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+
+// Load and parse the data
+val data = sc.textFile("spark/test/linear_regression/lpsa.data")
+val parsedData = data.map { line =>
+  val parts = line.split(',')
+  LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(x => x.toDouble).toArray))
+}
+
+// Building the model
+val numIterations = 20
+val model = LinearRegressionWithSGD.train(parsedData, numIterations)
+
+// Evaluate model on training examples and compute training error
+val valuesAndPreds = parsedData.map { point =>
+  val prediction = model.predict(point.features)
+  (point.label, prediction)
+}
+val MSE = valuesAndPreds.map{ case(v, p) => math.pow((v - p), 2)}.reduce(_ + _)/valuesAndPreds.count
+println("training Mean Squared Error = " + MSE)
+
+
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.classification.SVMWithSGD
+import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.util.MLUtils
+
+// Load training data in LIBSVM format.
+val data = MLUtils.loadLibSVMFile(sc, "spark/test/logistic_regression/sample_libsvm_data.txt")
+
+// Split data into training (60%) and test (40%).
+val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
+val training = splits(0).cache()
+val test = splits(1)
+
+// Run training algorithm to build the model
+val numIterations = 100
+val model = SVMWithSGD.train(training, numIterations)
+
+// Clear the default threshold.
+model.clearThreshold()
+
+// Compute raw scores on the test set. 
+val scoreAndLabels = test.map { point =>
+  val score = model.predict(point.features)
+  (score, point.label)
+}
+
+// Get evaluation metrics.
+val metrics = new BinaryClassificationMetrics(scoreAndLabels)
+val auROC = metrics.areaUnderROC()
+
+println("Area under ROC = " + auROC)
+
+
+import org.apache.spark.mllib.classification.NaiveBayes
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.regression.LabeledPoint
+
+val data = sc.textFile("spark/test/naive_bayes/sample_naive_bayes_data.txt")
+val parsedData = data.map { line =>
+  val parts = line.split(',')
+  LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
+}
+// Split data into training (60%) and test (40%).
+val splits = parsedData.randomSplit(Array(0.6, 0.4), seed = 11L)
+val training = splits(0)
+val test = splits(1)
+
+val model = NaiveBayes.train(training, lambda = 1.0)
+val prediction = model.predict(test.map(_.features))
+
+val predictionAndLabel = prediction.zip(test.map(_.label))
+val accuracy = 1.0 * predictionAndLabel.filter(x => x._1 == x._2).count() / test.count()
+
+
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.clustering.KMeans
+import org.apache.spark.mllib.linalg.Vectors
+
+// Load and parse the data
+
+val data = sc.textFile("spark/test/kmean/kmeans_data.txt")
+
+val parsedData = data.map(s => Vectors.dense(s.split(' ').map(_.toDouble)))
+
+// Cluster the data into two classes using KMeans
+
+val numIterations = 20
+
+val numClusters = 2
+
+val clusters = KMeans.train(parsedData, numClusters, numIterations)
+
+// Evaluate clustering by computing Within Set Sum of Squared Errors
+
+val WSSSE = clusters.computeCost(parsedData)
+
+println("Within Set Sum of Squared Errors = " + WSSSE)
+
+
+import org.apache.spark._
+import org.apache.spark.graphx._
+import org.apache.spark.rdd.RDD
+
+val graph = GraphLoader.edgeListFile(sc, "spark/test/graphx/followers/followers.txt")
+
+val ranks = graph.pageRank(0.0001).vertices
+
+// Join the ranks with the usernames
+
+val users = sc.textFile("spark/test/graphx/followers/users.txt").map { line =>
+
+  val fields = line.split(",")
+
+  (fields(0).toLong, fields(1))
+
+}
+
+val ranksByUsername = users.join(ranks).map {
+
+  case (id, (username, rank)) => (username, rank)
+
+}
+
+// Print the result
+println(ranksByUsername.collect().mkString("\n"))
+
+
+// CLASSIFICATION
+
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.tree.DecisionTree
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.tree.configuration.Algo._
+import org.apache.spark.mllib.tree.impurity.Gini
+
+// Load and parse the data file
+val data = sc.textFile("spark/test/decision_tree/sample_tree_data.csv")
+val parsedData = data.map { line =>
+  val parts = line.split(',').map(_.toDouble)
+  LabeledPoint(parts(0), Vectors.dense(parts.tail))
+}
+
+// Run training algorithm to build the model
+val maxDepth = 5
+val model = DecisionTree.train(parsedData, Classification, Gini, maxDepth)
+
+// Evaluate model on training examples and compute training error
+val labelAndPreds = parsedData.map { point =>
+  val prediction = model.predict(point.features)
+  (point.label, prediction)
+}
+val trainErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / parsedData.count
+println("Training Error = " + trainErr)
+
+
+// REGRESSION
+
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.tree.DecisionTree
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.tree.configuration.Algo._
+import org.apache.spark.mllib.tree.impurity.Variance
+
+// Load and parse the data file
+val data = sc.textFile("spark/test/decision_tree/sample_tree_data.csv")
+val parsedData = data.map { line =>
+  val parts = line.split(',').map(_.toDouble)
+  LabeledPoint(parts(0), Vectors.dense(parts.tail))
+}
+
+// Run training algorithm to build the model
+val maxDepth = 5
+val model = DecisionTree.train(parsedData, Regression, Variance, maxDepth)
+
+// Evaluate model on training examples and compute training error
+val valuesAndPreds = parsedData.map { point =>
+  val prediction = model.predict(point.features)
+  (point.label, prediction)
+}
+val MSE = valuesAndPreds.map{ case(v, p) => math.pow((v - p), 2)}.mean()
+println("training Mean Squared Error = " + MSE)
+
+exit
