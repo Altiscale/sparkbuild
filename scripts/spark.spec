@@ -33,8 +33,12 @@ BuildRequires: jdk >= 1.7.0.51
 Url: http://spark.apache.org/
 
 %description
-%{spark_folder_name} is a repackaged spark distro that is compiled against Hadoop 2.2.x
-with YARN enabled. This package should work with Altiscale Hadoop 2.2.
+Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.1 with 
+build script https://github.com/Altiscale/sparkbuild/tree/build_1.1 
+Origin source form https://github.com/apache/spark/tree/branch-1.1
+%{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
+Hadoop 2.2.x with YARN 2.2.x enabled, and hive-0.12.0. This package should work with Altiscale 
+Hadoop 2.2.0 and Hive 0.12.0 (vcc-hadoop-2.2.0 and vcc-hive-0.12.0).
 
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
