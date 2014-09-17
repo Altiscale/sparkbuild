@@ -31,7 +31,6 @@ fi
 export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin
 
 # Define defau;t spark uid:gid and build version
-# WARNING: the SPARK_VERSION branch name does not align with the Git branch name branch-0.9
 if [ "x${SPARK_USER}" = "x" ] ; then
   export SPARK_USER=spark
 fi
@@ -42,13 +41,42 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.1.1
+  if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
+    export SPARK_VERSION=1.1.1.hadoop22
+  elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
+    export SPARK_VERSION=1.1.1.hadoop24
+  elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
+    export SPARK_VERSION=1.1.1.hadoop24
+  else
+    echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION"
+  fi
 fi
+
+if [ "x${SPARK_VERSION}" = "x" ] ; then
+  if [ "x${HIVE_VERSION}" = "x0.12.0" ] ; then
+    export SPARK_VERSION=$SPARK_VERSION.hive12
+  elif [ "x${HIVE_VERSION}" = "x0.13.0" ] ; then
+    export SPARK_VERSION=$SPARK_VERSION.hive13
+  elif [ "x${HIVE_VERSION}" = "x0.13.1" ] ; then
+    export SPARK_VERSION=$SPARK_VERSION.hive13
+  else
+    echo "error - can't recognize altiscale's HIVE_VERSION=$HIVE_VERSION"
+  fi
+fi
+
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
-  export ALTISCALE_RELEASE=2.0.0
+  if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
+    export ALTISCALE_RELEASE=2.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
+    export ALTISCALE_RELEASE=3.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
+    export ALTISCALE_RELEASE=3.0.0
+  else
+    echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION for ALTISCALE_RELEASE"
+  fi 
 else
   export ALTISCALE_RELEASE
-fi
+fi 
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
   export BRANCH_NAME=altiscale-branch-1.1
