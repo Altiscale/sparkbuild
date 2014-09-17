@@ -4,7 +4,7 @@
 
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
-%define spark_version         SPARK_VERSION
+%define spark_version         SPARK_VERSION_REPLACE
 %define hadoop_version        HADOOP_VERSION_REPLACE
 %define hive_version          HIVE_VERSION_REPLACE
 %define build_service_name    alti-spark
