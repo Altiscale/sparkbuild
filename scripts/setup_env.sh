@@ -41,15 +41,17 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
-    export SPARK_VERSION="1.1.1.hadoop22"
-  elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
-    export SPARK_VERSION="1.1.1.hadoop24"
-  elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
-    export SPARK_VERSION="1.1.1.hadoop24"
-  else
-    echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION"
-  fi
+  export SPARK_VERSION=1.1.1
+fi
+
+if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
+  export SPARK_VERSION="$SPARK_VERSION.hadoop22"
+elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
+  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
+elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
+  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
+else
+  echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION"
 fi
 
 if [ "x${HIVE_VERSION}" = "x0.12.0" ] ; then
