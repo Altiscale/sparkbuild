@@ -9,7 +9,8 @@ curr_dir=`cd $curr_dir; pwd`
 kerberos_enable=false
 spark_home=$SPARK_HOME
 
-testcase_shell_file=$curr_dir/sparkshell_examples.txt
+testcase_shell_file_01=$curr_dir/sparkshell_examples.txt
+testcase_shell_file_02=$curr_dir/sparksql_examples.txt
 
 # Check RPM installation.
 
@@ -49,7 +50,7 @@ if [ ! -d $spark_home ] ; then
   exit -1
 fi
 
-if [ ! -f "$testcase_shell_file"  ] ; then
+if [ ! -f "$testcase_shell_file_01"  ] ; then
   echo "fail - missing testcase for spark, can't continue, exiting"
   exit -2
 fi
@@ -75,12 +76,23 @@ hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive
 echo "ok - testing spark REPL shell with various algorithm"
 
 LD_LIBRARY_PATH=/opt/hadoop/lib/native/ ./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 512M << EOT
-`cat $testcase_shell_file`
+`cat $testcase_shell_file_01`
 EOT
 
 if [ $? -ne "0" ] ; then
-  echo "fail - testing shell for various algorithm failed"
+  echo "fail - testing shell for various algorithm failed!"
   exit -3
+fi
+
+reset
+
+LD_LIBRARY_PATH=/opt/hadoop/lib/native/ ./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 512M << EOT
+`cat $testcase_shell_file_02`
+EOT
+
+if [ $? -ne "0" ] ; then
+  echo "fail - testing shell for SparkSQL on HiveQL failed!!"
+  exit -4
 fi
 
 popd
