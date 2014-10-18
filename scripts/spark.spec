@@ -9,9 +9,11 @@
 %define hive_version          HIVE_VERSION_REPLACE
 %define build_service_name    alti-spark
 %define spark_folder_name     %{rpm_package_name}-%{spark_version}
+%define spark_testsuite_name  %{spark_folder_name}
 %define install_spark_dest    /opt/%{spark_folder_name}
 %define install_spark_conf    /etc/%{spark_folder_name}
 %define install_spark_logs    /var/log/%{apache_name}
+%define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
 %define build_release         BUILD_TIME
 
 Name: %{rpm_package_name}-%{spark_version}
@@ -19,19 +21,15 @@ Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with
 Version: %{spark_version}
 Release: %{altiscale_release_ver}.%{build_release}%{?dist}
 License: ASL 2.0
+Group: Development/Libraries
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.4
-# Requires: jdk
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
-# Apply all patches to fix CLASSPATH and java lib issues
-# Patch1: %{_sourcedir}/patch.spark
-
 Url: http://spark.apache.org/
-
 %description
 Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.1 with 
 build script https://github.com/Altiscale/sparkbuild/tree/build_1.1 
@@ -39,6 +37,13 @@ Origin source form https://github.com/apache/spark/tree/branch-1.1
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
 Hadoop 2.2.x with YARN 2.2.x enabled, and hive-0.12.0. This package should work with Altiscale 
 Hadoop 2.2.0 and Hive 0.12.0 (vcc-hadoop-2.2.0 and vcc-hive-0.12.0).
+
+%package test
+Summary: The test package for Spark
+Group: Development/Libraries
+
+%description test
+The test directory to test Spark REPL shell, submit, sparksql after installing spark.
 
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
@@ -187,6 +192,7 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
+%{__mkdir} -p %{buildroot}%{install_spark_test}
 # copy all necessary jars
 cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
@@ -212,6 +218,9 @@ cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_des
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, cluster mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
+# deploy test suite and scripts
+cp -rp %{_builddir}/%{build_service_name}/test_spark/* %{buildroot}/%{install_spark_test}
+
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
 rm -rf %{buildroot}%{install_spark_dest}
@@ -224,6 +233,10 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0775,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
+%files test
+%defattr(0755,spark,spark,0755)
+%{install_spark_test}
+
 %post
 if [ "$1" = "1" ]; then
   echo "ok - performing fresh installation"
@@ -232,12 +245,14 @@ elif [ "$1" = "2" ]; then
 fi
 rm -vf /opt/%{apache_name}/logs
 rm -vf /opt/%{apache_name}/conf
+rm -vf /opt/%{apache_name}/test_spark
 rm -vf /opt/%{apache_name}
 rm -vf /etc/%{apache_name}
 ln -vsf %{install_spark_dest} /opt/%{apache_name}
 ln -vsf %{install_spark_conf} /etc/%{apache_name}
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
+ln -vsf %{install_spark_test} /opt/%{apache_name}/test_spark
 mkdir -p /home/spark/logs
 chmod -R 1777 /home/spark/logs
 chown %{spark_uid}:%{spark_gid} /home/spark/
@@ -248,14 +263,18 @@ if [ "$1" = "0" ]; then
   echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
   rm -vf /opt/%{apache_name}/logs
   rm -vf /opt/%{apache_name}/conf
+  rm -vf /opt/%{apache_name}/test_spark
   rm -vf /opt/%{apache_name}
   rm -vf /etc/%{apache_name}
   rm -vrf %{install_spark_dest}
   rm -vrf %{install_spark_conf}
+  rm -vrf %{install_spark_test}
 fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Sat Oct 18 2014 Andrew Lee 20141018
+- Add test package spec and source files, updated files for rpm package
 * Fri Aug 8 2014 Andrew Lee 20140808
 - Add new statement to post installation section, creating log directory
 * Mon Jun 23 2014 Andrew Lee 20140623

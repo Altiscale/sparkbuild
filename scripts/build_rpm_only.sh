@@ -72,7 +72,7 @@ echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
 mkdir -p $WORKSPACE/rpmbuild/{BUILD,BUILDROOT,RPMS,SPECS,SOURCES,SRPMS}/
 cp -f "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 pushd $WORKSPACE
-tar --exclude .git --exclude .gitignore -cf $WORKSPACE/rpmbuild/SOURCES/spark.tar spark
+tar --exclude .git --exclude .gitignore -cf $WORKSPACE/rpmbuild/SOURCES/spark.tar spark test_spark
 popd
 
 pushd "$WORKSPACE/rpmbuild/SOURCES/"
@@ -81,6 +81,7 @@ if [ -d alti-spark ] ; then
   rm -rf alti-spark
 fi
 mv spark alti-spark
+cp -rp test_spark alti-spark/
 tar --exclude .git --exclude .gitignore -cpzf alti-spark.tar.gz alti-spark
 stat alti-spark.tar.gz
 
