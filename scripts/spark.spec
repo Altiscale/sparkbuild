@@ -252,7 +252,6 @@ ln -vsf %{install_spark_dest} /opt/%{apache_name}
 ln -vsf %{install_spark_conf} /etc/%{apache_name}
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-ln -vsf %{install_spark_test} /opt/%{apache_name}/test_spark
 mkdir -p /home/spark/logs
 chmod -R 1777 /home/spark/logs
 chown %{spark_uid}:%{spark_gid} /home/spark/
@@ -268,7 +267,6 @@ if [ "$1" = "0" ]; then
   rm -vf /etc/%{apache_name}
   rm -vrf %{install_spark_dest}
   rm -vrf %{install_spark_conf}
-  rm -vrf %{install_spark_test}
 fi
 # Don't delete the users after uninstallation.
 
