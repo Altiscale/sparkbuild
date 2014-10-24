@@ -260,14 +260,21 @@ chown %{spark_uid}:%{spark_gid} /home/spark/logs
 
 %postun
 if [ "$1" = "0" ]; then
-  echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
-  rm -vf /opt/%{apache_name}/logs
-  rm -vf /opt/%{apache_name}/conf
-  rm -vf /opt/%{apache_name}/test_spark
-  rm -vf /opt/%{apache_name}
-  rm -vf /etc/%{apache_name}
-  rm -vrf %{install_spark_dest}
-  rm -vrf %{install_spark_conf}
+  ret=$(rpm -qa | grep alti-spark- | wc -l)
+  if [ "x${ret}" != "x0" ] ; then
+    echo "ok - detected other spark version, no need to clean up symbolic links"
+    echo "ok - cleaning up version specific directories only regarding this uninstallation"
+    rm -vrf %{install_spark_dest}
+    rm -vrf %{install_spark_conf}
+  else
+    echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
+    rm -vf /opt/%{apache_name}/logs
+    rm -vf /opt/%{apache_name}/conf
+    rm -vf /opt/%{apache_name}
+    rm -vf /etc/%{apache_name}
+    rm -vrf %{install_spark_dest}
+    rm -vrf %{install_spark_conf}
+  fi
 fi
 # Don't delete the users after uninstallation.
 
