@@ -12,7 +12,7 @@ spark_version=1.1.1
 
 # Check RPM installation.
 
-spark_installed=$(rpm -qa | grep alti-spark | wc -l)
+spark_installed=$(rpm -qa | grep alti-spark | grep -v test | wc -l)
 if [ "x${spark_installed}" = "x0" ] ; then
   echo "fail - spark not installed, can't continue, exiting"
   exit -1
