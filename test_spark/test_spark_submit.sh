@@ -8,7 +8,7 @@ curr_dir=`cd $curr_dir; pwd`
 
 kerberos_enable=false
 spark_home=$SPARK_HOME
-spark_version=1.1.1
+spark_version=1.2.1
 
 # Check RPM installation.
 
