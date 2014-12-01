@@ -41,7 +41,7 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.2.1
+  export SPARK_VERSION=1.2.0
 fi
 
 if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
