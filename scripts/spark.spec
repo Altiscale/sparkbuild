@@ -133,7 +133,7 @@ if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
     mvn -U -X -Phadoop-2.2 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    mvn -U -X -Phadoop-2.4 -Pyarn -Phive --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+    mvn -U -X -Phadoop-2.4 -Pyarn -Phive -Phive-0.13.1  --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -143,7 +143,7 @@ else
   if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
     mvn -U -X -Phadoop-2.2 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    mvn -U -X -Phadoop-2.4 -Pyarn -Phive -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+    mvn -U -X -Phadoop-2.4 -Pyarn -Phive -Phive-0.13.1 -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
