@@ -30,8 +30,7 @@ fi
 # be invalid after enabling Kerberos.
 
 if [ "x${kerberos_enable}" = "xfalse" ] ; then
-  HADOOP_USER_NAME=hdfs hdfs dfs -mkdir /user/spark/
-  HADOOP_USER_NAME=hdfs hdfs dfs -mkdir /user/spark/logs
+  HADOOP_USER_NAME=hdfs hdfs dfs -mkdir -p /user/spark/logs
   HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 /user/spark/
   HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 /user/spark/logs
 fi
