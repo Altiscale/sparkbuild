@@ -1,27 +1,29 @@
 sparkbuild
 ==========
 
-Init sparkbuild wrapper repo for Spark-1.1.1 (aka 1.1-rc3) official release.
-This branch tracks the upstream branch-1.1.0 branch.
+Init sparkbuild wrapper repo for Spark-1.2.0 (aka 1.2.0-rc1) official release.
+This branch tracks the upstream branch-1.2.0 branch.
 
 How to Install Spark RPM for this build
 ==========
 ```
-yum install --enablerepo=verticloud-test alti-spark-1.1.1
+yum install --enablerepo=verticloud-test alti-spark-1.2.0.hadoop24.hive13
 ```
 
 How to Install via Chef and mkcluster
 ==========
 When you run mkcluster, you will need to manually add the spark in the run_list.
-For example, I created a cluster with name alee-ae525-vpc2-cluster with the following mkcluster command on VPC.
-Currently, we built Spark 1.1 on Hadoop 2.2.0 with Hive 0.12. (Hive0.13.1+ is not yet supported due to incompatible Hive APIs).
+For example, I created a cluster with name alee-vpc2 with the following mkcluster command on VPC.
+Currently, we built Spark 1.2.0 on Hadoop 2.4.1 with Hive 0.13.1. 
+We have NOT tested on Kerberized cluster yet.
 
 ```
-mkcluster create -i alee-ae525-vpc2-cluster -t ./chef/environments/fantastic_four/template --region=us-west-1 --environment=dev --desktop=alee-ae525-vpc2-cluster-dt.test.altiscale.com --resource-manager=alee-ae525-vpc2-cluster-rm.test.altiscale.com --namenode=alee-ae525-vpc2-cluster-nn.test.altiscale.com --services-node=alee-ae525-vpc2-cluster-sn.test.altiscale.com --compute-nodes=alee-ae525-vpc2-cluster-s0.test.altiscale.com alee-ae525-vpc2-cluster-s1.test.altiscale.com alee-ae525-vpc2-cluster-s2.test.altiscale.com --configserver-iptables --force -d ./chef/environments/fantastic_four/alee-ae525-vpc2-cluster --hadoop-22
+mkcluster create -i alee-vpc2-cluster -t /Users/alee/AltiScale/vpc2/chef/environments/fantastic_four/template --region=us-west-1 --environment=dev --desktop=alee-vpc2-dt.test.altiscale.com --resource-manager=alee-vpc2-rm.test.altiscale.com --namenode=alee-vpc2-nn.test.altiscale.com --services-node=alee-vpc2-gw.test.altiscale.com --compute-nodes=alee-vpc2-slave-0.test.altiscale.com alee-vpc2-slave-1.test.altiscale.com alee-vpc2-slave-2.test.altiscale.com --configserver-iptables --force -d /Users/alee/AltiScale/vpc2/chef/environments/fantastic_four/alee-vpc2-cluster --hadoop-24 --no-krb
 ```
+
 Before you run deploy_desktop.rb, add the following entry to desktop.json
 ```
-vim ./chef/environments/fantastic_four/alee-ae525-vpc2-cluster/roles/desktop.json
+vim ./chef/environments/fantastic_four/alee-vpc2-cluster/roles/desktop.json
 ```
 The spark entry in run_list:
 ```
@@ -44,9 +46,9 @@ For example, in my desktop.json, I just add it after Pig's recipe.
     "recipe[hadoop-eco::spark]",
 ....
 ```
-Now, you can run deploy_desktop.rb, and it will install spark 1.1 on workbench. For example,
+Now, you can run deploy_desktop.rb, and it will install spark 1.2.0 on workbench. For example,
 ```
-./deploy_desktop.rb -k ~/.ssh/generic_smoke -l debug -H alee-ae525-vpc2-cluster-dt.test.altiscale.com -c alee-ae525-vpc2-cluster
+./deploy_desktop.rb -k ~/.ssh/generic_smoke -l debug -H alee-vpc2-dt.test.altiscale.com -c alee-vpc2-cluster
 ```
 
 Run Test Case
@@ -54,17 +56,23 @@ Run Test Case
 Copy the folder test_spark to the remote workbench. We will use /tmp/ here for example.
 Run the command as the user you want to test. In Altiscale, alti-test-01 is usually
 the user we use to test most test case. We will apply the same user here.
-Run the following command.
-
-```
-scp -r test_spark workbench_hostname:/tmp/
-```
 
 Login to remote workbench.
 ```
 ssh workbench_hostname
-cd /tmp/
+cp -rp /opt/spark/test_spark /tmp/
+cd /tmp/test_spark/
+./test_spark_shell.sh
+./test_spark_sql.sh
+./test_spark_submit.sh
+```
+
+If you prefer (discouraged) to run it as root and delegate to alti-test-01 user, the following
+command is sufficient.
+```
 /bin/su - alti-test-01 -c "/tmp/test_spark/test_spark_shell.sh"
 ```
+
 The test should exit with 0 if everything completes correctly.
+
 

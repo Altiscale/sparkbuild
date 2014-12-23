@@ -8,8 +8,11 @@ curr_dir=`cd $curr_dir; pwd`
 
 kerberos_enable=false
 spark_home=$SPARK_HOME
+spark_test_dir=$spark_home/test_spark/
 
-testcase_shell_file_02=$curr_dir/sparksql_sqlcontext_examples.txt
+if [ -f "$curr_dir/pom.xml" ] ; then
+  spark_test_dir=$curr_dir
+fi
 
 # Check RPM installation.
 
@@ -40,17 +43,15 @@ fi
 if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
+  if [ ! -f "$curr_dir/pom.xml" ] ; then
+    spark_test_dir=$spark_home/test_spark/
+  fi
   echo "ok - applying default location /opt/spark"
 fi
 
 if [ ! -d $spark_home ] ; then
-  echo "fail - SPARK_HOME doesn't exist, can't continue, is spark installed?"
+  echo "fail - $spark_home doesn't exist, can't continue, is spark installed correctly?"
   exit -1
-fi
-
-if [ ! -f "$testcase_shell_file_02"  ] ; then
-  echo "fail - missing testcase for spark, can't continue, exiting"
-  exit -2
 fi
 
 pushd `pwd`
@@ -60,9 +61,15 @@ hdfs dfs -copyFromLocal /opt/spark/examples/src/main/resources/* spark/test/reso
 
 echo "ok - testing spark SQL shell with simple queries"
 
-LD_LIBRARY_PATH=/opt/hadoop/lib/native/ ./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 1024M << EOT
-`cat $testcase_shell_file_02`
-EOT
+app_name=`head -n 9 $spark_test_dir/pom.xml | grep artifactId | cut -d">" -f2- | cut -d"<" -f1`
+app_ver=`head -n 9 $spark_test_dir/pom.xml | grep version | cut -d">" -f2- | cut -d"<" -f1`
+
+if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
+  echo "fail - $spark_test_dir/${app_name}-${app_ver}.jar test jar does not exist, cannot continue testing, failing!"
+  exit -3
+fi
+
+./bin/spark-submit --verbose --master yarn --deploy-mode cluster --class SparkSQLTestCase1App $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for SparkSQL on HiveQL failed!!"
