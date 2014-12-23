@@ -214,7 +214,11 @@ cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_des
 echo "Currently, cluster mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
 # deploy test suite and scripts
-cp -rp %{_builddir}/%{build_service_name}/test_spark/* %{buildroot}/%{install_spark_test}
+cp -rp %{_builddir}/%{build_service_name}/test_spark/*.jar %{buildroot}/%{install_spark_test}/
+cp -rp %{_builddir}/%{build_service_name}/test_spark/* %{buildroot}/%{install_spark_test}/
+# manual cleanup on unnecessary files
+rm -rf %{buildroot}/%{install_spark_test}/target
+rm -rf %{buildroot}/%{install_spark_test}/project/target
 
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
@@ -273,6 +277,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Tue Dec 23 2014 Andrew Lee 20141223
+- Output maven build command in build macro, added more files from test case
 * Sat Oct 18 2014 Andrew Lee 20141018
 - Add test package spec and source files, updated files for rpm package
 * Fri Aug 8 2014 Andrew Lee 20140808
