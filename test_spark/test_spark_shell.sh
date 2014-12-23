@@ -10,7 +10,7 @@ kerberos_enable=false
 spark_home=$SPARK_HOME
 
 testcase_shell_file_01=$curr_dir/sparkshell_examples.txt
-testcase_shell_file_02=$curr_dir/sparksql_examples.txt
+testcase_shell_file_02=$curr_dir/sparksql_sqlcontext_examples.txt
 
 # Check RPM installation.
 
@@ -72,6 +72,8 @@ hdfs dfs -mkdir -p spark/test/svm
 hdfs dfs -put /opt/spark/mllib/data/sample_svm_data.txt spark/test/svm/
 hdfs dfs -mkdir -p spark/test/naive_bayes
 hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive_bayes/
+hdfs dfs -mkdir -p spark/test/resources
+hdfs dfs -copyFromLocal /opt/spark/examples/src/main/resources/* spark/test/resources/
 
 echo "ok - testing spark REPL shell with various algorithm"
 
