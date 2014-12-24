@@ -154,14 +154,25 @@ else
   fi
 fi
 
-
 popd
 echo "ok - build spark core completed successfully!"
 
 echo "ok - start building spark test case in %{_builddir}/%{build_service_name}/test_spark"
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/test_spark
-mvn package -Pspark-1.2
+
+# TODO: Install local JARs to local repo so we apply the latest built assembly JARs from above
+# This is a workaround(hack). A better way is to deploy it to SNAPSHOT on Archiva via maven-deploy plugin,
+# and include it in the test_case pom.xml. This is really annoying.
+mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+
+mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+
+mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+
+mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+
+mvn -X package -Pspark-1.2 -Phadoop-provided
 
 popd
 echo "ok - build spark test case completed successfully!"

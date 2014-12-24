@@ -73,7 +73,7 @@ hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive
 
 echo "ok - testing spark REPL shell with various algorithm"
 
-LD_LIBRARY_PATH=/opt/hadoop/lib/native/ ./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 1024M << EOT
+./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 1024M << EOT
 `cat $testcase_shell_file_01`
 EOT
 
