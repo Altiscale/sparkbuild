@@ -168,13 +168,21 @@ echo "ok - local repository will be installed under %{current_workspace}/.m2/rep
 # This is a workaround(hack). A better way is to deploy it to SNAPSHOT on Archiva via maven-deploy plugin,
 # and include it in the test_case pom.xml. This is really annoying.
 # spark_version is different then spark_plain_Version
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+if [ ! -d "%{current_workspace}/.m2" ] ; then
+  # This usually happens in mock, the default local repository will be the same in this case
+  # no need to specify it here.
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+else
+  # This applies to local hand build with a existing user
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+fi
 
 mvn -X package -Pspark-1.2 -Phadoop-provided
 
