@@ -5,6 +5,8 @@
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
 %define spark_version         SPARK_VERSION_REPLACE
+%define spark_plain_version   SPARK_PLAINVERSION_REPLACE
+%define current_workspace     CURRENT_WORKSPACE_REPLACE
 %define hadoop_version        HADOOP_VERSION_REPLACE
 %define hive_version          HIVE_VERSION_REPLACE
 %define build_service_name    alti-spark
@@ -161,16 +163,18 @@ echo "ok - start building spark test case in %{_builddir}/%{build_service_name}/
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/test_spark
 
+echo "ok - local repository will be installed under %{current_workspace}/.m2/repository"
 # TODO: Install local JARs to local repo so we apply the latest built assembly JARs from above
 # This is a workaround(hack). A better way is to deploy it to SNAPSHOT on Archiva via maven-deploy plugin,
 # and include it in the test_case pom.xml. This is really annoying.
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+# spark_version is different then spark_plain_Version
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_version} -Dpackaging=jar -DlocalRepositoryPath=$HOME/.m2/repository
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 
 mvn -X package -Pspark-1.2 -Phadoop-provided
 
@@ -225,7 +229,7 @@ cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_des
 echo "Currently, cluster mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
 
 # deploy test suite and scripts
-cp -rp %{_builddir}/%{build_service_name}/test_spark/*.jar %{buildroot}/%{install_spark_test}/
+cp -rp %{_builddir}/%{build_service_name}/test_spark/target/*.jar %{buildroot}/%{install_spark_test}/
 cp -rp %{_builddir}/%{build_service_name}/test_spark/* %{buildroot}/%{install_spark_test}/
 # manual cleanup on unnecessary files
 rm -rf %{buildroot}/%{install_spark_test}/target
