@@ -69,10 +69,10 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-./bin/spark-submit --verbose --master yarn --deploy-mode cluster --class SparkSQLTestCase1App $spark_test_dir/${app_name}-${app_ver}.jar
+./bin/spark-submit --verbose --master yarn --deploy-mode cluster --class SparkSQLTestCase1SQLContextApp $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
-  echo "fail - testing shell for SparkSQL on HiveQL failed!!"
+  echo "fail - testing shell for SparkSQL SQLContext failed!!"
   exit -4
 fi
 

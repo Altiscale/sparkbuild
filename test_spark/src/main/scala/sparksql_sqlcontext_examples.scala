@@ -4,7 +4,7 @@ import org.apache.spark.SparkConf
 
 case class Person(name: String, age: Int)
 
-object SparkSQLTestCase1App {
+object SparkSQLTestCase1SQLContextApp {
  def main(args: Array[String]) {
 
   val conf = new SparkConf().setAppName("Spark SQL Context TestCase  Application")
