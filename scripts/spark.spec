@@ -207,6 +207,9 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
@@ -221,9 +224,12 @@ cp -rp %{_builddir}/%{build_service_name}/mllib/target/*.jar %{buildroot}%{insta
 cp -rp %{_builddir}/%{build_service_name}/graphx/data %{buildroot}%{install_spark_dest}/graphx/
 cp -rp %{_builddir}/%{build_service_name}/graphx/target/*.jar %{buildroot}%{install_spark_dest}/graphx/target/
 cp -rp %{_builddir}/%{build_service_name}/streaming/target/*.jar %{buildroot}%{install_spark_dest}/streaming/target/
+cp -rp %{_builddir}/%{build_service_name}/repl/target/*.jar %{buildroot}%{install_spark_dest}/repl/target/
 cp -rp %{_builddir}/%{build_service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/sbin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
+cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
 
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}

@@ -76,7 +76,7 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
 fi
 
 # pyspark only supports yarn-client mode now
-./bin/spark-submit --verbose --master yarn --deploy-mode client --py-files /tmp/test_python.py /tmp/test_python.py
+./bin/spark-submit --verbose --master yarn --deploy-mode client --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for Python SparkSQL on HiveQL/HiveContext failed!!"
