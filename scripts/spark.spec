@@ -13,6 +13,7 @@
 %define spark_folder_name     %{rpm_package_name}-%{spark_version}
 %define spark_testsuite_name  %{spark_folder_name}
 %define install_spark_dest    /opt/%{spark_folder_name}
+%define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
 %define install_spark_logs    /var/log/%{apache_name}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
@@ -238,9 +239,16 @@ cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf
 cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
+# This will capture the installation property form this spec file for further references
+rm -f %{install_spark_label}
+touch %{install_spark_label}
+echo "name=%{name}" >> %{install_spark_label}
+echo "version=%{spark_version}" >> %{install_spark_label}
+echo "release=%{name}-%{release}" >> %{install_spark_label}
+
 
 # add dummy file to warn user that CLUSTER mode is not for Production
-echo "Currently, cluster mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_MODE_NOT_SUPPORTED.why.txt
+echo "Currently, standalone mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_STANDALONE_MODE_NOT_SUPPORTED.why.txt
 
 # deploy test suite and scripts
 cp -rp %{_builddir}/%{build_service_name}/test_spark/target/*.jar %{buildroot}/%{install_spark_test}/
