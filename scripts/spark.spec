@@ -240,11 +240,11 @@ cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_
 cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
 # This will capture the installation property form this spec file for further references
-rm -f %{install_spark_label}
-touch %{install_spark_label}
-echo "name=%{name}" >> %{install_spark_label}
-echo "version=%{spark_version}" >> %{install_spark_label}
-echo "release=%{name}-%{release}" >> %{install_spark_label}
+rm -f %{buildroot}/%{install_spark_label}
+touch %{buildroot}/%{install_spark_label}
+echo "name=%{name}" >> %{buildroot}/%{install_spark_label}
+echo "version=%{spark_version}" >> %{buildroot}/%{install_spark_label}
+echo "release=%{name}-%{release}" >> %{buildroot}/%{install_spark_label}
 
 
 # add dummy file to warn user that CLUSTER mode is not for Production
