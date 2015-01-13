@@ -211,6 +211,7 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
@@ -231,6 +232,7 @@ cp -rp %{_builddir}/%{build_service_name}/sbin %{buildroot}%{install_spark_dest}
 cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
 cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
+cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/* %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
 
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
