@@ -10,6 +10,11 @@ kerberos_enable=false
 spark_home=$SPARK_HOME
 spark_test_dir=$spark_home/test_spark/
 
+hive_home=$HIVE_HOME
+if [ "x${hive_home}" = "x" ] ; then
+  hive_home=/opt/hive
+fi
+
 if [ -f "$curr_dir/pom.xml" ] ; then
   spark_test_dir=$curr_dir
 fi
@@ -75,7 +80,18 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-./bin/spark-submit --verbose --master yarn --deploy-mode cluster --class SparkSQLTestCase2HiveContextApp $spark_test_dir/${app_name}-${app_ver}.jar
+mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
+spark_opts_extra=
+for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
+do
+  spark_opts_extra="$spark_opts_extra --jars $i"
+done
+spark_opts_extra="$spark_opts_extra --jars $mysql_jars"
+
+spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
+spark_files="$spark_files$mysql_jars"
+
+./bin/spark-submit --verbose --driver-java-options -XX:MaxPermSize=8192M --master yarn --deploy-mode cluster --driver-memory 2048M --executor-memory 2048M --executor-cores 3 $spark_opts_extra --files $spark_files --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
