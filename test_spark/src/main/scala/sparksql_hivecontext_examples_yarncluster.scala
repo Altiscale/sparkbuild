@@ -13,6 +13,9 @@ object SparkSQLTestCase2HiveContextYarnClusterApp {
 
   import hiveContext._
 
+  // Set default hive warehouse that aligns with /etc/hive-metastore/hive-site.xml
+  hiveContext.hql("SET hive.metastore.warehouse.dir=hdfs://hive")
+
   // Create table and clean up data
   hiveContext.hql("CREATE TABLE IF NOT EXISTS spark_hive_test_yarn_cluster_table (key INT, value STRING)")
 
