@@ -52,14 +52,14 @@ The test directory to test Spark REPL shell, submit, sparksql after installing s
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
 # Should be harmless. MAKE SURE UID and GID is correct FIRST!!!!!!
-getent group %{apache_name} >/dev/null || groupadd -f -g %{spark_gid} -r %{apache_name}
-if ! getent passwd %{apache_name} >/dev/null ; then
-    if ! getent passwd %{spark_uid} >/dev/null ; then
-      useradd -r -u %{spark_uid} -g %{apache_name} -c "Soft creation of user and group of spark for manual deployment" %{apache_name}
-    else
-      useradd -r -g %{apache_name} -c "Soft adding user spark to group spark for manual deployment" %{apache_name}
-    fi
-fi
+# getent group %{apache_name} >/dev/null || groupadd -f -g %{spark_gid} -r %{apache_name}
+# if ! getent passwd %{apache_name} >/dev/null ; then
+#    if ! getent passwd %{spark_uid} >/dev/null ; then
+#      useradd -r -u %{spark_uid} -g %{apache_name} -c "Soft creation of user and group of spark for manual deployment" %{apache_name}
+#    else
+#      useradd -r -g %{apache_name} -c "Soft adding user spark to group spark for manual deployment" %{apache_name}
+#    fi
+# fi
 
 %prep
 # copying files into BUILD/spark/ e.g. BUILD/spark/* 
