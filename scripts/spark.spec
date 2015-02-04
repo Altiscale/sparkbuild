@@ -268,7 +268,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}
 %dir %{install_spark_conf}
 %attr(0755,spark,spark) %{install_spark_conf}
-%attr(0775,spark,spark) %{install_spark_logs}
+%attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
 %files test
