@@ -33,18 +33,6 @@ else
   exit -1
 fi
 
-# Create HDFS folders for Spark Event logs
-# Doesn't matter who runs it.
-# TBD: Move to Chef, and support Kerberos since HADOOP_USER_NAME will
-# be invalid after enabling Kerberos.
-
-if [ "x${kerberos_enable}" = "xfalse" ] ; then
-  HADOOP_USER_NAME=hdfs hdfs dfs -mkdir -p /user/spark/logs
-  HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 /user/spark/
-  HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 /user/spark/logs
-fi
-
-
 if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
@@ -58,6 +46,8 @@ if [ ! -d $spark_home ] ; then
   echo "fail - $spark_home doesn't exist, can't continue, is spark installed correctly?"
   exit -1
 fi
+
+source $spark_home/test_spark/init_spark.sh
 
 pushd `pwd`
 cd $spark_home
