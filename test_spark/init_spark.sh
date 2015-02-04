@@ -21,5 +21,3 @@ if [ "x${kerberos_enable}" = "xfalse" ] ; then
   HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 $event_log_dir
   HADOOP_USER_NAME=hdfs hdfs dfs -chown -R spark:hadoop $event_log_dir
 fi
-
-exit 0
