@@ -62,7 +62,7 @@ echo "ok - starting thriftserver"
 
 ret=$(./start-thriftserver.sh --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$(hostname) --master yarn-client --queue production --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.kryoserializer.buffer.mb=64 --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240)
 if [ $? -ne "0" ] ; then
-  >&2 echo "fail - can't start thriftserver"
+  >&2 echo "fail - can't start thriftserver, something went wrong, see $ret"
   exit -3
 fi
 
