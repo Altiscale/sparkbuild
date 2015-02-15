@@ -30,18 +30,12 @@ else
 fi
 
 if [ "x${spark_home}" = "x" ] ; then
-  # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
   echo "ok - applying default location /opt/spark"
   if [ -L "$spark_home" && -d "$spark_home" ] ; then
     >&2 echo "fail - $spark_home does not exist, can't continue, exiting! check spark installation."
     exit -1
   fi
-fi
-
-if [ ! -d $spark_home ] ; then
-  >&2 echo "fail - SPARK_HOME doesn't exist, can't continue, is spark installed?"
-  exit -1
 fi
 
 if [ "x${spark_version}" = "x" ] ; then
@@ -60,7 +54,7 @@ cd $spark_home/sbin/
 
 echo "ok - starting thriftserver"
 
-ret=$(./start-thriftserver.sh --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$(hostname) --master yarn-client --queue production --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.kryoserializer.buffer.mb=64 --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240)
+ret=$(./start-thriftserver.sh --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$(hostname) --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.kryoserializer.buffer.mb=64 --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240)
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - can't start thriftserver, something went wrong, see $ret"
   exit -3
@@ -69,7 +63,7 @@ fi
 daemon_str=$(echo $ret | grep -o '/opt/.*')
 cat $daemon_str
 
-# Shouldn't take longer then 20 seconds, it took ~ 3-5 seconds on the VPC spec
+# Shouldn't take longer then 60 seconds, it took ~ 3-5 seconds on the VPC spec
 sleep 60
 
 log_check_ts2="true"
@@ -81,7 +75,7 @@ if [ "x${start_log_line}" = "x" ] ; then
 else
   ts2_ret_str=$(tail -n +${start_log_line} /home/spark/Hadooplogs/spark/logs/spark.log | grep -i 'ThriftBinaryCLIService listening on')
   if [ "x${ts2_ret_str}" = "x" ] ; then
-    >&2 echo "fail - something is wrong, can't detect service listening string 'ThriftBinaryCLIService listening on', the service is taking longer then 20 seconds to start? This is odd on a fresh VPC, please manually check Spark TS2!"
+    >&2 echo "fail - something is wrong, can't detect service listening string 'ThriftBinaryCLIService listening on', the service is taking longer then 60 seconds to start? This is odd on a fresh VPC, please manually check Spark TS2!"
     >&2 echo "fail - stopping spark thriftserver2 due to unexpected performance or error!"
     log_check_ts2="false"
   fi
