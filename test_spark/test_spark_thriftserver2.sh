@@ -15,6 +15,7 @@ kerberos_enable=false
 spark_home=$SPARK_HOME
 spark_version=$SPARK_VERSION
 spark_ts2_listen_port=20000
+running_user=`whoami`
 # Check RPM installation.
 
 spark_installed=$(rpm -qa | grep alti-spark | grep -v test | wc -l)
@@ -49,6 +50,14 @@ fi
 
 source $spark_home/test_spark/init_spark.sh
 
+# Just inherit what is defined in spark-daemon.sh and load-spark-env.sh and /etc/spark/spark-env.sh
+# if [ "$SPARK_IDENT_STRING" = "" ]; then
+#   export SPARK_IDENT_STRING="$USER"
+# fi
+if [ "$SPARK_PID_DIR" = "" ]; then
+  SPARK_PID_DIR=/tmp
+fi
+
 pushd `pwd`
 cd $spark_home/sbin/
 
@@ -62,18 +71,28 @@ fi
 
 daemon_str=$(echo $ret | grep -o '/opt/.*')
 cat $daemon_str
+spark_ts2_pid_str=$SPARK_PID_DIR/$(echo $(basename $daemon_str) | sed "s/-$(hostname).out$/\.pid/")
 
 # Shouldn't take longer then 60 seconds, it took ~ 3-5 seconds on the VPC spec
 sleep 60
 
+if [ -f $spark_ts2_pid_str ] ; then
+  echo "ok - found spark PID file at $spark_ts2_pid_str"
+else
+  >&2 echo "warn - PID file $spark_ts2_pid_str not found, did the location change? or something went wrong?"
+fi
+
+ts2_yarn_app_id=""
 log_check_ts2="true"
+pid_check_ts2="true"
 nc_check_ts2="true"
 # TBD: This is not a good way to check if it is up and running, however, it's a start. Can check PID, etc as well.
-start_log_line=$(grep -n "Starting SparkContext" /home/spark/Hadooplogs/spark/logs/spark.log | tail -n 1 | cut -d":" -f1)
+start_log_line=$(grep -n "Starting SparkContext" ${HOME}/Hadooplogs/spark/logs/spark.log | tail -n 1 | cut -d":" -f1)
 if [ "x${start_log_line}" = "x" ] ; then
   >&2 echo "warn - log rotated so fast? can't find the starting string to search for."
 else
-  ts2_ret_str=$(tail -n +${start_log_line} /home/spark/Hadooplogs/spark/logs/spark.log | grep -i 'ThriftBinaryCLIService listening on')
+  ts2_ret_str=$(tail -n +${start_log_line} ${HOME}/Hadooplogs/spark/logs/spark.log | grep -i 'ThriftBinaryCLIService listening on')
+  ts2_yarn_app_id=$(tail -n +${start_log_line} ${HOME}/Hadooplogs/spark/logs/spark.log | grep -io 'Submitted application .*' | tail -n 1 | cut -d" " -f3)
   if [ "x${ts2_ret_str}" = "x" ] ; then
     >&2 echo "fail - something is wrong, can't detect service listening string 'ThriftBinaryCLIService listening on', the service is taking longer then 60 seconds to start? This is odd on a fresh VPC, please manually check Spark TS2!"
     >&2 echo "fail - stopping spark thriftserver2 due to unexpected performance or error!"
@@ -87,29 +106,48 @@ if [ "x${nc_ret}" = "x" ] ; then
   nc_check_ts2="false"
 fi
 
-if [ "x${log_check_ts2}" = "false" -a "x${log_check_ts2}" = "false" ] ; then
-  >&2 echo "fail - both log check and port check failed, Spark ThriftServer2 is not running, stopping it manuall, and please check!"
-  ./stop-thriftserver.sh 
+spark_pid=$(cat $spark_ts2_pid_str | tr -d '\n')
+pid_ret=$(ps -p $spark_pid > /dev/null)
+if [ "x${pid_ret}" = "x0" ] ; then
+  pid_check_ts2="false"
+  >&2  echo "fail - Spark ThriftServer2 PID $spark_pid NOT found from file $spark_ts2_pid_str, Spark TS2 not running!"
+else
+  echo "ok - Spark ThriftServer2 PID $spark_pid found"
+fi
+
+if [ "x${log_check_ts2}" = "false" -a "x${log_check_ts2}" = "false" -a "x${pid_check_ts2}" = "xfalse" ] ; then
+  >&2 echo "fail - all pid check, log check and port check failed, Spark ThriftServer2 is not running, stopping it, and please check!"
+  >&2 echo "fail - printing potential logs from YARN from applicationId $ts2_yarn_app_id"
+  >&2 yarn logs -applicationId $ts2_yarn_app_id
+  ./stop-thriftserver.sh
   exit -5
 fi
 
 # TBD: A quick test to see if Spark ThriftServer2 is able to talk to Hive metastore to list tables
 jdbc_ret=$(beeline -u "jdbc:hive2://$(hostname):$spark_ts2_listen_port" -n alti-test-01 -p "" -e "show tables;" 2>&1)
 error_str=$(echo $jdbc_ret | grep -io "Error:" | head -n 1 | tr [:upper:] [:lower:])
-if [ "x${error_set}" = "xerror:" ] ; then
+if [ "x${error_str}" = "xerror:" ] ; then
   >&2 echo "fail - beeline can't get Hive metadata via Spark ThriftServer2 due to $jdbc_ret"
+else
+  echo "ok - query Hive metastore successfully, we see: $jdbc_ret"
 fi
 
 # TBD: create a simple table via Hive command, and see if Spark TS2 can see it and query it
 # TBD: To query a single tables with results
 
 
-# Done testing, stop the service
-./stop-thriftserver.sh 
+# Done testing, stop the service. Not expecting a lot of data from YARN log
+./stop-thriftserver.sh
+yarn_ret=$(2>/dev/null yarn application -status $ts2_yarn_app_id | grep 'State : FINISHED' | tr -d '\t' | tr -d ' ' | tr [:upper:] [:lower:] | head -n 1)
+if [ "x${yarn_ret}" = "xstate:finished" ] ; then
+  echo "ok - test completed, printing last 100 lines from YARN log for record"
+  yarn logs -applicationId $ts2_yarn_app_id | tail -n 100
+else
+  >&2 echo "fail - Spark TS2 YARN application did not end with State FINISHED, something is wrong, printing all logs for debugging!"
+  yarn logs -applicationId $ts2_yarn_app_id
+fi
 
 popd
-
-reset
 
 exit 0
 
