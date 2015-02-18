@@ -9,10 +9,10 @@
 
   <properties>
     <spark.version>1.2.1</spark.version>
-    <hadoop.version>2.4.1</hadoop.version>
+    <hadoop.version>2.2.0</hadoop.version>
     <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
-    <hive.version>0.13.1a</hive.version>
-    <yarn.version>2.4.1</yarn.version>
+    <hive.version>0.12.0-protobuf-2.5</hive.version>
+    <yarn.version>2.2.0</yarn.version>
     <avro.version>1.7.6</avro.version>
     <akka.group>org.spark-project.akka</akka.group>
     <akka.version>2.3.4-spark</akka.version>
