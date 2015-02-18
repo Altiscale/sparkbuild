@@ -39,8 +39,8 @@ Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.2 with
 build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.2 
 Origin source form https://github.com/apache/spark/tree/branch-1.2
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
-Hadoop 2.4.x with YARN 2.4.x enabled, and hive-0.13.1. This package should work with Altiscale 
-Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
+Hadoop 2.2.x with YARN 2.2.x enabled, and hive-0.12.0. This package should work with Altiscale 
+Hadoop 2.2.0 and Hive 0.12.0 (vcc-hadoop-2.2.0 and vcc-hive-0.12.0).
 
 %package test
 Summary: The test package for Spark
