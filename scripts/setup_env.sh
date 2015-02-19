@@ -82,7 +82,7 @@ else
 fi 
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.2
+  export BRANCH_NAME=altiscale-branch-1.2-hadoop22hive12
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
