@@ -63,8 +63,9 @@ hdfs dfs -mkdir -p spark/test/naive_bayes
 hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive_bayes/
 
 echo "ok - testing spark REPL shell with various algorithm"
+spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 1024M << EOT
+./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ << EOT
 `cat $testcase_shell_file_01`
 EOT
 

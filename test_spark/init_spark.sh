@@ -23,7 +23,7 @@ if [ "x${kerberos_enable}" = "xfalse" ] ; then
   if [ $? -ne "0" ] ; then
     HADOOP_USER_NAME=hdfs hdfs dfs -mkdir -p $event_log_dir
     HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 $event_log_dir
-    HADOOP_USER_NAME=hdfs hdfs dfs -chown spark:hadoop $event_log_dir
+    HADOOP_USER_NAME=hdfs hdfs dfs -chown spark:spark $event_log_dir
   fi
   hdfs dfs -test -e "$spark_user_dir"
   if [ $? -ne "0" ] ; then
