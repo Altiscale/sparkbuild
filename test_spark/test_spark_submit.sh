@@ -31,7 +31,7 @@ if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
   echo "ok - applying default location /opt/spark"
-  if [ -L "$spark_home" && -d "$spark_home" ] ; then
+  if [[ ! -L "$spark_home" && ! -d "$spark_home" ]] ; then
     >&2 echo "fail - $spark_home does not exist, can't continue, exiting! check spark installation."
     exit -1
   fi
