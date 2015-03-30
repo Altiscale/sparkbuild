@@ -10,6 +10,11 @@ kerberos_enable=false
 spark_home=$SPARK_HOME
 spark_test_dir=$spark_home/test_spark/
 
+hive_home=$HIVE_HOME
+if [ "x${hive_home}" = "x" ] ; then
+  hive_home=/opt/hive
+fi
+
 if [ -f "$curr_dir/pom.xml" ] ; then
   spark_test_dir=$curr_dir
 fi
@@ -46,8 +51,16 @@ source $spark_home/test_spark/init_spark.sh
 
 pushd `pwd`
 cd $spark_home
+# Deploy the test data we need from the current user that is running the test case
+# User does not share test data with other users
 hdfs dfs -mkdir -p spark/test/resources
-hdfs dfs -copyFromLocal /opt/spark/examples/src/main/resources/* spark/test/resources/
+hdfs dfs -put /opt/spark/examples/src/main/resources/kv1.txt spark/test/resources/
+
+# Perform sanity check on required files in test case
+if [ ! -f "$spark_home/examples/src/main/resources/kv1.txt" ] ; then
+  echo "fail - missing test data $spark_home/examples/src/main/resources/kv1.txt to load, did the examples directory structure changed?"
+  exit -3
+fi
 
 echo "ok - testing spark SQL shell with simple queries"
 
@@ -59,12 +72,25 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
+mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
+spark_opts_extra=
+for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
+do
+  spark_opts_extra="$spark_opts_extra --jars $i"
+done
+hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
+hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
+spark_opts_extra="$spark_opts_extra --jars $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar"
+
+spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
+spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
+
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-submit --queue research --verbose --master yarn --deploy-mode cluster --driver-java-options "-Djava.library.path=/opt/hadoop/lib/native/" --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --class SparkSQLTestCase1SQLContextApp $spark_test_dir/${app_name}-${app_ver}.jar
+./bin/spark-submit --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=8192M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --master yarn --deploy-mode client --driver-memory 2048M --executor-memory 2048M --executor-cores 3 $spark_opts_extra --files $spark_files --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
-  echo "fail - testing shell for SparkSQL SQLContext failed!!"
+  echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
   exit -4
 fi
 

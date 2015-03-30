@@ -1,0 +1,69 @@
+import org.apache.spark.SparkContext
+
+// Load and parse the LOCAL data file
+// In local mode, --master local
+val lines = sc.textFile("file:///opt/spark/README.md");
+
+// In cluster mode, --master yarn --deploy-mode client
+// val lines = sc.textFile("spark/test/README.md");
+
+// Count how many lines in the file README.md in our examples
+lines.count()
+
+// Show the first line
+lines.first()
+
+// Filter lines results with some keyword 'scala', case insensitive.
+//  Return a new RDD.
+// If the function returns a new RDD, it is pretty much a transformation, not an action lib
+val scala_lines = lines.filter(line => line.toLowerCase.contains("scala"));
+
+// Show the first line we found from the keyword
+scala_lines.first()
+
+// Look for 'example', case insensitive
+val example_lines = lines.filter(line => line.toLowerCase.contains("example"));
+
+example_lines.first()
+
+// Union on 2 RDDs
+val scala_n_examples_rdd = scala_lines.union(example_lines)
+
+// Print top 15 results mixed with 'scala' and 'example' keyword
+scala_n_examples_rdd.top(15)
+
+// take 20 records and print them
+// WARNING, don't do this on 'BigData', it doesn't make sense to print tons of records to
+// screen that you can't read, and this will consume a lot of network bandwidth between the
+// executors and the driver
+// NEVER use 'collect' or 'take' on large dataset. Store them to file or preferred HDFS.
+scala_n_examples_rdd.take(20).foreach(println)
+
+// Store onto HDFS, default path is set to HDFS here. Use 'file://' to store
+// to local disk on the driver machine.
+// The output is a DIRECTORY, the files are like MR files e.g. part-00000, part-00001
+scala_n_examples_rdd.saveAsTextFile("spark/test/README.filter.multiple_files.results.dir")
+
+// Looking for a single output file?
+// coalesce(1) or repartition(1) works but SLOW, be careful on BigData. coalesce faster than repartition
+// since it doesn't reshuffle the data over the network.
+// Hadoop 'merge' function will help and give you better performance on BigData
+// See sample code: https://gist.github.com/mneedham/2fa4752749c8aba7f6b3
+scala_n_examples_rdd.coalesce(1).saveAsTextFile("spark/test/README.filter.single_file.results.dir")
+scala_n_examples_rdd.repartition(1).saveAsTextFile("spark/test/README.filter.repartition_single_file.results.dir")
+// TBD: add examples to use the HDFS merge function for scalability
+
+// Define user function in Scala and handle serialization issues on reference variables
+// Distributed env requires function/variables to be serializable so it can be copied 
+// and distributed to other machines and reconstruct the logic in memory. Provide safe practice
+// here for examples. Same idea applies to most common programming languages (e.g. Scala, Java, Python, etc)
+
+
+
+
+
+
+
+
+exit
+

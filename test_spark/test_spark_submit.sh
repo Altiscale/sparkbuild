@@ -31,7 +31,7 @@ if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
   echo "ok - applying default location /opt/spark"
-  if [ -L "$spark_home" && -d "$spark_home" ] ; then
+  if [[ ! -L "$spark_home" && ! -d "$spark_home" ]] ; then
     >&2 echo "fail - $spark_home does not exist, can't continue, exiting! check spark installation."
     exit -1
   fi
@@ -60,7 +60,9 @@ if [ ! -f "${SPARK_EXAMPLE_JAR}" ] ; then
   exit -2
 fi
 
-./bin/spark-submit --verbose --queue research --master yarn --deploy-mode cluster --class org.apache.spark.examples.SparkPi "${SPARK_EXAMPLE_JAR}"
+spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
+
+./bin/spark-submit --verbose --queue research --master yarn --deploy-mode cluster --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --class org.apache.spark.examples.SparkPi "${SPARK_EXAMPLE_JAR}"
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for various algorithm failed!"
