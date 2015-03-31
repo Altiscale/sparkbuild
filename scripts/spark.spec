@@ -35,9 +35,9 @@ BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
 Url: http://spark.apache.org/
 %description
-Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.2 with 
-build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.2 
-Origin source form https://github.com/apache/spark/tree/branch-1.2
+Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.3 with 
+build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.3 
+Origin source form https://github.com/apache/spark/tree/branch-1.3
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
 Hadoop 2.4.x with YARN 2.4.x enabled, and hive-0.13.1. This package should work with Altiscale 
 Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
@@ -185,7 +185,7 @@ else
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 fi
 
-mvn -X package -Pspark-1.2 -Phadoop-provided
+mvn -X package -Pspark-1.3 -Phadoop-provided
 
 popd
 echo "ok - build spark test case completed successfully!"
@@ -316,6 +316,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Mon Mar 30 2015 Andrew Lee 20150330
+- Update spark version to 1.3
 * Tue Dec 23 2014 Andrew Lee 20141223
 - Output maven build command in build macro, added more files from test case
 * Sat Oct 18 2014 Andrew Lee 20141018
