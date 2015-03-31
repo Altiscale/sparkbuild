@@ -20,17 +20,17 @@ if [ -f "$curr_dir/setup_env.sh" ]; then
 fi
 
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  echo "ok - SPARK_VERSION=$SPARK_VERSION"
-else
   echo >&2 "fail - SPARK_VERSION can't be empty"
   exit -8
+else
+  echo "ok - SPARK_VERSION=$SPARK_VERSION"
 fi
 
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  echo "ok - SPARK_PLAIN_VERSION=$SPARK_PLAIN_VERSION"
-else
   echo >&2 "fail - SPARK_PLAIN_VERSION can't be empty"
   exit -8
+else
+  echo "ok - SPARK_PLAIN_VERSION=$SPARK_PLAIN_VERSION"
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
