@@ -14,14 +14,14 @@ object SparkSQLTestCase2HiveContextYarnClientApp {
   import hiveContext._
 
   // Create table and clean up data
-  hiveContext.hql("CREATE TABLE IF NOT EXISTS spark_hive_test_yarn_client_table (key INT, value STRING)")
+  hiveContext.sql("CREATE TABLE IF NOT EXISTS spark_hive_test_yarn_client_table (key INT, value STRING)")
 
   // load sample data from local workbench only
-  hiveContext.hql("LOAD DATA LOCAL INPATH '/opt/spark/examples/src/main/resources/kv1.txt' INTO TABLE spark_hive_test_yarn_client_table")
+  hiveContext.sql("LOAD DATA LOCAL INPATH '/opt/spark/examples/src/main/resources/kv1.txt' INTO TABLE spark_hive_test_yarn_client_table")
 
   // Queries are expressed in HiveQL, use collect(), results go into memory, be careful. This is just
   // a test case. Do NOT use the following line for production, store results to HDFS.
-  hiveContext.hql("FROM spark_hive_test_yarn_client_table SELECT key, value").collect().foreach(println)
+  hiveContext.sql("FROM spark_hive_test_yarn_client_table SELECT key, value").collect().foreach(println)
 
   }
 }

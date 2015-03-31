@@ -14,14 +14,14 @@ object SparkSQLTestCase2HiveContextYarnClusterApp {
   import hiveContext._
 
   // Create table and clean up data
-  hiveContext.hql("CREATE TABLE IF NOT EXISTS spark_hive_test_yarn_cluster_table (key INT, value STRING)")
+  hiveContext.sql("CREATE TABLE IF NOT EXISTS spark_hive_test_yarn_cluster_table (key INT, value STRING)")
 
   // load sample data from HDFS, need to be uploaded first
-  hiveContext.hql("LOAD DATA INPATH 'spark/test/resources/kv1.txt' INTO TABLE spark_hive_test_yarn_cluster_table")
+  hiveContext.sql("LOAD DATA INPATH 'spark/test/resources/kv1.txt' INTO TABLE spark_hive_test_yarn_cluster_table")
 
   // Queries are expressed in HiveQL, use collect(), results go into memory, be careful. This is just
   // a test case. Do NOT use the following line for production, store results to HDFS.
-  hiveContext.hql("FROM spark_hive_test_yarn_cluster_table SELECT key, value").collect().foreach(println)
+  hiveContext.sql("FROM spark_hive_test_yarn_cluster_table SELECT key, value").collect().foreach(println)
 
   }
 }

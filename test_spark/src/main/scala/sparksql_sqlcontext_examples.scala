@@ -13,16 +13,20 @@ object SparkSQLTestCase1SQLContextApp {
   // sc is an existing SparkContext.
   val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 
-  // createSchemaRDD is used to implicitly convert an RDD to a SchemaRDD.
-  import sqlContext.createSchemaRDD
+  // SPARK-1.2 createSchemaRDD obsolete, used to implicitly convert an RDD to a SchemaRDD.
+  // import sqlContext.createSchemaRDD
+
+  // SPARK-1.3 This is used to implicitly convert an RDD to a DataFrame.
+  import sqlContext.implicits._
 
   // Define the schema using a case class.
   // Note: Case classes in Scala 2.10 can support only up to 22 fields. To work around this limit,
   // you can use custom classes that implement the Product interface.
   
   // Create an RDD of Person objects and register it as a table.
-  val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))
-
+  // val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))
+  // SPARK-1.3, applying toDF() function here.
+  val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt)).toDF()
   people.registerTempTable("people")
 
   // SQL statements can be run by using the sql methods provided by sqlContext.
