@@ -41,7 +41,7 @@
 
   <profiles>
     <profile>
-      <id>spark-1.2</id>
+      <id>spark-1.3</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>

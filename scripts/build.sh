@@ -14,9 +14,23 @@ maven_settings="$HOME/.m2/settings.xml"
 maven_settings_spec="$curr_dir/alti-maven-settings.spec"
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
-  set +a
-  source "$curr_dir/setup_env.sh"
   set -a
+  source "$curr_dir/setup_env.sh"
+  set +a
+fi
+
+if [ "x${SPARK_VERSION}" = "x" ] ; then
+  echo "ok - SPARK_VERSION=$SPARK_VERSION"
+else
+  echo >&2 "fail - SPARK_VERSION can't be empty"
+  exit -8
+fi
+
+if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
+  echo "ok - SPARK_PLAIN_VERSION=$SPARK_PLAIN_VERSION"
+else
+  echo >&2 "fail - SPARK_PLAIN_VERSION can't be empty"
+  exit -8
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
