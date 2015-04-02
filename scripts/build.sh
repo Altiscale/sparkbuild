@@ -8,7 +8,7 @@ spark_spec="$curr_dir/spark.spec"
 mock_cfg="$curr_dir/altiscale-spark-centos-6-x86_64.cfg"
 mock_cfg_name=$(basename "$mock_cfg")
 mock_cfg_runtime=`echo $mock_cfg_name | sed "s/.cfg/.runtime.cfg/"`
-build_timeout=14400
+build_timeout=28800
 
 maven_settings="$HOME/.m2/settings.xml"
 maven_settings_spec="$curr_dir/alti-maven-settings.spec"
@@ -34,7 +34,7 @@ else
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
-  build_timeout=14400
+  build_timeout=28800
 else
   build_timeout=$BUILD_TIMEOUT
 fi

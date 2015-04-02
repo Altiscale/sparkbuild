@@ -86,7 +86,7 @@ if [ "x${BRANCH_NAME}" = "x" ] ; then
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
-  export BUILD_TIMEOUT=14400
+  export BUILD_TIMEOUT=28800
 fi
 
 BUILD_TIME=$(date +%Y%m%d%H%M)
