@@ -31,3 +31,4 @@ if [ "x${kerberos_enable}" = "xfalse" ] ; then
     HADOOP_USER_NAME=hdfs hdfs dfs -chown spark:users $spark_user_dir
   fi
 fi
+hdfs dfs -mkdir $event_log_dir/$USER
