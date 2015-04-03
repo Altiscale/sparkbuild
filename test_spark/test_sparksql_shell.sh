@@ -8,8 +8,16 @@ curr_dir=`cd $curr_dir; pwd`
 
 kerberos_enable=false
 spark_home=$SPARK_HOME
+spark_test_dir=$spark_home/test_spark/
 
-testcase_shell_file_01=$curr_dir/sparkshell_examples.txt
+hive_home=$HIVE_HOME
+if [ "x${hive_home}" = "x" ] ; then
+  hive_home=/opt/hive
+fi
+
+if [ -f "$curr_dir/pom.xml" ] ; then
+  spark_test_dir=$curr_dir
+fi
 
 # Check RPM installation.
 
@@ -25,58 +33,58 @@ else
   exit -1
 fi
 
-
 if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
+  if [ ! -f "$curr_dir/pom.xml" ] ; then
+    spark_test_dir=$spark_home/test_spark/
+  fi
   echo "ok - applying default location /opt/spark"
 fi
 
 if [ ! -d $spark_home ] ; then
-  echo "fail - SPARK_HOME doesn't exist, can't continue, is spark installed?"
+  echo "fail - $spark_home doesn't exist, can't continue, is spark installed correctly?"
   exit -1
-fi
-
-if [ ! -f "$testcase_shell_file_01"  ] ; then
-  echo "fail - missing testcase for spark, can't continue, exiting"
-  exit -2
 fi
 
 source $spark_home/test_spark/init_spark.sh
 
 pushd `pwd`
-cd "$spark_home"
-hdfs dfs -mkdir -p spark/test/graphx/followers
-hdfs dfs -put "$spark_home/graphx/data/followers.txt" spark/test/graphx/followers/
-hdfs dfs -put "$spark_home/graphx/data/users.txt" spark/test/graphx/followers/
-hdfs dfs -mkdir -p spark/test/decision_tree
-hdfs dfs -put "$spark_home/mllib/data/sample_tree_data.csv" spark/test/decision_tree/
-hdfs dfs -mkdir -p spark/test/logistic_regression
-hdfs dfs -put "$spark_home/mllib/data/sample_libsvm_data.txt" spark/test/logistic_regression/
-hdfs dfs -mkdir -p spark/test/kmean
-hdfs dfs -put "$spark_home/mllib/data/kmeans/kmeans_data.txt" spark/test/kmean/
-hdfs dfs -mkdir -p spark/test/linear_regression
-hdfs dfs -put "$spark_home/mllib/data/ridge-data/lpsa.data" spark/test/linear_regression/
-hdfs dfs -mkdir -p spark/test/svm
-hdfs dfs -put "$spark_home/mllib/data/sample_svm_data.txt" spark/test/svm/
-hdfs dfs -mkdir -p spark/test/naive_bayes
-hdfs dfs -put "$spark_home/mllib/data/sample_naive_bayes_data.txt" spark/test/naive_bayes/
-hdfs dfs -put "$spark_home/README.md" spark/test/
+cd $spark_home
 
-echo "ok - testing spark REPL shell with various algorithm"
+echo "ok - testing spark SQL shell with simple queries"
 
-./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 1024M << EOT
-`cat $testcase_shell_file_01`
-EOT
+app_name=`head -n 9 $spark_test_dir/pom.xml | grep artifactId | cut -d">" -f2- | cut -d"<" -f1`
+app_ver=`head -n 9 $spark_test_dir/pom.xml | grep version | cut -d">" -f2- | cut -d"<" -f1`
 
-if [ $? -ne "0" ] ; then
-  echo "fail - testing shell for various algorithm failed!"
+if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
+  echo "fail - $spark_test_dir/${app_name}-${app_ver}.jar test jar does not exist, cannot continue testing, failing!"
   exit -3
 fi
 
-popd
+mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
+spark_opts_extra=
+for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
+do
+  spark_opts_extra="$spark_opts_extra --jars $i"
+done
+hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
+hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
+spark_opts_extra="$spark_opts_extra --jars $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar"
 
-reset
+spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
+spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
+
+spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
+
+./bin/spark-sql --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=8192M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --master yarn --deploy-mode client --driver-memory 1G --executor-memory 1G --executor-cores 2 $spark_opts_extra 
+
+if [ $? -ne "0" ] ; then
+  echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
+  exit -4
+fi
+
+popd
 
 exit 0
 
