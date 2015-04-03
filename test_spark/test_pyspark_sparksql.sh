@@ -6,6 +6,10 @@
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 
+if [ -f "/etc/spark/spark-env.sh" ] ; then
+  source /etc/spark/spark-env.sh
+fi
+
 kerberos_enable=false
 spark_home=$SPARK_HOME
 spark_test_dir=$spark_home/test_spark/
@@ -28,31 +32,27 @@ else
   exit -1
 fi
 
-# Create HDFS folders for Spark Event logs
-# Doesn't matter who runs it.
-# TBD: Move to Chef, and support Kerberos since HADOOP_USER_NAME will
-# be invalid after enabling Kerberos.
-
-if [ "x${kerberos_enable}" = "xfalse" ] ; then
-  HADOOP_USER_NAME=hdfs hdfs dfs -mkdir -p /user/spark/logs
-  HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 /user/spark/
-  HADOOP_USER_NAME=hdfs hdfs dfs -chmod 1777 /user/spark/logs
-fi
-
 
 if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
   spark_home=/opt/spark
-  if [ ! -f "$curr_dir/pom.xml" ] ; then
-    spark_test_dir=$spark_home/test_spark/
-  fi
   echo "ok - applying default location /opt/spark"
+  if [[ ! -L "$spark_home" && ! -d "$spark_home" ]] ; then
+    >&2 echo "fail - $spark_home does not exist, can't continue, exiting! check spark installation."
+    exit -1
+  fi
 fi
 
-if [ ! -d $spark_home ] ; then
-  echo "fail - $spark_home doesn't exist, can't continue, is spark installed correctly?"
-  exit -1
+if [ "x${spark_version}" = "x" ] ; then
+  if [ "x${SPARK_VERSION}" = "x" ] ; then
+    >&2 echo "fail - SPARK_VERSION not set, can't continue, exiting!!!"
+    exit -1
+  else
+    spark_version=$SPARK_VERSION
+  fi
 fi
+
+source $spark_home/test_spark/init_spark.sh
 
 pushd `pwd`
 cd $spark_home
@@ -75,8 +75,14 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
+hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
+hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
+spark_opts_extra="$spark_opts_extra --jars $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar"
+
+spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
+
 # pyspark only supports yarn-client mode now
-./bin/spark-submit --verbose --master yarn --deploy-mode client --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
+./bin/spark-submit --verbose --master yarn --deploy-mode client --queue research $spark_opts_extra --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for Python SparkSQL on HiveQL/HiveContext failed!!"
