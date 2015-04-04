@@ -16,6 +16,11 @@ if [ "x${spark_home}" = "x" ] ; then
   echo "ok - applying default location /opt/spark"
 fi
 
+if [ ! -d $spark_home ] ; then
+  echo "fail - $spark_home doesn't exist, can't continue, is spark installed correctly?"
+  exit -1
+fi
+
 source $spark_home/test_spark/init_spark.sh
 
 spark_test_dir=$spark_home/test_spark/
@@ -31,16 +36,6 @@ fi
 
 pushd `pwd`
 cd $spark_home
-# Deploy the test data we need from the current user that is running the test case
-# User does not share test data with other users
-hdfs dfs -mkdir -p spark/test/resources
-hdfs dfs -put /opt/spark/examples/src/main/resources/kv1.txt spark/test/resources/
-
-# Perform sanity check on required files in test case
-if [ ! -f "$spark_home/examples/src/main/resources/kv1.txt" ] ; then
-  echo "fail - missing test data $spark_home/examples/src/main/resources/kv1.txt to load, did the examples directory structure changed?"
-  exit -3
-fi
 
 echo "ok - testing spark SQL shell with simple queries"
 
@@ -67,7 +62,7 @@ spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-submit --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=8192M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --master yarn --deploy-mode client --driver-memory 2048M --executor-memory 2048M --executor-cores 3 $spark_opts_extra --files $spark_files --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
+./bin/spark-sql --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=8192M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --master yarn --deploy-mode client --driver-memory 1G --executor-memory 1G --executor-cores 2 $spark_opts_extra 
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
@@ -75,8 +70,6 @@ if [ $? -ne "0" ] ; then
 fi
 
 popd
-
-reset
 
 exit 0
 

@@ -7,28 +7,7 @@
 
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
-
-if [ -f "/etc/spark/spark-env.sh" ] ; then
-  source /etc/spark/spark-env.sh
-fi
-kerberos_enable=false
 spark_home=$SPARK_HOME
-spark_version=$SPARK_VERSION
-spark_ts2_listen_port=20000
-running_user=`whoami`
-# Check RPM installation.
-
-spark_installed=$(rpm -qa | grep alti-spark | grep -v test | wc -l)
-if [ "x${spark_installed}" = "x0" ] ; then
-  >&2 echo "fail - spark not installed, can't continue, exiting"
-  exit -1
-elif [ "x${spark_installed}" = "x1" ] ; then
-  echo "ok - detect one version of spark installed"
-  echo "ok - $(rpm -q $(rpm -qa | grep alti-spark)) installed"
-else
-  >&2 echo "error - detected more than 1 spark installed, please remove one version, currently, testcase doesn't support mutiple version"
-  exit -1
-fi
 
 if [ "x${spark_home}" = "x" ] ; then
   spark_home=/opt/spark
@@ -39,6 +18,12 @@ if [ "x${spark_home}" = "x" ] ; then
   fi
 fi
 
+source $spark_home/test_spark/init_spark.sh
+
+spark_version=$SPARK_VERSION
+spark_ts2_listen_port=20000
+running_user=`whoami`
+
 if [ "x${spark_version}" = "x" ] ; then
   if [ "x${SPARK_VERSION}" = "x" ] ; then
     >&2 echo "fail - SPARK_VERSION not set, can't continue, exiting!!!"
@@ -48,7 +33,6 @@ if [ "x${spark_version}" = "x" ] ; then
   fi
 fi
 
-source $spark_home/test_spark/init_spark.sh
 
 # Just inherit what is defined in spark-daemon.sh and load-spark-env.sh and /etc/spark/spark-env.sh
 # if [ "$SPARK_IDENT_STRING" = "" ]; then
