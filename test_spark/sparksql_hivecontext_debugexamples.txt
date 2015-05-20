@@ -1,0 +1,44 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.hive._
+
+val hiveContext = new org.apache.spark.sql.hive.HiveContext(sc)
+
+import hiveContext._
+
+// Create table and clean up data
+hiveContext.sql("CREATE TABLE IF NOT EXISTS spark_hive_test_table (key INT, value STRING)")
+hiveContext.sql("TRUNCATE TABLE spark_hive_test_table")
+
+// load data
+hiveContext.sql("LOAD DATA LOCAL INPATH '/opt/spark/examples/src/main/resources/kv1.txt' INTO TABLE spark_hive_test_table")
+
+// Queries are expressed in HiveQL
+val hqltest = hiveContext.sql("FROM spark_hive_test_table SELECT key, value")
+
+val hqltest2 = hiveContext.sql("SELECT key, COUNT(value) FROM spark_hive_test_table GROUP BY key ORDER BY key LIMIT 50")
+
+// Enable DebugQuery APIs, this is a developer API and is not for production.
+// Only for testing to glean some information on how the queries run and what is the output, etc.
+import org.apache.spark.sql.execution.debug._
+
+// Print out RDD info for debugging
+hqltest.explain(true)
+
+hqltest.debug
+
+hqltest2.explain(true)
+
+hqltest2.debug
+
+// Print out results in console, be aware, if the data is huge, this will flush the console
+// and potentially take out the Driver. Make sure your query only returns a few records 
+// either by LIMIT in your SQL statement or Scala APIs such as count(), first(), and take(N)
+hqltest2.collect().foreach(println)
+hqltest2.count()
+hqltest2.first()
+hqltest2.take(10)
+hqltest2.show(10)
+
+
+exit
+
