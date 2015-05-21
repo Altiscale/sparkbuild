@@ -32,7 +32,7 @@ Requires: scala >= 2.10.4
 Requires: %{rpm_package_name}-%{spark_version}-test
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
-BuildRequires: jdk >= 1.7.0.51
+BuildRequires: jdk >= 1.6
 Url: http://spark.apache.org/
 %description
 Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.3 with 
@@ -45,6 +45,8 @@ Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
 %package test
 Summary: The test package for Spark
 Group: Development/Libraries
+PreReq: %{rpm_package_name}-%{spark_version}
+Requires: %{rpm_package_name}-%{spark_version}
 
 %description test
 The test directory to test Spark REPL shell, submit, sparksql after installing spark.
