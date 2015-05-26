@@ -2,6 +2,9 @@
      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <!-- Run this command to build this pom.xml with the src for our test cases -->
+  <!-- mvn -X package -Pspark-1.3 -Phadoop-provided -->
+
   <groupId>com.altiscale.testsuite</groupId>
   <artifactId>sparksql-test-case</artifactId>
   <packaging>jar</packaging>

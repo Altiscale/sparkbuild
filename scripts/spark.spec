@@ -33,6 +33,9 @@ Requires: %{rpm_package_name}-%{spark_version}-test
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.6
+# The whole purpose for this req is just to repackage the JAR with JDK 1.6
+BuildRequires: java-1.6.0-openjdk-devel
+
 Url: http://spark.apache.org/
 %description
 Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.3 with 

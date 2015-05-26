@@ -1,0 +1,8 @@
+file=sc.textFile("spark/test/README.md")
+errors = file.filter(lambda line: "scala" in line)
+# Count all the errors
+errors.count()
+# Count errors mentioning MySQL
+errors.filter(lambda line: "MySQL" in line).count()
+# Fetch the MySQL errors as an array of strings
+errors.filter(lambda line: "MySQL" in line).collect()
