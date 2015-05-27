@@ -35,8 +35,8 @@ hdfs dfs -copyFromLocal /opt/spark/examples/src/main/resources/* spark/test/reso
 
 echo "ok - testing spark SQL shell with simple queries"
 
-app_name=`grep "<artifactId>.*</artifactId>" pom.xml | cut -d">" -f2- | cut -d"<" -f1  | head -n 1`
-app_ver=`grep "<version>.*</version>" pom.xml | cut -d">" -f2- | cut -d"<" -f1 | head -n 1`
+app_name=`grep "<artifactId>.*</artifactId>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1  | head -n 1`
+app_ver=`grep "<version>.*</version>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1 | head -n 1`
 
 if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   echo "fail - $spark_test_dir/${app_name}-${app_ver}.jar test jar does not exist, cannot continue testing, failing!"
