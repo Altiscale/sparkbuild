@@ -203,6 +203,7 @@ cd %{_builddir}/%{build_service_name}/
 # AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with 
 # JDK 1.6 while not breaking the bytecode, etc. In other word, only the JAR format matters
 # and we don't want to compile it with JDK 1.6.
+ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
 cp -p %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
 pushd %{_builddir}/%{build_service_name}/tmp/
 unzip -d tweak_spark ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
@@ -211,10 +212,9 @@ cd tweak_spark
 popd
 popd
 
-
-cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
-ls -al %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
 ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+ls -al %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
 
 echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 
