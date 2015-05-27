@@ -210,7 +210,7 @@ cd tweak_spark
 /usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvmf META-INF/MANIFEST.MF %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
 popd
 popd
-cp -p %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+cp -p %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
 echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 
 
