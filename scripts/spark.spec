@@ -32,7 +32,7 @@ Requires: scala >= 2.10.4
 Requires: %{rpm_package_name}-%{spark_version}-test
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
-BuildRequires: jdk >= 1.6
+BuildRequires: jdk >= 1.7
 # The whole purpose for this req is just to repackage the JAR with JDK 1.6
 BuildRequires: java-1.6.0-openjdk-devel
 
@@ -48,7 +48,6 @@ Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
 %package test
 Summary: The test package for Spark
 Group: Development/Libraries
-PreReq: %{rpm_package_name}-%{spark_version}
 Requires: %{rpm_package_name}-%{spark_version}
 
 %description test
@@ -136,6 +135,7 @@ echo "ok - building assembly"
 # This will build the overall JARs we need in each folder
 # and install them locally for further reference. We assume the build
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
+# Default JDK version applied is 1.7 here.
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
   if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
@@ -190,10 +190,28 @@ else
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 fi
 
+# Build our test case with out own pom.xml file
 mvn -X package -Pspark-1.3 -Phadoop-provided
 
 popd
 echo "ok - build spark test case completed successfully!"
+
+echo "ok - start repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
+pushd `pwd`
+cd %{_builddir}/%{build_service_name}/
+%{__mkdir} -p %{_builddir}/%{build_service_name}/tmp/
+# AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with 
+# JDK 1.6 while not breaking the bytecode, etc. In other word, only the JAR format matters
+# and we don't want to compile it with JDK 1.6.
+cp -p %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+pushd %{_builddir}/%{build_service_name}/tmp/
+unzip -d tweak_spark ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+cd tweak_spark
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvmf META-INF/MANIFEST.MF %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+popd
+popd
+cp -p %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 
 
 %install
