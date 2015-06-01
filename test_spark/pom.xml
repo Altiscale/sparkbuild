@@ -63,24 +63,6 @@
         </dependency>
         <dependency>
           <groupId>local.org.apache.spark</groupId>
-          <artifactId>spark-core_${scala.binary.version}</artifactId>
-          <version>${spark.version}</version>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>local.org.apache.spark</groupId>
-          <artifactId>spark-sql_${scala.binary.version}</artifactId>
-          <version>${spark.version}</version>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>local.org.apache.spark</groupId>
-          <artifactId>spark-catalyst_${scala.binary.version}</artifactId>
-          <version>${spark.version}</version>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>local.org.apache.spark</groupId>
           <artifactId>spark-assembly_${scala.binary.version}</artifactId>
           <version>${spark.version}</version>
           <scope>compile</scope>
