@@ -81,8 +81,9 @@ else
   export ALTISCALE_RELEASE
 fi 
 
-if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.3
+# Enforce the right spark submodule branch to be build
+if [ "x${SPARK_BRANCH_NAME}" = "x" ] ; then
+  export SPARK_BRANCH_NAME=altiscale-branch-1.3
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
