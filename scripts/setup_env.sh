@@ -48,11 +48,11 @@ if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
 fi
 
 if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop22"
+  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
 elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
+  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
 elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
+  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
 else
   echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION"
 fi
