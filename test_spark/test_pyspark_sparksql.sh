@@ -38,8 +38,8 @@ fi
 
 echo "ok - testing spark SQL shell with simple queries"
 
-app_name=`head -n 9 $spark_test_dir/pom.xml | grep artifactId | cut -d">" -f2- | cut -d"<" -f1`
-app_ver=`head -n 9 $spark_test_dir/pom.xml | grep version | cut -d">" -f2- | cut -d"<" -f1`
+app_name=`grep "<artifactId>.*</artifactId>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1  | head -n 1`
+app_ver=`grep "<version>.*</version>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1 | head -n 1`
 
 if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   echo "fail - $spark_test_dir/${app_name}-${app_ver}.jar test jar does not exist, cannot continue testing, failing!"
