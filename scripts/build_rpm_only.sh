@@ -58,12 +58,12 @@ env | sort
 # The path in the following is all relative, if the parent jenkin config is changed, things may break here.
 pushd `pwd`
 cd $WORKSPACE/spark
-if [ "x${BRANCH_NAME}" = "x" ] ; then
-  echo "error - BRANCH_NAME is not defined. Please specify the BRANCH_NAME explicitly. Exiting!"
+if [ "x${SPARK_BRANCH_NAME}" = "x" ] ; then
+  echo "error - SPARK_BRANCH_NAME is not defined. Please specify the BRANCH_NAME explicitly. Exiting!"
   exit -9
 fi
-  echo "ok - switching to latest branch $BRANCH_NAME and refetch the files"
-  git checkout $BRANCH_NAME
+  echo "ok - switching to latest branch $SPARK_BRANCH_NAME and refetch the files"
+  git checkout $SPARK_BRANCH_NAME
   git fetch --all
   git pull
 popd

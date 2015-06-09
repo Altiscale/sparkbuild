@@ -33,11 +33,14 @@ Requires: %{rpm_package_name}-%{spark_version}-test
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
+# The whole purpose for this req is just to repackage the JAR with JDK 1.6
+BuildRequires: java-1.6.0-openjdk-devel
+
 Url: http://spark.apache.org/
 %description
-Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.3 with 
-build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.3 
-Origin source form https://github.com/apache/spark/tree/branch-1.3
+Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.4 with 
+build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.4 
+Origin source form https://github.com/apache/spark/tree/branch-1.4
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
 Hadoop 2.4.x with YARN 2.4.x enabled, and hive-0.13.1. This package should work with Altiscale 
 Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
@@ -45,6 +48,7 @@ Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
 %package test
 Summary: The test package for Spark
 Group: Development/Libraries
+Requires: %{rpm_package_name}-%{spark_version}
 
 %description test
 The test directory to test Spark REPL shell, submit, sparksql after installing spark.
@@ -131,6 +135,7 @@ echo "ok - building assembly"
 # This will build the overall JARs we need in each folder
 # and install them locally for further reference. We assume the build
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
+# Default JDK version applied is 1.7 here.
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
   if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
@@ -174,21 +179,48 @@ if [ ! -d "%{current_workspace}/.m2" ] ; then
   # This usually happens in mock, the default local repository will be the same in this case
   # no need to specify it here.
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
 else
   # This applies to local hand build with a existing user
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 fi
 
-mvn -X package -Pspark-1.3 -Phadoop-provided
+# Build our test case with out own pom.xml file
+mvn -X package -Pspark-1.4 -Phadoop-provided
 
 popd
 echo "ok - build spark test case completed successfully!"
+
+echo "ok - start repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
+pushd `pwd`
+cd %{_builddir}/%{build_service_name}/
+%{__mkdir} -p %{_builddir}/%{build_service_name}/tmp/
+# AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with 
+# JDK 1.6 while not breaking the bytecode, etc. In other word, only the JAR format matters
+# and we don't want to compile it with JDK 1.6.
+ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+
+cp -p %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+
+ls -al %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+
+pushd %{_builddir}/%{build_service_name}/tmp/
+unzip -d tweak_spark ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+cd tweak_spark
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvmf META-INF/MANIFEST.MF %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar .
+popd
+popd
+
+ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+ls -al %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+
+echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 
 
 %install
@@ -316,6 +348,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Tue Jun 9 2015 Andrew Lee 20150609
+- Update spark version to 1.4
 * Mon Mar 30 2015 Andrew Lee 20150330
 - Update spark version to 1.3
 * Tue Dec 23 2014 Andrew Lee 20141223
