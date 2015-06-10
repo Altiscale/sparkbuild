@@ -191,7 +191,8 @@ else
 fi
 
 # Build our test case with out own pom.xml file
-mvn -X package -Pspark-1.4 -Phadoop-provided
+# Update profile ID spark-1.3 or spark-1.4 for 1.3.1 or 1.4.0, and hadoop version hadoop24-provided or hadoop27-provided as well
+mvn -X package -Pspark-1.4 -Phadoop24-provided
 
 popd
 echo "ok - build spark test case completed successfully!"
