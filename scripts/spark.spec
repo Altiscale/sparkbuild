@@ -142,8 +142,8 @@ if [ -f /etc/alti-maven-settings/settings.xml ] ; then
     echo "mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
     mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-0.13.1 -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-0.13.1 -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-provided -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-provided -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -154,8 +154,8 @@ else
     echo "mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
     mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-0.13.1 -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-0.13.1 -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-provided -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-provided -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -332,6 +332,14 @@ mkdir -p /home/spark/logs
 chmod -R 1777 /home/spark/logs
 chown %{spark_uid}:%{spark_gid} /home/spark/
 chown %{spark_uid}:%{spark_gid} /home/spark/logs
+# TBD: Add symbolic links to Hive datanucleus JARs to spark_home/libs directory
+# TBD: Create release directory libs
+# cp "$SPARK_HOME"/assembly/target/scala*/*assembly*hadoop*.jar "$DISTDIR/lib/"
+# cp "$SPARK_HOME"/examples/target/scala*/spark-examples*.jar "$DISTDIR/lib/"
+# In this case, silence the error and ignore the return code of this command
+# cp "$SPARK_HOME"/network/yarn/target/scala*/spark-*-yarn-shuffle.jar "$DISTDIR/lib/" &> /dev/null || :
+
+
 
 %postun
 if [ "$1" = "0" ]; then
