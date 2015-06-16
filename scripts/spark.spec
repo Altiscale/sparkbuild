@@ -35,6 +35,8 @@ BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
 # The whole purpose for this req is just to repackage the JAR with JDK 1.6
 BuildRequires: java-1.6.0-openjdk-devel
+# For SparkR, prefer R 3.1.2, but we only have 3.1.1
+BuildRequires: vcc-R_3.1.1
 
 Url: http://spark.apache.org/
 %description
