@@ -33,7 +33,7 @@ if [ "x${R_HOME}" = "x" ] ; then
   echo "ok - R_HOME redefined based on installed RPM due to AE-1226"
 fi
 
-export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin
+export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_HOME
 
 # Define defau;t spark uid:gid and build version
 if [ "x${SPARK_USER}" = "x" ] ; then
