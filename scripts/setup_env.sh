@@ -27,6 +27,11 @@ fi
 if [ "x${HIVE_VERSION}" = "x" ] ; then
   export HIVE_VERSION=0.13.1
 fi
+# AE-1226 temp fix on the R PATH
+if [ "x${R_HOME}" = "x" ] ; then
+  export R_HOME=$(dirname $(rpm -ql $(rpm -qa | grep vcc-R | head -n 1 ) | grep bin | head -n 1))
+  echo "ok - R_HOME redefined based on installed RPM due to AE-1226"
+fi
 
 export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin
 
