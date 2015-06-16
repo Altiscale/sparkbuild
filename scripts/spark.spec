@@ -81,6 +81,16 @@ if [ "x${SCALA_HOME}" = "x" ] ; then
   echo "ok - SCALA_HOME not defined, trying to set SCALA_HOME to default location /opt/scala/"
   export SCALA_HOME=/opt/scala/
 fi
+# AE-1226 temp fix on the R PATH
+if [ "x${R_HOME}" = "x" ] ; then
+  export R_HOME=$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep bin | head -n 1))
+  if [ "x${R_HOME}" = "x" ] ; then
+    echo "warn - R_HOME not defined, CRAN R isn't installed properly in the current env"
+  else
+    echo "ok - R_HOME redefined to $R_HOME based on installed RPM due to AE-1226"
+    export PATH=$PATH:$R_HOME
+  fi
+fi
 
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
