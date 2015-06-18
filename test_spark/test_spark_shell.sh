@@ -43,11 +43,14 @@ hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive
 echo "ok - testing spark REPL shell with various algorithm"
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
 hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-spark_opts_extra="$spark_opts_extra --jars $hadoop_lzo_jar,$hadoop_snappy_jar"
+# The guava JAR here does not match the Spark's pom.xml which is looking for version 14.0.1
+# Hive comes with Guava 11.0.2
+guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
+spark_opts_extra="$spark_opts_extra --jars $hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-shell --master yarn --deploy-mode client --queue research --driver-memory 2048M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra << EOT
+./bin/spark-shell --verbose --master yarn --deploy-mode client --queue research --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra << EOT
 `cat $testcase_shell_file_01`
 EOT
 
