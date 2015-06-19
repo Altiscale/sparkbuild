@@ -136,7 +136,7 @@ export SPARK_YARN=true
 
 env | sort
 
-echo "ok - building assembly"
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION"
 # SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
 # PURGE LOCAL CACHE for clean build
