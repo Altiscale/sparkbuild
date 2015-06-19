@@ -30,6 +30,7 @@ BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.4
 Requires: %{rpm_package_name}-%{spark_version}-test
+Requires: vcc-hive-%{hive_version}
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
