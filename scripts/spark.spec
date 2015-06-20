@@ -358,7 +358,7 @@ chown %{spark_uid}:%{spark_gid} /home/spark/logs
 
 %postun
 if [ "$1" = "0" ]; then
-  ret=$(rpm -qa | grep alti-spark- | wc -l)
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep -v test | wc -l)
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark version, no need to clean up symbolic links"
     echo "ok - cleaning up version specific directories only regarding this uninstallation"
@@ -377,6 +377,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Tue Jun 9 2015 Andrew Lee 20150609
+- Fix post uninstall operation
 * Tue Jun 9 2015 Andrew Lee 20150609
 - Update spark version to 1.4
 * Mon Mar 30 2015 Andrew Lee 20150330
