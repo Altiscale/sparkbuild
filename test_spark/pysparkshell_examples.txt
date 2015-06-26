@@ -16,8 +16,8 @@ from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.feature import HashingTF
 from pyspark.mllib.classification import LogisticRegressionWithSGD
 
-spam = sc.textFile("spark/test/spam.txt")
-normal = sc.textFile("spark/test/ham.txt")
+spam = sc.textFile("spark/test/spam_sample.txt")
+normal = sc.textFile("spark/test/normal_sample.txt")
 
 # Create a HashingTF instance to map email text to vectors of 10,000 features.
 tf = HashingTF(numFeatures = 10000)

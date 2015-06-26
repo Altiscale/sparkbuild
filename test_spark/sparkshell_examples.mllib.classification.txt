@@ -1,0 +1,77 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.classification.SVMWithSGD
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.util.MLUtils
+
+// Load and parse the data file
+val data = sc.textFile("spark/test/svm/sample_svm_data.txt")
+val parsedData = data.map { line =>
+  val parts = line.split(' ')
+  LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(x => x.toDouble).toArray))
+}
+
+// Run training algorithm to build the model
+val numIterations = 20
+val model = SVMWithSGD.train(parsedData, numIterations)
+
+// Evaluate model on training examples and compute training error
+val labelAndPreds = parsedData.map { point =>
+  val prediction = model.predict(point.features)
+  (point.label, prediction)
+}
+val trainErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / parsedData.count
+println("Training Error = " + trainErr)
+
+import org.apache.spark.mllib.classification.SVMWithSGD
+import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+
+// Load training data in LIBSVM format.
+val data = MLUtils.loadLibSVMFile(sc, "spark/test/logistic_regression/sample_libsvm_data.txt")
+
+// Split data into training (60%) and test (40%).
+val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
+val training = splits(0).cache()
+val test = splits(1)
+
+// Run training algorithm to build the model
+val numIterations = 100
+val model = SVMWithSGD.train(training, numIterations)
+
+// Clear the default threshold.
+model.clearThreshold()
+
+// Compute raw scores on the test set. 
+val scoreAndLabels = test.map { point =>
+  val score = model.predict(point.features)
+  (score, point.label)
+}
+
+// Get evaluation metrics.
+val metrics = new BinaryClassificationMetrics(scoreAndLabels)
+val auROC = metrics.areaUnderROC()
+
+println("Area under ROC = " + auROC)
+
+
+import org.apache.spark.mllib.classification.NaiveBayes
+
+val data = sc.textFile("spark/test/naive_bayes/sample_naive_bayes_data.txt")
+val parsedData = data.map { line =>
+  val parts = line.split(',')
+  LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
+}
+// Split data into training (60%) and test (40%).
+val splits = parsedData.randomSplit(Array(0.6, 0.4), seed = 11L)
+val training = splits(0)
+val test = splits(1)
+
+val model = NaiveBayes.train(training, lambda = 1.0)
+val prediction = model.predict(test.map(_.features))
+
+val predictionAndLabel = prediction.zip(test.map(_.label))
+val accuracy = 1.0 * predictionAndLabel.filter(x => x._1 == x._2).count() / test.count()
+
+exit
+
+
