@@ -133,6 +133,8 @@ fi
 
 # Always build with YARN
 export SPARK_YARN=true
+# Build SPARK with Hive
+export SPARK_HIVE=true
 
 env | sort
 
