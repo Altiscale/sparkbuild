@@ -8,8 +8,8 @@ fi
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
-all_nonkerberos_testcase=(test_spark_submit.sh test_spark_shell.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.sh test_spark_hql.kerberos.sh test_sparksql_shell.sh)
-all_kerberos_testcase=(test_spark_submit.sh test_spark_shell.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.kerberos.sh test_sparksql_shell.sh)
+all_nonkerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spark_shell_mllib_classification.sh test_spark_shell_mllib_regression.sh test_spark_shell_mllib_tree.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.sh test_spark_hql.kerberos.sh test_sparksql_shell.sh)
+all_kerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spark_shell_mllib_classification.sh test_spark_shell_mllib_regression.sh test_spark_shell_mllib_tree.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.kerberos.sh test_sparksql_shell.sh)
 
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
@@ -46,20 +46,22 @@ fi
 
 
 pushd `pwd`
-cd $spark_home
-pushd $spark_home/test_spark/
-for testcase in ${all_nonkerberos_testcase[*]}
-do
-  echo "ok - executing testcase $testcase"
-  ./$testcase
-  if [ $? -ne "0" ] ; then
-    >&2 echo "fail - testcase $testcase failed!!!"
-    exit -3
-  else
-    echo "ok - $testcase successsfully completed"
-  fi
-done
-popd
+  cd $spark_home
+  pushd $spark_home/test_spark/
+  for testcase in ${all_nonkerberos_testcase[*]}
+  do
+    echo "ok - ############################################"
+    echo "ok - executing testcase $testcase"
+    echo "ok - ############################################"
+    ./$testcase
+    if [ $? -ne "0" ] ; then
+      >&2 echo "fail - testcase $testcase failed!!!"
+      exit -3
+    else
+      echo "ok - $testcase successsfully completed"
+    fi
+  done
+  popd
 popd
 
 exit 0

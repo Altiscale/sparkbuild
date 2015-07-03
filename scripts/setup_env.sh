@@ -39,7 +39,8 @@ fi
 
 export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_HOME
 
-# Define defau;t spark uid:gid and build version
+# Define default spark uid:gid and build version
+# and all other Spark build related env
 if [ "x${SPARK_USER}" = "x" ] ; then
   export SPARK_USER=spark
 fi
@@ -54,6 +55,12 @@ if [ "x${SPARK_VERSION}" = "x" ] ; then
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
   export SPARK_PLAIN_VERSION=1.4.1
+fi
+if [ "x${SPARK_YARN}" = "x" ] ; then
+  export SPARK_YARN=true
+fi
+if [ "x${SPARK_HIVE}" = "x" ] ; then
+  export SPARK_HIVE=true
 fi
 
 if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
