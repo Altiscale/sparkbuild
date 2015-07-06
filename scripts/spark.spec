@@ -348,6 +348,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Mon Jul 06 2015 Andrew Lee 20150706
+- Rename Spark test RPM pkg to example
 * Mon Mar 30 2015 Andrew Lee 20150330
 - Update spark version to 1.3
 * Tue Dec 23 2014 Andrew Lee 20141223
