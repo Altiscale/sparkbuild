@@ -28,6 +28,8 @@ hdfs dfs -mkdir -p spark/test/svm
 hdfs dfs -put /opt/spark/mllib/data/sample_svm_data.txt spark/test/svm/
 hdfs dfs -mkdir -p spark/test/naive_bayes
 hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive_bayes/
+hdfs dfs -mkdir spark/test/logistic_regression/
+hdfs dfs -put /opt/spark/mllib/data/sample_libsvm_data.txt spark/test/logistic_regression/
 
 echo "ok - testing spark REPL shell with various algorithm"
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")

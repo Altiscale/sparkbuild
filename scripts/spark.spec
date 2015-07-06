@@ -29,7 +29,7 @@ Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.4
-Requires: %{rpm_package_name}-%{spark_version}-test
+Requires: %{rpm_package_name}-%{spark_version}-example
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.2.1
 BuildRequires: jdk >= 1.7.0.51
@@ -45,13 +45,13 @@ Origin source form https://github.com/apache/spark/tree/branch-1.3
 Hadoop 2.4.x with YARN 2.4.x enabled, and hive-0.13.1. This package should work with Altiscale 
 Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
 
-%package test
-Summary: The test package for Spark
+%package example
+Summary: The test example package for Spark
 Group: Development/Libraries
 Requires: %{rpm_package_name}-%{spark_version}
 
-%description test
-The test directory to test Spark REPL shell, submit, sparksql after installing spark.
+%description example
+The test example directory to test Spark REPL shell, submit, sparksql after installing spark.
 
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
@@ -303,7 +303,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
-%files test
+%files example
 %defattr(0755,spark,spark,0755)
 %{install_spark_test}
 
