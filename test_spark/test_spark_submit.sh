@@ -44,7 +44,10 @@ fi
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-submit --verbose --queue research --master yarn --deploy-mode cluster --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --class org.apache.spark.examples.SparkPi "${SPARK_EXAMPLE_JAR}"
+# ./bin/spark-submit --verbose --queue research --master yarn --deploy-mode cluster --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --class org.apache.spark.examples.SparkPi "${SPARK_EXAMPLE_JAR}"
+# queue_name="--queue interactive"
+queue_name=""
+./bin/spark-submit --verbose --master yarn --deploy-mode cluster $queue_name --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --class org.apache.spark.examples.SparkPi "${SPARK_EXAMPLE_JAR}"
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for various algorithm failed!"

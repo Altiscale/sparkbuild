@@ -38,7 +38,13 @@ spark_opts_extra="$spark_opts_extra --jars $hadoop_lzo_jar,$hadoop_snappy_jar,$g
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-shell --verbose --master yarn --deploy-mode client --queue research --driver-memory 1536M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra << EOT
+# ./bin/spark-shell --verbose --master yarn --deploy-mode client --queue research --driver-memory 1536M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra << EOT
+# `cat $testcase_shell_file_01`
+# EOT
+
+# queue_name="--queue interactive"
+queue_name=""
+./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1536M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra $queue_name << EOT
 `cat $testcase_shell_file_01`
 EOT
 
