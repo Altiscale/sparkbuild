@@ -42,7 +42,10 @@ spark_opts_extra="$spark_opts_extra --jars $hadoop_lzo_jar,$hadoop_snappy_jar,$g
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-submit --verbose --master yarn --deploy-mode client --queue research $spark_opts_extra --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
+# ./bin/spark-submit --verbose --master yarn --deploy-mode client --queue research $spark_opts_extra --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
+# queue_name="--queue interactive"
+queue_name=""
+./bin/spark-submit --verbose --master yarn --deploy-mode client $spark_opts_extra $queue_name --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
 
 # WARNING: The following commented example will not work for PySpark shell.
 # We couldn't redirect the output to stdin for PySpark shell, so we need to submit it as a spark job.

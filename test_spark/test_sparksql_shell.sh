@@ -62,7 +62,10 @@ spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-./bin/spark-sql --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 $spark_opts_extra 
+# ./bin/spark-sql --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 $spark_opts_extra 
+# queue_name="--queue interactive"
+queue_name=""
+./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml $spark_opts_extra $queue_name
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"

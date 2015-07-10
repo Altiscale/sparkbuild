@@ -40,7 +40,10 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf |
 SPARK_EXAMPLE_JAR=$(find ${spark_home}/examples/target/spark-examples_*-${spark_version}.jar)
 
 # Testing PageRank type
-./bin/spark-submit --verbose --queue research --master yarn --deploy-mode cluster --driver-memory 2048M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra --class org.apache.spark.examples.graphx.Analytics $SPARK_EXAMPLE_JAR pagerank spark/test/graphx/followers/followers.txt --numEPart=15
+# ./bin/spark-submit --verbose --queue research --master yarn --deploy-mode cluster --driver-memory 2048M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra --class org.apache.spark.examples.graphx.Analytics $SPARK_EXAMPLE_JAR pagerank spark/test/graphx/followers/followers.txt --numEPart=15
+# queue_name="--queue interactive"
+queue_name=""
+./bin/spark-submit --verbose --master yarn --deploy-mode cluster --driver-memory 2048M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra $queue_name --class org.apache.spark.examples.graphx.Analytics $SPARK_EXAMPLE_JAR pagerank spark/test/graphx/followers/followers.txt --numEPart=15
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing GraphX spark-submit for pagerank failed!"
