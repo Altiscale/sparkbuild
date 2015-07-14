@@ -194,20 +194,20 @@ if [ ! -d "%{current_workspace}/.m2" ] ; then
   # This usually happens in mock, the default local repository will be the same in this case
   # no need to specify it here.
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  # For Kafka Examples
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
 else
   # This applies to local hand build with a existing user
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  # For Kafka Examples
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 fi
 
 # Build our test case with out own pom.xml file
 # Update profile ID spark-1.3 or spark-1.4 for 1.3.1 or 1.4.0, and hadoop version hadoop24-provided or hadoop27-provided as well
-mvn -X package -Pspark-1.4 -Phadoop24-provided
+mvn -X package -Pspark-1.4 -Phadoop24-provided -Pkafka-provided
 
 popd
 echo "ok - build spark test case completed successfully!"
