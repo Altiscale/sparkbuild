@@ -33,11 +33,12 @@ import org.apache.spark.SparkConf
  */
 object DirectKafkaWordCount {
   def main(args: Array[String]) {
-    if (args.length < 2) {
+    if (args.length < 3) {
       System.err.println(s"""
         |Usage: DirectKafkaWordCount <brokers> <topics>
         |  <brokers> is a list of one or more Kafka brokers
         |  <topics> is a list of one or more kafka topics to consume from
+        |  seconds is to determine how often to pull in events
         |
         """.stripMargin)
       System.exit(1)
@@ -45,11 +46,11 @@ object DirectKafkaWordCount {
 
     StreamingExamples.setStreamingLogLevels()
 
-    val Array(brokers, topics) = args
+    val Array(brokers, topics, sec) = args
 
     // Create context with 2 second batch interval
     val sparkConf = new SparkConf().setAppName("DirectKafkaWordCount")
-    val ssc = new StreamingContext(sparkConf, Seconds(2))
+    val ssc = new StreamingContext(sparkConf, Seconds(sec.toLong))
 
     // Create direct kafka stream with brokers and topics
     val topicsSet = topics.split(",").toSet
