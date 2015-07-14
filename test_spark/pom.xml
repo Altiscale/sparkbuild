@@ -6,7 +6,7 @@
   <!-- mvn -X package -Pspark-1.4 -Phadoop24-provided -->
 
   <groupId>com.altiscale.testsuite</groupId>
-  <artifactId>sparksql-test-case</artifactId>
+  <artifactId>altiscale-spark-test-case</artifactId>
   <packaging>jar</packaging>
   <version>1.4</version>
 
