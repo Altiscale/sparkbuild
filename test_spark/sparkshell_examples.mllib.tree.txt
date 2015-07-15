@@ -18,6 +18,8 @@ val parsedData = data.map { line =>
 val maxDepth = 5
 val model = DecisionTree.train(parsedData, Classification, Gini, maxDepth)
 
+// PMML export not yet supported
+
 // Evaluate model on training examples and compute training error
 val labelAndPreds = parsedData.map { point =>
   val prediction = model.predict(point.features)

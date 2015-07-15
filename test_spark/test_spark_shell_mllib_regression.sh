@@ -26,6 +26,8 @@ pushd `pwd`
 cd $spark_home
 hdfs dfs -mkdir -p spark/test/linear_regression
 hdfs dfs -put /opt/spark/mllib/data/ridge-data/lpsa.data spark/test/linear_regression/
+# To create local directory when generating PMML XML file locally on workbench
+mkdir -p /tmp/spark_pmml_test/
 
 echo "ok - testing spark REPL shell with various algorithm"
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")

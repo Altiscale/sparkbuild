@@ -15,6 +15,9 @@ val parsedData = data.map { line =>
 val numIterations = 20
 val model = SVMWithSGD.train(parsedData, numIterations)
 
+// Write out the PPML model in XML description
+model.toPMML("/tmp/spark_pmml_test/SVMWithSGD.xml")
+
 // Evaluate model on training examples and compute training error
 val labelAndPreds = parsedData.map { point =>
   val prediction = model.predict(point.features)
@@ -37,6 +40,9 @@ val test = splits(1)
 // Run training algorithm to build the model
 val numIterations = 100
 val model = SVMWithSGD.train(training, numIterations)
+
+// Write out the PPML model in XML description
+model.toPMML("/tmp/spark_pmml_test/SVMWithSGD2.xml")
 
 // Clear the default threshold.
 model.clearThreshold()
@@ -67,6 +73,9 @@ val training = splits(0)
 val test = splits(1)
 
 val model = NaiveBayes.train(training, lambda = 1.0)
+
+# Naive Bayes PPML not yet supported
+
 val prediction = model.predict(test.map(_.features))
 
 val predictionAndLabel = prediction.zip(test.map(_.label))

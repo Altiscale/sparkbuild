@@ -5,7 +5,7 @@
 
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
-testcase_shell_file_01="$curr_dir/sparkshell_examples.mllib.classification.txt"
+testcase_shell_file_01="$curr_dir/sparkshell_examples.mllib.clustering.txt"
 spark_home=$SPARK_HOME
 
 if [ "x${spark_home}" = "x" ] ; then

@@ -14,6 +14,9 @@ val parsedData = data.map { line =>
 val numIterations = 20
 val model = LinearRegressionWithSGD.train(parsedData, numIterations)
 
+// Write out the PPML model in XML description 
+model.toPMML("/tmp/spark_pmml_test/LinearRegressionWithSGD.xml")
+
 // Evaluate model on training examples and compute training error
 val valuesAndPreds = parsedData.map { point =>
   val prediction = model.predict(point.features)

@@ -1,0 +1,28 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.mllib.clustering.KMeans
+import org.apache.spark.mllib.linalg.Vectors
+
+// Load and parse the data
+
+val data = sc.textFile("spark/test/kmean/kmeans_data.txt")
+
+val parsedData = data.map(s => Vectors.dense(s.split(' ').map(_.toDouble)))
+
+// Cluster the data into two classes using KMeans
+
+val numIterations = 20
+
+val numClusters = 2
+
+val model = KMeans.train(parsedData, numClusters, numIterations)
+
+// Write out the PPML model in XML description 
+model.toPMML("/tmp/spark_pmml_test/KMeansModel.xml")
+
+// Evaluate clustering by computing Within Set Sum of Squared Errors
+
+val WSSSE = model.computeCost(parsedData)
+
+println("Within Set Sum of Squared Errors = " + WSSSE)
+
+exit

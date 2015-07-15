@@ -26,6 +26,8 @@ pushd `pwd`
 cd $spark_home
 hdfs dfs -mkdir -p spark/test/decision_tree
 hdfs dfs -put /opt/spark/mllib/data/sample_tree_data.csv spark/test/decision_tree/
+# To create local directory when generating PMML XML file locally on workbench
+mkdir -p /tmp/spark_pmml_test/
 
 echo "ok - testing spark REPL shell with various algorithm"
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
