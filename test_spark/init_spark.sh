@@ -29,7 +29,7 @@ fi
 
 # Check Spark RPM installation
 
-spark_installed=$(rpm -qa | grep alti-spark | grep $spark_version | grep -v test | wc -l)
+spark_installed=$(rpm -qa | grep alti-spark | grep $spark_version | grep -v test | grep -v example | wc -l)
 if [ "x${spark_installed}" = "x0" ] ; then
   >&2 echo "fail - spark for $spark_Version not detected or installed, can't continue, exiting"
   >&2 echo "fail - you should install spark via RPM, if you install them from binary distros, you will need to tweak these test case"
@@ -55,10 +55,3 @@ fi
 event_log_dir=$(grep 'spark.history.fs.logDirectory' $spark_conf | tr -s ' ' '\t' | cut -f2)
 
 hdfs dfs -mkdir $event_log_dir/$USER
-ret=$?
-
-if [ "x${ret}" = "x0" ] ; then
-  exit 0
-else
-  exit $ret
-fi
