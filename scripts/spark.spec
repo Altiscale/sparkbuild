@@ -286,7 +286,7 @@ cp -rp %{_builddir}/%{build_service_name}/sbin %{buildroot}%{install_spark_dest}
 cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
 cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
-cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/* %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/* %{buildroot}%{install_spark_dest}/sql/
 cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{install_spark_dest}/lib_managed/jars/
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
