@@ -98,11 +98,11 @@ else
 fi 
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.3
+  export BRANCH_NAME=altiscale-branch-1.4
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
-  export BUILD_TIMEOUT=28800
+  export BUILD_TIMEOUT=86400
 fi
 
 BUILD_TIME=$(date +%Y%m%d%H%M)

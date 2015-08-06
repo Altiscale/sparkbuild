@@ -17,6 +17,7 @@
 %define install_spark_conf    /etc/%{spark_folder_name}
 %define install_spark_logs    /var/log/%{apache_name}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
+%define spark_release_dir     /opt/%{apache_name}/lib
 %define build_release         BUILD_TIME
 
 Name: %{rpm_package_name}-%{spark_version}
@@ -263,6 +264,8 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/R/lib/
+# Added due to AE-1219 to support Hive 1.2.0+ with Hive on Spark
+%{__mkdir} -p %{buildroot}%{spark_release_dir}/
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
@@ -349,13 +352,16 @@ mkdir -p /home/spark/logs
 chmod -R 1777 /home/spark/logs
 chown %{spark_uid}:%{spark_gid} /home/spark/
 chown %{spark_uid}:%{spark_gid} /home/spark/logs
-# TBD: Add symbolic links to Hive datanucleus JARs to spark_home/libs directory
-# TBD: Create release directory libs
-# cp "$SPARK_HOME"/assembly/target/scala*/*assembly*hadoop*.jar "$DISTDIR/lib/"
-# cp "$SPARK_HOME"/examples/target/scala*/spark-examples*.jar "$DISTDIR/lib/"
-# In this case, silence the error and ignore the return code of this command
-# cp "$SPARK_HOME"/network/yarn/target/scala*/spark-*-yarn-shuffle.jar "$DISTDIR/lib/" &> /dev/null || :
-
+# Added due to AE-1219, this should go to Chef for refactor
+# The symbolic link is version sensitive
+# TODO: Move to Chef later
+ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{spark_release_dir}/
+for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
+do
+  ln -vsf $f %{spark_release_dir}/
+done
+ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
 
 
 %postun
@@ -379,6 +385,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Wed Jul 29 2015 Andrew Lee 20150729
+- Update install section with new directories lib for AE-1219
 * Mon Jul 6 2015 Andrew Lee 20150706
 - Rename spark test RPM pkg to example
 * Tue Jun 9 2015 Andrew Lee 20150609
