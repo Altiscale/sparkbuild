@@ -46,9 +46,12 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
+mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
 hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
 spark_opts_extra=" --jars $hadoop_lzo_jar,$hadoop_snappy_jar"
+spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
+spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
@@ -56,7 +59,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf |
 # ./bin/spark-submit --verbose --master yarn --deploy-mode client --queue research --driver-class-path $hadoop_lzo_jar:$hadoop_snappy_jar $spark_opts_extra --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client --driver-class-path $hadoop_lzo_jar:$hadoop_snappy_jar $queue_name $spark_opts_extra $queue_name --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
+./bin/spark-submit --verbose --master yarn --deploy-mode client --driver-class-path $hadoop_lzo_jar:$hadoop_snappy_jar $queue_name $spark_opts_extra $queue_name --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --files $spark_files --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for Python SparkSQL on HiveQL/HiveContext failed!!"
