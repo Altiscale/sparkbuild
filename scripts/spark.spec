@@ -265,7 +265,7 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/R/lib/
 # Added due to AE-1219 to support Hive 1.2.0+ with Hive on Spark
-%{__mkdir} -p %{buildroot}%{spark_release_dir}/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib/
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
