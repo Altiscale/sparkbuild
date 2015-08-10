@@ -355,7 +355,7 @@ chown %{spark_uid}:%{spark_gid} /home/spark/logs
 # Added due to AE-1219, this should go to Chef for refactor
 # The symbolic link is version sensitive
 # TODO: Move to Chef later
-ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_version}.jar %{spark_release_dir}/
 for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
 do
   ln -vsf $f %{spark_release_dir}/
