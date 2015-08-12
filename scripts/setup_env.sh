@@ -3,9 +3,9 @@
 # TBD: honor system pre-defined property/variable files from 
 # /etc/hadoop/ and other /etc config for spark, hdfs, hadoop, etc
 
-if [ "x${JAVA_HOME}" = "x" ] ; then
-  export JAVA_HOME=/usr/java/default
-fi
+# Force to use default Java which is JDK 1.7 now
+export JAVA_HOME=/usr/java/default
+
 if [ "x${ANT_HOME}" = "x" ] ; then
   export ANT_HOME=/opt/apache-ant
 fi
