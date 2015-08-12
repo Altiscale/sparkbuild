@@ -100,6 +100,11 @@ if [ "x${R_HOME}" = "x" ] ; then
     export PATH=$PATH:$R_HOME
   fi
 fi
+if [ "x${JAVA_HOME}" = "x" ] ; then
+  export JAVA_HOME=/usr/java/default
+  # Hijack JAva path to use our JDK 1.7 here instead of openjdk
+  export PATH=$JAVA_HOME/bin:$PATH
+fi
 
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
