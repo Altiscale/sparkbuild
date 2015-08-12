@@ -1,22 +1,21 @@
 sparkbuild
 ==========
 
-Init sparkbuild wrapper repo for Spark-1.4.1 (aka 1.4.1-rc2) official release.
-This branch tracks the upstream branch-1.4 branch.
+Init sparkbuild wrapper repo for Spark-1.5.0 official release.
+This branch tracks the upstream branch-1.5 branch.
 
 How to Install Spark RPM for this build
 ==========
 ```
-yum install alti-spark-1.4.1.hadoop24.hive13 alti-spark-1.4.1.hadoop24.hive13-test
+yum install alti-spark-1.5.0.hadoop24.hive121 alti-spark-1.5.0.hadoop24.hive121-test
 ```
 
 How to Install via Chef and mkcluster
 ==========
 When you run mkcluster, you will need to manually add the spark in the run_list.
 For example, I created a cluster with name alee-vpc2 with the following mkcluster command on VPC.
-Currently, we built Spark 1.4.1 on Hadoop 2.4.1 with Hive 0.13.1. 
-Also tested on Hadoop 2.7.0.
-Most function works on Keberos enabled cluster except Spark TS2.
+Currently, we built Spark 1.5.0 on Hadoop 2.4.1 with Hive 1.2.1. 
+TODO: Need to test Hadoop 2.7
 
 ```
 mkcluster create -i alee-vpc2-cluster -t /Users/alee/AltiScale/vpc2/chef/environments/fantastic_four/template --region=us-west-1 --environment=dev --desktop=alee-vpc2-dt.test.altiscale.com --resource-manager=alee-vpc2-rm.test.altiscale.com --namenode=alee-vpc2-nn.test.altiscale.com --services-node=alee-vpc2-gw.test.altiscale.com --compute-nodes=alee-vpc2-slave-0.test.altiscale.com alee-vpc2-slave-1.test.altiscale.com alee-vpc2-slave-2.test.altiscale.com --configserver-iptables --force -d /Users/alee/AltiScale/vpc2/chef/environments/fantastic_four/alee-vpc2-cluster --hadoop-24 --no-krb
@@ -47,7 +46,7 @@ For example, in my desktop.json, I just add it after Pig's recipe.
     "recipe[hadoop-eco::spark]",
 ....
 ```
-Now, you can run deploy_desktop.rb, and it will install spark 1.4.1 on workbench. For example,
+Now, you can run deploy_desktop.rb, and it will install spark 1.5.0 on workbench. For example,
 ```
 ./deploy_desktop.rb -k ~/.ssh/your_priv_key -l debug -H alee-vpc2-dt.test.altiscale.com -c alee-vpc2-cluster
 ```

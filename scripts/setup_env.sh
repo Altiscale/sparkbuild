@@ -25,7 +25,7 @@ if [ "x${HADOOP_VERSION}" = "x" ] ; then
   export HADOOP_VERSION=2.4.1
 fi
 if [ "x${HIVE_VERSION}" = "x" ] ; then
-  export HIVE_VERSION=0.13.1
+  export HIVE_VERSION=1.2.0
 fi
 # AE-1226 temp fix on the R PATH
 if [ "x${R_HOME}" = "x" ] ; then
@@ -83,6 +83,8 @@ elif [ "x${HIVE_VERSION}" = "x0.13.0" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hive13"
 elif [ "x${HIVE_VERSION}" = "x0.13.1" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hive13"
+elif [ "x${HIVE_VERSION}" = "x1.2.0" ] ; then
+  export SPARK_VERSION="$SPARK_VERSION.hive120"
 elif [ "x${HIVE_VERSION}" = "x1.2.1" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hive121"
 else

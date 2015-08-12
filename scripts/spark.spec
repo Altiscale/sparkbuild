@@ -31,7 +31,7 @@ BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala >= 2.10.4
 Requires: %{rpm_package_name}-%{spark_version}-example
-BuildRequires: vcc-hive-%{hive_version}
+# BuildRequires: vcc-hive-%{hive_version}
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.3.3
 BuildRequires: jdk >= 1.7.0.51
@@ -46,8 +46,8 @@ Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.4 with
 build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.4 
 Origin source form https://github.com/apache/spark/tree/branch-1.4
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
-Hadoop 2.4.x with YARN 2.4.x enabled, and hive-0.13.1. This package should work with Altiscale 
-Hadoop 2.4.1 and Hive 0.13.1 (vcc-hadoop-2.4.1 and vcc-hive-0.13.1).
+Hadoop 2.4.x with YARN 2.4.x enabled, and hive-1.2.1. This package should work with Altiscale 
+Hadoop 2.4.1 and Hive 1.2.1 (vcc-hadoop-2.4.1 and alti-hive-1.2.0).
 
 %package example
 Summary: The test example package for Spark
