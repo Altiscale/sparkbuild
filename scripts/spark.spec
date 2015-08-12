@@ -93,7 +93,9 @@ if [ "x${R_HOME}" = "x" ] ; then
     export PATH=$PATH:$R_HOME
   fi
 fi
-
+if [ "x${JAVA_HOME}" = "x" ] ; then
+  export JAVA_HOME=/usr/java/default
+fi
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
 echo "build - spark core in %{_builddir}"
