@@ -33,7 +33,7 @@ Requires: scala >= 2.10.4
 Requires: %{rpm_package_name}-%{spark_version}-example
 BuildRequires: vcc-hive-%{hive_version}
 BuildRequires: scala = 2.10.4
-BuildRequires: apache-maven >= 3.2.1
+BuildRequires: apache-maven = 3.2.1
 BuildRequires: jdk >= 1.7.0.51
 # The whole purpose for this req is just to repackage the JAR with JDK 1.6
 BuildRequires: java-1.6.0-openjdk-devel
@@ -56,6 +56,13 @@ Requires: %{rpm_package_name}-%{spark_version}
 
 %description example
 The test example directory to test Spark REPL shell, submit, sparksql after installing spark.
+
+%package yarn-shuffle
+Summary: The pluggable spark_shuffle RPM to install spark_shuffle JAR
+Group: Development/Libraries
+
+%description yarn-shuffle
+This package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath.
 
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
@@ -332,6 +339,10 @@ rm -rf %{buildroot}%{install_spark_dest}
 %files example
 %defattr(0755,spark,spark,0755)
 %{install_spark_test}
+
+%files yarn-shuffle
+%defattr(0755,spark,spark,0755)
+%{install_spark_dest}/network/yarn/target/scala-2.10/spark-1.4.1-yarn-shuffle.jar
 
 %post
 if [ "$1" = "1" ]; then
