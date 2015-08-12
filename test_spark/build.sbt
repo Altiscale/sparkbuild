@@ -4,6 +4,8 @@ version := "1.0"
 
 scalaVersion := "2.10.4"
 
+// This is designed for Spark 1.3, 1.4 only. 1.5 has not yet been released.
+
 // BUILD option 1
 // You can create a local repository and use the resolvers to include them
 // ~/.m2/repository/local/org/apache/spark/

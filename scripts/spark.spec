@@ -140,7 +140,6 @@ export SPARK_HIVE=true
 env | sort
 
 echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION SPARK_YARN=$SPARK_YARN SPARK_HIVE=$SPARK_HIVE"
-# SPARK_HADOOP_VERSION=2.2.0 SPARK_YARN=true sbt/sbt assembly
 
 # PURGE LOCAL CACHE for clean build
 # mvn dependency:purge-local-repository
@@ -152,26 +151,32 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 # and install them locally for further reference. We assume the build
 # environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
 # Default JDK version applied is 1.7 here.
+
+# hadoop.version, yarn.version, and hive.version are all defined in maven profile now
+# they are tied to each profile.
+# hadoop-2.2 No longer supported, removed.
+# hadoop-2.4 hadoop.version=2.4.1 yarn.version=2.4.1 hive.version=0.13.1a hive.short.version=0.13.1
+# hadoop-2.6 hadoop.version=2.6.0 yarn.version=2.6.0 hive.version=1.2.1.spark hive.short.version=1.2.1
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
-  if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
-    mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
+  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
+    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
   fi
 else
   echo "ok - applying default repository form pom.xml"
-  if [[ $SPARK_HADOOP_VERSION == 2.2.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
-    mvn -U -X -Phadoop-2.2 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -Dhive.version=$SPARK_HIVE_VERSION -DskipTests install
+  if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
+  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install"
+    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -206,9 +211,9 @@ else
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 fi
 
-# Build our test case with out own pom.xml file
-# Update profile ID spark-1.3 or spark-1.4 for 1.3.1 or 1.4.0, and hadoop version hadoop24-provided or hadoop27-provided as well
-mvn -X package -Pspark-1.4 -Phadoop24-provided -Pkafka-provided
+# Build our test case with our own pom.xml file
+# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.0, and hadoop version hadoop24-provided or hadoop27-provided as well
+mvn -X package -Pspark-1.5 -Phadoop24-provided -Pkafka-provided
 
 popd
 echo "ok - build spark test case completed successfully!"
@@ -385,6 +390,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Tue Aug 11 2015 Andrew Lee 20150811
+- Update spark version to 1.5 
 * Wed Jul 29 2015 Andrew Lee 20150729
 - Update install section with new directories lib for AE-1219
 * Mon Jul 6 2015 Andrew Lee 20150706

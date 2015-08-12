@@ -8,17 +8,18 @@
   <groupId>com.altiscale.testsuite</groupId>
   <artifactId>altiscale-spark-test-case</artifactId>
   <packaging>jar</packaging>
-  <version>1.4</version>
+  <version>1.5</version>
 
   <properties>
-    <spark.version>1.4.1</spark.version>
+    <spark.version>1.5.0</spark.version>
     <hadoop.version>2.4.1</hadoop.version>
     <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
     <hive.version>0.13.1a</hive.version>
+    <!-- hive.version>1.2.1.spark</hive.version -->
     <yarn.version>2.4.1</yarn.version>
     <avro.version>1.7.7</avro.version>
-    <akka.group>org.spark-project.akka</akka.group>
-    <akka.version>2.3.4-spark</akka.version>
+    <akka.group>com.typesafe.akka</akka.group>
+    <akka.version>2.3.11</akka.version>
     <scala.binary.version>2.10</scala.binary.version>
     <avro.mapred.classifier>hadoop2</avro.mapred.classifier>
   </properties>
@@ -46,7 +47,7 @@
     <profile>
       <id>spark-1.4</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <dependencies>
         <dependency>
@@ -93,9 +94,174 @@
         </dependency>
       </dependencies>
     </profile>
-    
+
+    <profile>
+      <id>spark-1.5</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.10</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-assembly_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${hadoop.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>${akka.group}</groupId>
+          <artifactId>akka-actor_${scala.binary.version}</artifactId>
+          <version>${akka.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-streaming-kafka_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-streaming_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <!--
+          The following dependencies are already present in the Spark assembly, so we want to force
+          them to be provided.
+        -->
+        <dependency>
+          <groupId>org.scala-lang</groupId>
+          <artifactId>scala-library</artifactId>
+          <version>2.10.4</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
     <profile>
       <id>hadoop24-provided</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-client</artifactId>
+          <version>${hadoop.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-api</artifactId>
+          <version>${yarn.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-common</artifactId>
+          <version>${yarn.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-server-web-proxy</artifactId>
+          <version>${yarn.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-client</artifactId>
+          <version>${yarn.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro</artifactId>
+          <version>${avro.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-ipc</artifactId>
+          <version>${avro.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.spark-project.hive</groupId>
+          <artifactId>hive-metastore</artifactId>
+          <version>${hive.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>commons-httpclient</groupId>
+          <artifactId>commons-httpclient</artifactId>
+          <version>3.1</version>
+        </dependency>
+        <dependency>
+          <groupId>org.spark-project.hive</groupId>
+          <artifactId>hive-exec</artifactId>
+          <version>${hive.version}</version>
+          <scope>provided</scope>
+          <exclusions>
+            <exclusion>
+              <groupId>commons-logging</groupId>
+              <artifactId>commons-logging</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>com.esotericsoftware.kryo</groupId>
+              <artifactId>kryo</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-mapper-asl</artifactId>
+          <version>1.8.8</version>
+        </dependency>
+        <dependency>
+          <groupId>org.spark-project.hive</groupId>
+          <artifactId>hive-serde</artifactId>
+          <version>${hive.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>commons-logging</groupId>
+              <artifactId>commons-logging</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>commons-logging</groupId>
+              <artifactId>commons-logging-api</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-mapred</artifactId>
+          <version>${avro.version}</version>
+          <classifier>${avro.mapred.classifier}</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.scalatest</groupId>
+          <artifactId>scalatest_${scala.binary.version}</artifactId>
+          <version>2.2.1</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
+      <id>hadoop27-provided</id>
+      <hadoop.version>2.7.1</hadoop.version>
+      <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
+      <hive.version>1.2.1.spark</hive.version>
+      <yarn.version>2.7.1</yarn.version>
       <dependencies>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
