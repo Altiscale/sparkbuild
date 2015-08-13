@@ -152,6 +152,12 @@
 
     <profile>
       <id>hadoop24-provided</id>
+      <properties>
+        <hadoop.version>2.4.1</hadoop.version>$
+        <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->$
+        <hive.version>1.2.1.spark</hive.version>$
+        <yarn.version>2.4.1</yarn.version>$
+      </properties>
       <dependencies>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
@@ -258,10 +264,12 @@
 
     <profile>
       <id>hadoop27-provided</id>
-      <hadoop.version>2.7.1</hadoop.version>
-      <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
-      <hive.version>1.2.1.spark</hive.version>
-      <yarn.version>2.7.1</yarn.version>
+      <properties>
+        <hadoop.version>2.7.1</hadoop.version>
+        <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
+        <hive.version>1.2.1.spark</hive.version>
+        <yarn.version>2.7.1</yarn.version>
+      </properties>
       <dependencies>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
