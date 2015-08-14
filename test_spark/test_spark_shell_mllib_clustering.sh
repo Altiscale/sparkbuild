@@ -30,6 +30,8 @@ hdfs dfs -mkdir -p spark/test/naive_bayes
 hdfs dfs -put /opt/spark/mllib/data/sample_naive_bayes_data.txt spark/test/naive_bayes/
 hdfs dfs -mkdir spark/test/logistic_regression/
 hdfs dfs -put /opt/spark/mllib/data/sample_libsvm_data.txt spark/test/logistic_regression/
+hdfs dfs -mkdir spark/test/kmean/
+hdfs dfs -put /opt/spark/mllib/data/kmeans/kmeans_data.txt spark/test/kmean/
 # To create local directory when generating PMML XML file locally on workbench
 mkdir -p /tmp/spark_pmml_test/
 
