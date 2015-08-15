@@ -8,6 +8,7 @@
 %define spark_plain_version   SPARK_PLAINVERSION_REPLACE
 %define current_workspace     CURRENT_WORKSPACE_REPLACE
 %define hadoop_version        HADOOP_VERSION_REPLACE
+%define hadoop_build_version  HADOOP_BUILD_VERSION_REPLACE
 %define hive_version          HIVE_VERSION_REPLACE
 %define build_service_name    alti-spark
 %define spark_folder_name     %{rpm_package_name}-%{spark_version}
@@ -128,6 +129,12 @@ else
   export SPARK_HADOOP_VERSION=%{hadoop_version}
   echo "ok - applying customized hadoop version $SPARK_HADOOP_VERSION"
 fi
+
+if [ "x%{hadoop_build_version}" = "x" ] ; then
+  echo "fatal - hadoop_build_version needs to be set, can't build anything, exiting"
+  exit -8
+fi
+
 if [ "x%{hive_version}" = "x" ] ; then
   echo "fatal - HIVE_VERSION needs to be set, can't build anything, exiting"
   exit -8
@@ -161,14 +168,19 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 # hadoop-2.2 No longer supported, removed.
 # hadoop-2.4 hadoop.version=2.4.1 yarn.version=2.4.1 hive.version=0.13.1a hive.short.version=0.13.1
 # hadoop-2.6 hadoop.version=2.6.0 yarn.version=2.6.0 hive.version=1.2.1.spark hive.short.version=1.2.1
+# hadoop-2.7 hadoop.version=2.7.1 yarn.version=2.7.1 hive.version=1.2.1.spark hive.short.version=1.2.1
+
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
   if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
     echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
     mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
+  elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
     echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
     mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
+  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
+    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -178,9 +190,12 @@ else
   if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
     echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
     mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Dhadoop.version=$SPARK_HADOOP_VERSION -Dyarn.version=$SPARK_HADOOP_VERSION -DskipTests install"
+  elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
     mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
+  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
+    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
+    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -203,25 +218,13 @@ echo "ok - local repository will be installed under %{current_workspace}/.m2/rep
 if [ ! -d "%{current_workspace}/.m2" ] ; then
   # This usually happens in mock, the default local repository will be the same in this case
   # no need to specify it here.
-  # SPARK_HADOOP_VERSION 2.7 is remap to 2.6 since current spark pom.xml only use hadoop 2.6 which 
-  # is ths closest one that is compatible with 2.7
-  if [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop2.6.0.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  else
-    mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  fi
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
   # For Kafka Examples
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
 else
   # This applies to local hand build with a existing user
-  # SPARK_HADOOP_VERSION 2.7 is remap to 2.6 since current spark pom.xml only use hadoop 2.6 which 
-  # is ths closest one that is compatible with 2.7
-  if [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop2.6.0.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  else
-    mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  fi
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
   # For Kafka Examples
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
@@ -241,22 +244,22 @@ cd %{_builddir}/%{build_service_name}/
 # AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with 
 # JDK 1.6 while not breaking the bytecode, etc. In other word, only the JAR format matters
 # and we don't want to compile it with JDK 1.6.
-ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
 
-cp -p %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+cp -p %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
 
-ls -al %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+ls -al %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
 
 pushd %{_builddir}/%{build_service_name}/tmp/
-unzip -d tweak_spark ORG-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+unzip -d tweak_spark ORG-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
 cd tweak_spark
-/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvmf META-INF/MANIFEST.MF %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar .
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvmf META-INF/MANIFEST.MF %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar .
 popd
 popd
 
-ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
-ls -al %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
-cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop${SPARK_HADOOP_VERSION}.jar
+ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
+ls -al %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
+cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
 
 echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 
@@ -376,7 +379,7 @@ chown %{spark_uid}:%{spark_gid} /home/spark/logs
 # Added due to AE-1219, this should go to Chef for refactor
 # The symbolic link is version sensitive
 # TODO: Move to Chef later
-ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_version}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/
 for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
 do
   ln -vsf $f %{spark_release_dir}/

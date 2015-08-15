@@ -148,6 +148,7 @@ sed -i "s/SPARK_VERSION_REPLACE/$SPARK_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spa
 sed -i "s/SPARK_PLAINVERSION_REPLACE/$SPARK_PLAIN_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s:CURRENT_WORKSPACE_REPLACE:$WORKSPACE:g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/HADOOP_VERSION_REPLACE/$HADOOP_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
+sed -i "s/HADOOP_BUILD_VERSION_REPLACE/$HADOOP_BUILD_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/HIVE_VERSION_REPLACE/$HIVE_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/SPARK_USER/$SPARK_USER/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/SPARK_GID/$SPARK_GID/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"

@@ -63,12 +63,18 @@ if [ "x${SPARK_HIVE}" = "x" ] ; then
   export SPARK_HIVE=true
 fi
 
+# Defines which Hadoop version to build against
+HADOOP_BUILD_VERSION=$HADOOP_VERSION
+
+# Define what goes into the RPM pkg name
 if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hadoop22"
 elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hadoop24"
 elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hadoop24"
+elif [ "x${HADOOP_VERSION}" = "x2.6.0" ] ; then
+  export SPARK_VERSION="$SPARK_VERSION.hadoop26"
 elif [ "x${HADOOP_VERSION}" = "x2.7.0" ] ; then
   export SPARK_VERSION="$SPARK_VERSION.hadoop27"
 elif [ "x${HADOOP_VERSION}" = "x2.7.1" ] ; then
