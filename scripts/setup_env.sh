@@ -99,21 +99,39 @@ fi
 
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
   if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
-    export ALTISCALE_RELEASE=2.0.0
+    ALTISCALE_RELEASE=2.0.0
   elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
-    export ALTISCALE_RELEASE=3.0.0
+    ALTISCALE_RELEASE=3.0.0
   elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
-    export ALTISCALE_RELEASE=3.0.0
+    ALTISCALE_RELEASE=3.0.0
   elif [ "x${HADOOP_VERSION}" = "x2.7.0" ] ; then
-    export ALTISCALE_RELEASE=4.0.0
+    ALTISCALE_RELEASE=4.0.0
   elif [ "x${HADOOP_VERSION}" = "x2.7.1" ] ; then
-    export ALTISCALE_RELEASE=4.0.0
+    ALTISCALE_RELEASE=4.0.0
   else
     echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION for ALTISCALE_RELEASE"
+    exit -1
   fi 
 else
-  export ALTISCALE_RELEASE
+  # OVerride human mistake
+  if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
+    ALTISCALE_RELEASE=2.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
+    ALTISCALE_RELEASE=3.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
+    ALTISCALE_RELEASE=3.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.6.0" ] ; then
+    ALTISCALE_RELEASE=4.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.7.0" ] ; then
+    ALTISCALE_RELEASE=4.0.0
+  elif [ "x${HADOOP_VERSION}" = "x2.7.1" ] ; then
+    ALTISCALE_RELEASE=4.0.0
+  else
+    echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION for ALTISCALE_RELEASE"
+    exit -1
+  fi
 fi 
+export ALTISCALE_RELEASE
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
   export BRANCH_NAME=altiscale-branch-1.5
@@ -128,7 +146,5 @@ export BUILD_TIME
 
 # Customize build OPTS for MVN
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
-
-
 
 
