@@ -17,6 +17,7 @@ object SparkSQLTestCase2HiveContextYarnClusterApp {
   hiveContext.sql("CREATE TABLE IF NOT EXISTS spark_hive_test_yarn_cluster_table (key INT, value STRING)")
 
   // load sample data from HDFS, need to be uploaded first
+  // kv1 will be deleted after completion
   hiveContext.sql("LOAD DATA INPATH 'spark/test/resources/kv1.txt' INTO TABLE spark_hive_test_yarn_cluster_table")
 
   // Queries are expressed in HiveQL, use collect(), results go into memory, be careful. This is just
