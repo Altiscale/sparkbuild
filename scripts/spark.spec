@@ -343,6 +343,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/assembly
 %{install_spark_dest}/bin
 %{install_spark_dest}/data
+%{install_spark_dest}/docs
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
 %{install_spark_dest}/graphx
@@ -359,6 +360,17 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-javadoc.jar
 %{install_spark_dest}/network/yarn/target/scala-2.10/spark-1.4.1-yarn-shuffle.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-sources.jar
+%{install_spark_dest}/network/yarn/target/.plxarc
+%{install_spark_dest}/network/yarn/target/analysis
+%{install_spark_dest}/network/yarn/target/antrun
+%{install_spark_dest}/network/yarn/target/maven-archiver
+%{install_spark_dest}/network/yarn/target/maven-shared-archive-resources
+%{install_spark_dest}/network/yarn/target/maven-status
+%{install_spark_dest}/network/yarn/target/scala-2.10/classes
+%{install_spark_dest}/network/yarn/target/scala-2.10/test-classes
+%{install_spark_dest}/network/yarn/target/scalastyle-output.xml
+%{install_spark_dest}/network/yarn/target/site
+%{install_spark_dest}/network/yarn/target/spark-test-classpath.txt
 %{install_spark_dest}/python
 %{install_spark_dest}/R
 %{install_spark_dest}/repl
