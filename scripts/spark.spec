@@ -297,6 +297,8 @@ cp -rp %{_builddir}/%{build_service_name}/repl/target/*.jar %{buildroot}%{instal
 cp -rp %{_builddir}/%{build_service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/sbin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/project %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/docs %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
 cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
 cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/* %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
@@ -311,6 +313,8 @@ cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf
 cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}/%{install_spark_dest}
 # This will capture the installation property form this spec file for further references
 rm -f %{buildroot}/%{install_spark_label}
 touch %{buildroot}/%{install_spark_label}
@@ -335,6 +339,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,spark,spark,0755)
+%{install_spark_dest}/project
 %{install_spark_dest}/assembly
 %{install_spark_dest}/bin
 %{install_spark_dest}/data
@@ -361,11 +366,13 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/sql
 %{install_spark_dest}/streaming
 %{install_spark_dest}/tools
-%dir %{install_spark_conf}
+%docdir %{install_spark_dest}/docs
 %doc %{install_spark_label}
 %doc %{install_spark_dest}/LICENSE
 %doc %{install_spark_dest}/README.md
 %doc %{install_spark_dest}/NOTICE
+%doc %{install_spark_dest}/CHANGES.txt
+%doc %{install_spark_dest}/CONTRIBUTING.md
 %attr(0755,spark,spark) %{install_spark_conf}
 %attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
