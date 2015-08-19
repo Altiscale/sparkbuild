@@ -2,7 +2,7 @@
 
 iam=`whoami`
 if [ "$iam" = "root" ] ; then
-  >&2 echo "fail - you can't run thest case as root!!! exiting!"
+  >&2 echo "fail - you can't run test case as root!!! exiting!"
   exit -1
 fi
 
