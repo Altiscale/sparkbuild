@@ -335,8 +335,37 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,spark,spark,0755)
-%{install_spark_dest}
+%{install_spark_dest}/assembly
+%{install_spark_dest}/bin
+%{install_spark_dest}/data
+%{install_spark_dest}/examples
+%{install_spark_dest}/external
+%{install_spark_dest}/graphx
+%{install_spark_dest}/lib
+%{install_spark_dest}/lib_managed
+%{install_spark_dest}/mllib
+%{install_spark_dest}/network/common
+%{install_spark_dest}/network/shuffle
+%{install_spark_dest}/network/yarn/pom.xml
+%{install_spark_dest}/network/yarn/src
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-tests.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-test-sources.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-javadoc.jar
+%{install_spark_dest}/network/yarn/target/scala-2.10/spark-1.4.1-yarn-shuffle.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-sources.jar
+%{install_spark_dest}/python
+%{install_spark_dest}/R
+%{install_spark_dest}/repl
+%{install_spark_dest}/sbin
+%{install_spark_dest}/sql
+%{install_spark_dest}/streaming
+%{install_spark_dest}/tools
 %dir %{install_spark_conf}
+%doc %{install_spark_label}
+%doc %{install_spark_dest}/LICENSE
+%doc %{install_spark_dest}/README.md
+%doc %{install_spark_dest}/NOTICE
 %attr(0755,spark,spark) %{install_spark_conf}
 %attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
