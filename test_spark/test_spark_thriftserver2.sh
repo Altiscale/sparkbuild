@@ -8,6 +8,7 @@
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 spark_home=$SPARK_HOME
+spark_logs=""
 
 if [ "x${spark_home}" = "x" ] ; then
   spark_home=/opt/spark
@@ -23,6 +24,8 @@ source $spark_home/test_spark/init_spark.sh
 spark_version=$SPARK_VERSION
 spark_ts2_listen_port=20000
 running_user=`whoami`
+# This needs to align with /etc/spark/log4j.properties
+spark_logs=${HOME}/Hadooplogs/spark/logs/spark.log
 
 if [ "x${spark_version}" = "x" ] ; then
   if [ "x${SPARK_VERSION}" = "x" ] ; then
@@ -44,12 +47,25 @@ fi
 
 pushd `pwd`
 cd $spark_home/sbin/
+mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
+spark_opts_extra=
+for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
+do
+  spark_opts_extra="$spark_opts_extra $i"
+done
+hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
+hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
+spark_opts_extra=$(echo "$spark_opts_extra $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar" | tr -s ' ' ' ' | tr -s ' ' ',')
+
+spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
+spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
+
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 echo "ok - starting thriftserver"
 
-ret=$(./start-thriftserver.sh --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$(hostname) --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/)
+ret=$(./start-thriftserver.sh --jars $spark_opts_extra --files $spark_files --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$(hostname) --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/)
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - can't start thriftserver, something went wrong, see $ret"
   exit -3
@@ -73,12 +89,12 @@ log_check_ts2="true"
 pid_check_ts2="true"
 nc_check_ts2="true"
 # TBD: This is not a good way to check if it is up and running, however, it's a start. Can check PID, etc as well.
-start_log_line=$(grep -n "Starting SparkContext" ${HOME}/Hadooplogs/spark/logs/spark.log | tail -n 1 | cut -d":" -f1)
+start_log_line=$(grep -n "Starting SparkContext" $spark_logs | tail -n 1 | cut -d":" -f1)
 if [ "x${start_log_line}" = "x" ] ; then
   >&2 echo "warn - log rotated so fast? can't find the starting string to search for."
 else
-  ts2_ret_str=$(tail -n +${start_log_line} ${HOME}/Hadooplogs/spark/logs/spark.log | grep -i 'ThriftBinaryCLIService listening on')
-  ts2_yarn_app_id=$(tail -n +${start_log_line} ${HOME}/Hadooplogs/spark/logs/spark.log | grep -io 'Submitted application .*' | tail -n 1 | cut -d" " -f3)
+  ts2_ret_str=$(tail -n +${start_log_line} $spark_logs | grep -i 'ThriftBinaryCLIService listening on')
+  ts2_yarn_app_id=$(tail -n +${start_log_line} $spark_logs | grep -io 'Submitted application .*' | tail -n 1 | cut -d" " -f3)
   if [ "x${ts2_ret_str}" = "x" ] ; then
     >&2 echo "fail - something is wrong, can't detect service listening string 'ThriftBinaryCLIService listening on', the service is taking longer then 60 seconds to start? This is odd on a fresh VPC, please manually check Spark TS2!"
     >&2 echo "fail - stopping spark thriftserver2 due to unexpected performance or error!"
@@ -118,9 +134,15 @@ else
   echo "ok - query Hive metastore successfully, we see: $jdbc_ret"
 fi
 
-# TBD: create a simple table via Hive command, and see if Spark TS2 can see it and query it
-# TBD: To query a single tables with results
-
+# This table spark_hive_test_yarn_cluster_table should be created prior to this test case
+# If not, then your Spark is not well tested nor deployed correctly, BE AWARE.
+jdbc_ret=$(beeline -u "jdbc:hive2://$(hostname):$spark_ts2_listen_port" -n alti-test-01 -p "" -e "SELECT COUNT(*) FROM spark_hive_test_yarn_cluster_table;" 2>&1)
+error_str=$(echo $jdbc_ret | grep -io "Error:" | head -n 1 | tr [:upper:] [:lower:])
+if [ "x${error_str}" = "xerror:" ] ; then
+  >&2 echo "fail - beeline can't query hive table spark_hive_test_yarn_cluster_table via Spark ThriftServer2 due to $jdbc_ret"
+else
+  echo "ok - query Hive table spark_hive_test_yarn_cluster_table successfully, we see: $jdbc_ret"
+fi
 
 # Done testing, stop the service. Not expecting a lot of data from YARN log
 ./stop-thriftserver.sh
