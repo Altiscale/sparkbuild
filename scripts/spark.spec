@@ -58,6 +58,13 @@ Requires: %{rpm_package_name}-%{spark_version}
 %description example
 The test example directory to test Spark REPL shell, submit, sparksql after installing spark.
 
+%package yarn-shuffle
+Summary: The pluggable spark_shuffle RPM to install spark_shuffle JAR
+Group: Development/Libraries
+
+%description yarn-shuffle
+This package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath.
+
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
 # Should be harmless. MAKE SURE UID and GID is correct FIRST!!!!!!
@@ -318,6 +325,9 @@ cp -rp %{_builddir}/%{build_service_name}/repl/target/*.jar %{buildroot}%{instal
 cp -rp %{_builddir}/%{build_service_name}/bin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/sbin %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/project %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/docs %{buildroot}%{install_spark_dest}/
+cp -rp %{_builddir}/%{build_service_name}/dev %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
 cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
 cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/* %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
@@ -332,6 +342,9 @@ cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf
 cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}/%{install_spark_dest}
+
 # This will capture the installation property form this spec file for further references
 rm -f %{buildroot}/%{install_spark_label}
 touch %{buildroot}/%{install_spark_label}
@@ -356,8 +369,52 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,spark,spark,0755)
-%{install_spark_dest}
-%dir %{install_spark_conf}
+%{install_spark_dest}/project
+%{install_spark_dest}/assembly
+%{install_spark_dest}/bin
+%{install_spark_dest}/data
+%{install_spark_dest}/dev
+%{install_spark_dest}/docs
+%{install_spark_dest}/examples
+%{install_spark_dest}/external
+%{install_spark_dest}/graphx
+%{install_spark_dest}/lib
+%{install_spark_dest}/lib_managed
+%{install_spark_dest}/mllib
+%{install_spark_dest}/network/common
+%{install_spark_dest}/network/shuffle
+%{install_spark_dest}/network/yarn/pom.xml
+%{install_spark_dest}/network/yarn/src
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/network/yarn/target/.plxarc
+%{install_spark_dest}/network/yarn/target/analysis
+%{install_spark_dest}/network/yarn/target/antrun
+%{install_spark_dest}/network/yarn/target/generated-sources
+%{install_spark_dest}/network/yarn/target/maven-archiver
+%{install_spark_dest}/network/yarn/target/maven-shared-archive-resources
+%{install_spark_dest}/network/yarn/target/maven-status
+%{install_spark_dest}/network/yarn/target/scala-2.10/classes
+%{install_spark_dest}/network/yarn/target/scala-2.10/test-classes
+%{install_spark_dest}/network/yarn/target/scalastyle-output.xml
+%{install_spark_dest}/network/yarn/target/site
+%{install_spark_dest}/python
+%{install_spark_dest}/R
+%{install_spark_dest}/repl
+%{install_spark_dest}/sbin
+%{install_spark_dest}/sql
+%{install_spark_dest}/streaming
+%{install_spark_dest}/tools
+%docdir %{install_spark_dest}/docs
+%doc %{install_spark_label}
+%doc %{install_spark_dest}/LICENSE
+%doc %{install_spark_dest}/README.md
+%doc %{install_spark_dest}/NOTICE
+%doc %{install_spark_dest}/CHANGES.txt
+%doc %{install_spark_dest}/CONTRIBUTING.md
 %attr(0755,spark,spark) %{install_spark_conf}
 %attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
@@ -365,6 +422,10 @@ rm -rf %{buildroot}%{install_spark_dest}
 %files example
 %defattr(0755,spark,spark,0755)
 %{install_spark_test}
+
+%files yarn-shuffle
+%defattr(0755,spark,spark,0755)
+%{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar
 
 %post
 if [ "$1" = "1" ]; then
@@ -418,6 +479,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Fri Aug 21 2015 Andrew Lee 20150821
+- Update RPM file listing
 * Tue Aug 11 2015 Andrew Lee 20150811
 - Update spark version to 1.5 
 * Wed Jul 29 2015 Andrew Lee 20150729
