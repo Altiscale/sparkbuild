@@ -279,6 +279,14 @@ cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plai
 
 echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 
+# AE-1369
+echo "ok - start packging a sparkr.zip for YARN distributed cache, this assumes user isn't going to customize this file"
+pushd `pwd`
+cd %{_builddir}/%{build_service_name}/
+cd R/lib/
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf %{_builddir}/%{build_service_name}/R/lib/sparkr.zip SparkR
+popd
+
 
 %install
 # manual cleanup for compatibility, and to be safe if the %clean isn't implemented
