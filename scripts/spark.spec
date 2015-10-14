@@ -16,7 +16,7 @@
 %define install_spark_dest    /opt/%{spark_folder_name}
 %define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
-%define install_spark_logs    /var/log/%{apache_name}
+%define install_spark_logs    /service/log/%{apache_name}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
 %define spark_release_dir     /opt/%{apache_name}/lib
 %define build_release         BUILD_TIME
@@ -239,7 +239,7 @@ else
 fi
 
 # Build our test case with our own pom.xml file
-# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.0, and hadoop version hadoop24-provided or hadoop27-provided as well
+# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.1, and hadoop version hadoop24-provided or hadoop27-provided as well
 if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
   mvn -U -X package -Pspark-1.5 -Phadoop24-provided -Pkafka-provided
 elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
@@ -451,10 +451,10 @@ ln -vsf %{install_spark_dest} /opt/%{apache_name}
 ln -vsf %{install_spark_conf} /etc/%{apache_name}
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-mkdir -p /home/spark/logs
-chmod -R 1777 /home/spark/logs
-chown %{spark_uid}:%{spark_gid} /home/spark/
-chown %{spark_uid}:%{spark_gid} /home/spark/logs
+# mkdir -p /home/spark/logs
+# chmod -R 1777 /home/spark/logs
+# chown %{spark_uid}:%{spark_gid} /home/spark/
+# chown %{spark_uid}:%{spark_gid} /home/spark/logs
 # Added due to AE-1219, this should go to Chef for refactor
 # The symbolic link is version sensitive
 # TODO: Move to Chef later
