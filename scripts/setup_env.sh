@@ -50,10 +50,10 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.4.1
+  export SPARK_VERSION=1.4.2
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  export SPARK_PLAIN_VERSION=1.4.1
+  export SPARK_PLAIN_VERSION=1.4.2
 fi
 if [ "x${SPARK_YARN}" = "x" ] ; then
   export SPARK_YARN=true

@@ -356,12 +356,12 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/network/shuffle
 %{install_spark_dest}/network/yarn/pom.xml
 %{install_spark_dest}/network/yarn/src
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-tests.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-test-sources.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-javadoc.jar
-%{install_spark_dest}/network/yarn/target/scala-2.10/spark-1.4.1-yarn-shuffle.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-1.4.1-sources.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar
+%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-sources.jar
 %{install_spark_dest}/network/yarn/target/.plxarc
 %{install_spark_dest}/network/yarn/target/analysis
 %{install_spark_dest}/network/yarn/target/antrun
@@ -397,7 +397,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files yarn-shuffle
 %defattr(0755,spark,spark,0755)
-%{install_spark_dest}/network/yarn/target/scala-2.10/spark-1.4.1-yarn-shuffle.jar
+%{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar
 
 %post
 if [ "$1" = "1" ]; then
