@@ -15,7 +15,7 @@
 %define install_spark_dest    /opt/%{spark_folder_name}
 %define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
-%define install_spark_logs    /var/log/%{apache_name}
+%define install_spark_logs    /service/log/%{apache_name}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
 %define spark_release_dir     /opt/%{apache_name}/lib
 %define build_release         BUILD_TIME
