@@ -25,7 +25,7 @@ spark_version=$SPARK_VERSION
 spark_ts2_listen_port=20000
 running_user=`whoami`
 # This needs to align with /etc/spark/log4j.properties
-spark_logs=$spark_home/logs/$running_user/spark.log
+spark_logs=${HOME}/Hadooplogs/spark/logs/spark.log
 
 if [ "x${spark_version}" = "x" ] ; then
   if [ "x${SPARK_VERSION}" = "x" ] ; then
