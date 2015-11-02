@@ -24,8 +24,9 @@ fi
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
   export HADOOP_VERSION=2.4.1
 fi
+# Spark 1.5+ default Hive starts with 1.2.1, backward compatible with Hive 1.2.0
 if [ "x${HIVE_VERSION}" = "x" ] ; then
-  export HIVE_VERSION=1.2.0
+  export HIVE_VERSION=1.2.1
 fi
 # AE-1226 temp fix on the R PATH
 if [ "x${R_HOME}" = "x" ] ; then
