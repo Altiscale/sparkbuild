@@ -239,7 +239,7 @@ else
 fi
 
 # Build our test case with our own pom.xml file
-# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.1, and hadoop version hadoop24-provided or hadoop27-provided as well
+# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, and hadoop version hadoop24-provided or hadoop27-provided as well
 if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
   mvn -U -X package -Pspark-1.5 -Phadoop24-provided -Pkafka-provided
 elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
