@@ -8,8 +8,8 @@ fi
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
-all_nonkerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spark_shell_mllib_clustering.sh test_spark_shell_mllib_classification.sh test_spark_shell_mllib_regression.sh test_spark_shell_mllib_tree.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.sh test_spark_hql.kerberos.sh test_sparksql_shell.sh)
-all_kerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spark_shell_mllib_clustering.sh test_spark_shell_mllib_classification.sh test_spark_shell_mllib_regression.sh test_spark_shell_mllib_tree.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.kerberos.sh test_sparksql_shell.sh)
+all_nonkerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spark_shell_mllib_clustering.sh test_spark_shell_mllib_classification.sh test_spark_shell_mllib_regression.sh test_spark_shell_mllib_tree.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.sh test_spark_hql.kerberos.sh test_sparksql_function.sh)
+all_kerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spark_shell_mllib_clustering.sh test_spark_shell_mllib_classification.sh test_spark_shell_mllib_regression.sh test_spark_shell_mllib_tree.sh test_spark_sql.sh test_pyspark_sparksql.sh test_pyspark_shell.sh test_spark_hql.kerberos.sh test_sparksql_function.sh)
 
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
