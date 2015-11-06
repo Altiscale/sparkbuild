@@ -55,7 +55,8 @@ do
 done
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
 hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-spark_opts_extra=$(echo "$spark_opts_extra $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar" | tr -s ' ' ' ' | tr -s ' ' ',')
+guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
+spark_opts_extra=$(echo "$spark_opts_extra $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar" | tr -s ' ' ' ' | tr -s ' ' ',')
 
 spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
 spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
@@ -76,7 +77,7 @@ cat $daemon_str
 spark_ts2_pid_str=$SPARK_PID_DIR/$(echo $(basename $daemon_str) | sed "s/-$(hostname).out$/\.pid/")
 
 # Shouldn't take longer then 60 seconds, it took ~ 3-5 seconds on the VPC spec
-sleep 60
+sleep 90
 
 if [ -f $spark_ts2_pid_str ] ; then
   echo "ok - found spark PID file at $spark_ts2_pid_str"

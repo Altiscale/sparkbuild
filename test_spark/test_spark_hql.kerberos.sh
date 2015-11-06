@@ -18,11 +18,11 @@ fi
 
 source $spark_home/test_spark/init_spark.sh
 
+spark_version=$SPARK_VERSION
 spark_test_dir=$spark_home/test_spark/
 
-hive_home=$HIVE_HOME
-if [ "x${hive_home}" = "x" ] ; then
-  hive_home=/opt/hive
+if [ "x${HIVE_HOME}" = "x" ] ; then
+  HIVE_HOME=/opt/hive
 fi
 
 if [ -f "$curr_dir/pom.xml" ] ; then
@@ -53,24 +53,18 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
 fi
 
 mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-spark_opts_extra=
-for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
-do
-  spark_opts_extra="$spark_opts_extra --jars $i"
-done
 hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
 hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-spark_opts_extra="$spark_opts_extra --jars $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar"
-
-spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
+guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
+datanucleus_files=$(find $HIVE_HOME/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
+spark_opts_extra="/etc/spark/hive-site.xml,${datanucleus_files}$mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
+# spark_files="${datanucleus_files}$mysql_jars,/etc/spark/hive-site.xml"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
-# ./bin/spark-submit --verbose --queue research --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hadoop_lzo_jar:$hadoop_snappy_jar --master yarn --deploy-mode client --driver-memory 512M --executor-memory 2048M --executor-cores 3 $spark_opts_extra --files $spark_files --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 2048M --executor-cores 3 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hadoop_lzo_jar:$hadoop_snappy_jar $spark_opts_extra $queue_name --files $spark_files --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
+./bin/spark-submit --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 2048M --executor-cores 3 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml $queue_name --jars $spark_opts_extra --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
   echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
