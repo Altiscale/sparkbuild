@@ -69,7 +69,7 @@ test_create_database_sql1="CREATE DATABASE IF NOT EXISTS ${db_name}"
 test_create_table_sql1="CREATE TABLE $table_name (key INT, value STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE"
 test_alter_table_sql1="ALTER TABLE $table_name RENAME TO $new_table_name"
 test_truncate_table_sql1="TRUNCATE TABLE $new_table_name"
-test_load_data_sql1="LOAD DATA LOCAL INPATH '/opt/spark/test_spark/test_data/sparksql_testdata2.csv' INTO TABLE $new_table_name"
+test_load_data_sql1="LOAD DATA LOCAL INPATH '${spark_test_dir}/test_data/sparksql_testdata2.csv' INTO TABLE $new_table_name"
 test_select_sql1="SELECT SUM(key) FROM $new_table_name"
 # Only works with Hive 1.2.x. Bug on Hive 0.13.1
 test_create_orc_sql1="CREATE TABLE $orc_table_name STORED AS ORC AS SELECT key,value FROM $new_table_name"
