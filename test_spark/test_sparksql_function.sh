@@ -6,6 +6,7 @@
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 spark_home=$SPARK_HOME
+spark_conf=""
 
 if [ "x${spark_home}" = "x" ] ; then
   # rpm -ql $(rpm -qa --last | grep alti-spark | sort | head -n 1 | cut -d" " -f1) | grep -e '^/opt/alti-spark' | cut -d"/" -f1-3
@@ -21,7 +22,15 @@ if [ ! -d $spark_home ] ; then
   exit -1
 fi
 
-source $spark_home/test_spark/init_spark.sh
+. $spark_home/test_spark/init_spark.sh
+
+spark_conf=$SPARK_CONF_DIR
+
+if [ "x${spark_conf}" = "x" ] ; then
+  spark_conf=/etc/spark
+fi
+echo "ok - applying Spark conf $spark_conf"
+
 
 spark_test_dir=$spark_home/test_spark/
 
@@ -54,9 +63,9 @@ guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
 spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
 spark_opts_extra="${spark_files}$mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
 
-spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
+spark_files="$spark_files$mysql_jars,${spark_conf}/hive-site.xml"
 
-spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
+spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 table_uuid=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
 db_name="spark_test_db_${table_uuid}"
@@ -69,7 +78,7 @@ test_create_database_sql1="CREATE DATABASE IF NOT EXISTS ${db_name}"
 test_create_table_sql1="CREATE TABLE $table_name (key INT, value STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE"
 test_alter_table_sql1="ALTER TABLE $table_name RENAME TO $new_table_name"
 test_truncate_table_sql1="TRUNCATE TABLE $new_table_name"
-test_load_data_sql1="LOAD DATA LOCAL INPATH '/opt/spark/test_spark/test_data/sparksql_testdata2.csv' INTO TABLE $new_table_name"
+test_load_data_sql1="LOAD DATA LOCAL INPATH '${spark_test_dir}/test_data/sparksql_testdata2.csv' INTO TABLE $new_table_name"
 test_select_sql1="SELECT SUM(key) FROM $new_table_name"
 # Only works with Hive 1.2.x. Bug on Hive 0.13.1
 test_create_orc_sql1="CREATE TABLE $orc_table_name STORED AS ORC AS SELECT key,value FROM $new_table_name"

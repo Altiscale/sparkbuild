@@ -45,9 +45,9 @@ fi
 # Doesn't matter who runs it.
 # TBD: Move to Chef, and support Kerberos since HADOOP_USER_NAME will
 # be invalid after enabling Kerberos.
-spark_conf="/etc/spark/spark-defaults.conf"
+spark_conf_tmp="${spark_conf_dir}/spark-defaults.conf"
 
-if [ ! -f $spark_conf ] ; then
+if [ ! -f $spark_conf_tmp ] ; then
   echo "fatal - spark config not found, installation not complete, exiting!!!"
   exit -2
 fi
