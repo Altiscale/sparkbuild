@@ -18,7 +18,7 @@ source $spark_home/test_spark/init_spark.sh
 spark_version=$SPARK_VERSION
 
 if [ ! -f "$testcase_shell_file_01"  ] ; then
-  echo "fail - missing testcase for spark, can't continue, exiting"
+  >&2 echo "fail - missing testcase for spark, can't continue, exiting"
   exit -2
 fi
 
@@ -49,7 +49,7 @@ queue_name=""
 EOT
 
 if [ $? -ne "0" ] ; then
-  echo "fail - testing shell for various algorithm failed!"
+  >&2 echo "fail - testing shell for various algorithm failed!"
   exit -3
 fi
 

@@ -7,18 +7,29 @@ curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 testcase_shell_file_01=$curr_dir/sparkshell_examples.txt
 spark_home=$SPARK_HOME
+spark_conf=""
 
 if [ "x${spark_home}" = "x" ] ; then
   spark_home=/opt/spark
-  echo "ok - applying default location /opt/spark"
+  echo "ok - applying default location $spark_home"
 fi
 
 source $spark_home/test_spark/init_spark.sh
 
+spark_conf=$SPARK_CONF_DIR
+if [ "x${spark_conf}" = "x" ] ; then
+  spark_conf=/etc/spark
+fi
+echo "ok - applying Spark conf $spark_conf"
+
 spark_version=$SPARK_VERSION
+if [ "x${spark_version}" = "x" ] ; then
+  >&2 echo "fail - spark_version can not be identified, is end SPARK_VERSION defined? Exiting!"
+  exit -2
+fi
 
 if [ ! -f "$testcase_shell_file_01"  ] ; then
-  echo "fail - missing testcase for spark, can't continue, exiting"
+  >&2 echo "fail - missing testcase for spark, can't continue, exiting"
   exit -2
 fi
 
@@ -58,7 +69,7 @@ queue_name=""
 EOT
 
 if [ $? -ne "0" ] ; then
-  echo "fail - testing shell for various algorithm failed!"
+  >&2 echo "fail - testing shell for various algorithm failed!"
   exit -3
 fi
 
