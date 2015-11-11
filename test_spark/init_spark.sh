@@ -35,7 +35,7 @@ if [ "x${spark_home_tmp}" = "x" ] ; then
     >&2 echo "fail - $spark_home_tmp does not exist, can't continue, exiting! check spark installation."
     exit -1
   fi
-  echo "ok - applying default location $spark_home"
+  echo "ok - applying default location $spark_home_tmp"
 fi
 
 # Check Spark RPM installation

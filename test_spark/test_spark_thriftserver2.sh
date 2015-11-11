@@ -7,7 +7,7 @@
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 spark_logs=""
-spark_home=$SPARK_HOME
+spark_home=${SPARK_HOME:='/opt/spark'}
 spark_conf=""
 spark_version=$SPARK_VERSION
 
