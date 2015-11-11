@@ -6,7 +6,7 @@
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 testcase_sparkr_file_01=$curr_dir/sparkr.test.txt
-spark_home=$SPARK_HOME
+spark_home=${SPARK_HOME:='/opt/spark'}
 spark_conf=$SPARK_CONF_DIR
 
 source $spark_home/test_spark/init_spark.sh

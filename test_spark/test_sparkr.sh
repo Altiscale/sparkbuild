@@ -8,10 +8,10 @@ curr_dir=`cd $curr_dir; pwd`
 run_sparkr="$curr_dir/run_sparkr.sh"
 spark_tmp_dir=$(mktemp -d -q --tmpdir=/tmp)
 
-spark_home=$SPARK_HOME
+spark_home=${SPARK_HOME:='/opt/spark'}
 if [ "x${spark_home}" = "x" ] ; then
   spark_home=/opt/spark
-  echo "ok - applying default location /opt/spark"
+  echo "ok - applying default location $spark_home"
 fi
 
 mkdir -p "$spark_tmp_dir/spark/"
