@@ -53,14 +53,18 @@ fi
 
 pushd `pwd`
 cd $spark_home
+# Perform sanity check on required files in test case
+if [ ! -f "$spark_home/examples/src/main/resources/kv1.txt" ] ; then
+  >&2 echo "fail - missing test data $spark_home/examples/src/main/resources/kv1.txt to load, did the examples directory structure changed?"
+  exit -3
+fi
 # Deploy the test data we need from the current user that is running the test case
 # User does not share test data with other users
 hdfs dfs -mkdir -p spark/test/resources
 hdfs dfs -put $spark_home/examples/src/main/resources/kv1.txt spark/test/resources/
-
-# Perform sanity check on required files in test case
-if [ ! -f "$spark_home/examples/src/main/resources/kv1.txt" ] ; then
-  >&2 echo "fail - missing test data $spark_home/examples/src/main/resources/kv1.txt to load, did the examples directory structure changed?"
+hdfs dfs -test -e spark/test/resources/kv1.txt
+if [ $? -ne "0" ] ; then
+  >&2 echo "fail - missing example HDFS file under spark/test/resources/kv1.txt!! something went wrong with HDFS FsShell! exiting"
   exit -3
 fi
 
