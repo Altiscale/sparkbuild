@@ -30,11 +30,11 @@ Group: Development/Libraries
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
-Requires: scala >= 2.10.4
+Requires: scala = 2.10.5
 Requires: %{rpm_package_name}-%{spark_version}-example
 Requires: %{rpm_package_name}-%{spark_version}-yarn-shuffle
 # BuildRequires: vcc-hive-%{hive_version}
-BuildRequires: scala = 2.10.4
+BuildRequires: scala = 2.10.5
 BuildRequires: apache-maven >= 3.3.3
 BuildRequires: jdk >= 1.7.0.51
 # The whole purpose for this req is just to repackage the JAR with JDK 1.6
@@ -239,13 +239,13 @@ else
 fi
 
 # Build our test case with our own pom.xml file
-# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, and hadoop version hadoop24-provided or hadoop27-provided as well
+# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
 if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-  mvn -U -X package -Pspark-1.5 -Phadoop24-provided -Pkafka-provided
+  mvn -U -X package -Pspark-1.6 -Phadoop24-provided -Pkafka-provided
 elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-  mvn -U -X package -Pspark-1.5 -Phadoop26-provided -Pkafka-provided
+  mvn -U -X package -Pspark-1.6 -Phadoop26-provided -Pkafka-provided
 elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-  mvn -U -X package -Pspark-1.5 -Phadoop27-provided -Pkafka-provided
+  mvn -U -X package -Pspark-1.6 -Phadoop27-provided -Pkafka-provided
 else
   echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION for test case test_spark, can't continue, exiting, no cleanup"
   exit -9
@@ -488,6 +488,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Fri Nov 13 2015 Andrew Lee 20151113
+- Update spark version to 1.6 
 * Fri Aug 21 2015 Andrew Lee 20150821
 - Update RPM file listing
 * Tue Aug 11 2015 Andrew Lee 20150811

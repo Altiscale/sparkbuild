@@ -1,17 +1,17 @@
 sparkbuild
 ==========
 
-Init sparkbuild wrapper repo for Spark-1.5.2 official release.
+Init sparkbuild wrapper repo for Spark-1.6.0 official release.
 This branch tracks the upstream branch-1.5 branch.
 
 How to Install Spark RPM for this build
 ==========
 ```
 # Install on Hadoop 2.7.1
-yum install alti-spark-1.5.2.hadoop27.hive121 alti-spark-1.5.2.hadoop27.hive121-example alti-spark-1.5.2.hadoop27.hive121-yarn-shuffle
+yum install alti-spark-1.6.0.hadoop27.hive121 alti-spark-1.6.0.hadoop27.hive121-example alti-spark-1.6.0.hadoop27.hive121-yarn-shuffle
 
 # Install on Hadoop 2.4.1
-yum install alti-spark-1.5.2.hadoop24.hive121 alti-spark-1.5.2.hadoop24.hive121-example
+yum install alti-spark-1.6.0.hadoop24.hive121 alti-spark-1.6.0.hadoop24.hive121-example
 ```
 
 Before you run deploy_desktop.rb, add the following entry to desktop.json
@@ -22,7 +22,7 @@ The spark entry in run_list:
 ```
 "recipe[hadoop-eco::spark]"
 ```
-Now, you can run deploy_desktop.rb, and it will install spark 1.5.2 on workbench. For example,
+Now, you can run deploy_desktop.rb, and it will install spark 1.6.0 on workbench. For example,
 ```
 ./deploy_desktop.rb -k ~/.ssh/your_priv_key -l debug -H alee-vpc2-dt.test.altiscale.com -c alee-vpc2-cluster
 ```

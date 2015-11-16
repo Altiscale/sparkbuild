@@ -52,10 +52,10 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.5.2
+  export SPARK_VERSION=1.6.0
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  export SPARK_PLAIN_VERSION=1.5.2
+  export SPARK_PLAIN_VERSION=1.6.0
 fi
 if [ "x${SPARK_YARN}" = "x" ] ; then
   export SPARK_YARN=true
@@ -135,7 +135,7 @@ fi
 export ALTISCALE_RELEASE
 
 if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.5
+  export BRANCH_NAME=altiscale-branch-1.6
 fi
 
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then

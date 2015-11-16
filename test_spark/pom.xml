@@ -8,10 +8,10 @@
   <groupId>com.altiscale.testsuite</groupId>
   <artifactId>altiscale-spark-test-case</artifactId>
   <packaging>jar</packaging>
-  <version>1.5</version>
+  <version>1.6</version>
 
   <properties>
-    <spark.version>1.5.2</spark.version>
+    <spark.version>1.6.0</spark.version>
     <hadoop.version>2.4.1</hadoop.version>
     <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
     <hive.version>1.2.1.spark</hive.version>
@@ -145,6 +145,61 @@
           <groupId>org.scala-lang</groupId>
           <artifactId>scala-library</artifactId>
           <version>2.10.4</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
+      <id>spark-1.6</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.10</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-assembly_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${hadoop.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>${akka.group}</groupId>
+          <artifactId>akka-actor_${scala.binary.version}</artifactId>
+          <version>${akka.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-streaming-kafka_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-streaming_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <!--
+          The following dependencies are already present in the Spark assembly, so we want to force
+          them to be provided.
+        -->
+        <dependency>
+          <groupId>org.scala-lang</groupId>
+          <artifactId>scala-library</artifactId>
+          <version>2.10.5</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
