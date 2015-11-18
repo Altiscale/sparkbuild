@@ -66,6 +66,13 @@ Group: Development/Libraries
 %description yarn-shuffle
 This package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath.
 
+%packare devel
+Summary: Spark module JARs and libraries compiled by maven
+Group: Development/Libraries
+
+%description spark-devel
+This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-launcher, spark-kinesis-asl spark-gangalia-lgpl jars, etc.
+
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
 # Should be harmless. MAKE SURE UID and GID is correct FIRST!!!!!!
@@ -128,6 +135,7 @@ rm -f %{_builddir}/%{build_service_name}/sbin/stop-all.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/slaves.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-daemons.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
+rm -f %{_builddir}/%{build_service_name}/sbin/*mesos*.sh
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
 if [ "x%{hadoop_version}" = "x" ] ; then
@@ -181,14 +189,14 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
   if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
+    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
+    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
+    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
+    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
+    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -196,14 +204,14 @@ if [ -f /etc/alti-maven-settings/settings.xml ] ; then
 else
   echo "ok - applying default repository form pom.xml"
   if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
+    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
+    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
+    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
     echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
+    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
@@ -301,17 +309,18 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}/etc/%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/bagel/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/R/lib/
 # Added due to AE-1219 to support Hive 1.2.0+ with Hive on Spark
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/lib/
@@ -321,6 +330,7 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_test}
 # copy all necessary jars
 cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
+cp -rp %{_builddir}/%{build_service_name}/bagel/target/*.jar %{buildroot}%{install_spark_dest}/bagel/target/
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
 # required for python and SQL
 cp -rp %{_builddir}/%{build_service_name}/examples/src %{buildroot}%{install_spark_dest}/examples/
@@ -364,6 +374,7 @@ echo "release=%{name}-%{release}" >> %{buildroot}/%{install_spark_label}
 
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, standalone mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_STANDALONE_MODE_NOT_SUPPORTED.why.txt
+echo "DO NOT HAND EDIT, DEPLOYED BY RPM and CHEF" >  %{buildroot}%{install_spark_conf}/DO_NOT_HAND_EDIT.txt
 
 # deploy test suite and scripts
 cp -rp %{_builddir}/%{build_service_name}/test_spark/target/*.jar %{buildroot}/%{install_spark_test}/
@@ -430,6 +441,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0644,spark,spark) %{install_spark_conf}/java-opts
 %attr(0644,spark,spark) %{install_spark_conf}/slaves
 %attr(0644,spark,spark) %{install_spark_conf}/*.template
+%attr(0444,spark,spark) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
 %attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
@@ -438,8 +450,18 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_test}
 
 %files yarn-shuffle
-%defattr(0755,spark,spark,0755)
+%defattr(0644,spark,spark,0644)
 %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar
+
+%files devel
+%defattr(0644,spark,spark,0644)
+%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}.jar
 
 %post
 if [ "$1" = "1" ]; then
