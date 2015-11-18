@@ -428,7 +428,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0644,spark,spark) %{install_spark_conf}/log4j.properties
 %attr(0644,spark,spark) %{install_spark_conf}/spark-defaults.conf
 %attr(0644,spark,spark) %{install_spark_conf}/java-opts
-%attr(0644,spark,spark) %{install_spark_conf}/slaves
 %attr(0644,spark,spark) %{install_spark_conf}/*.template
 %attr(1777,spark,spark) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
