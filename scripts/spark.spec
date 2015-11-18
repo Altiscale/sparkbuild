@@ -66,7 +66,7 @@ Group: Development/Libraries
 %description yarn-shuffle
 This package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath.
 
-%packare devel
+%package devel
 Summary: Spark module JARs and libraries compiled by maven
 Group: Development/Libraries
 
