@@ -313,7 +313,9 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/licenses/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
@@ -334,6 +336,7 @@ cp -rp %{_builddir}/%{build_service_name}/bagel/target/*.jar %{buildroot}%{insta
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
 # required for python and SQL
 cp -rp %{_builddir}/%{build_service_name}/examples/src %{buildroot}%{install_spark_dest}/examples/
+cp -rp %{_builddir}/%{build_service_name}/extras/* %{buildroot}%{install_spark_dest}/extras/
 cp -rp %{_builddir}/%{build_service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
 cp -rp %{_builddir}/%{build_service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
 cp -rp %{_builddir}/%{build_service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
@@ -354,15 +357,32 @@ cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{insta
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
 
+# devel package files
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/core/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/catalyst/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/core/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/launcher/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/unsafe/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/yarn/target/
+cp -rp %{_builddir}/%{build_service_name}/core/target/*.jar %{buildroot}%{install_spark_dest}/core/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/catalyst/target/*.jar %{buildroot}%{install_spark_dest}/sql/catalyst/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/core/target/*.jar %{buildroot}%{install_spark_dest}/sql/core/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/hive/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive/target/
+cp -rp %{_builddir}/%{build_service_name}/launcher/target/*.jar %{buildroot}%{install_spark_dest}/launcher/target/
+cp -rp %{_builddir}/%{build_service_name}/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/unsafe/target/
+cp -rp %{_builddir}/%{build_service_name}/yarn/target/*.jar %{buildroot}%{install_spark_dest}/yarn/target/
+
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
 
 # Inherit license, readme, etc
-cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/licenses/* %{buildroot}%{install_spark_dest}/licenses/
 
 # This will capture the installation property form this spec file for further references
 rm -f %{buildroot}/%{install_spark_label}
@@ -370,7 +390,6 @@ touch %{buildroot}/%{install_spark_label}
 echo "name=%{name}" >> %{buildroot}/%{install_spark_label}
 echo "version=%{spark_version}" >> %{buildroot}/%{install_spark_label}
 echo "release=%{name}-%{release}" >> %{buildroot}/%{install_spark_label}
-
 
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, standalone mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_STANDALONE_MODE_NOT_SUPPORTED.why.txt
@@ -395,11 +414,14 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/data
 %{install_spark_dest}/dev
 %{install_spark_dest}/docs
+%{install_spark_dest}/bagel
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
+%{install_spark_dest}/extras
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
 %{install_spark_dest}/lib_managed
+%{install_spark_dest}/licenses
 %{install_spark_dest}/mllib
 %{install_spark_dest}/network/common
 %{install_spark_dest}/network/shuffle
@@ -454,13 +476,13 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files devel
 %defattr(0644,spark,spark,0644)
-%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/core/target/*.jar
+%{install_spark_dest}/sql/catalyst/target/*.jar
+%{install_spark_dest}/sql/core/target/*.jar
+%{install_spark_dest}/sql/hive/target/*.jar
+%{install_spark_dest}/launcher/target/*.jar
+%{install_spark_dest}/unsafe/target/*.jar
+%{install_spark_dest}/yarn/target/*.jar
 
 %post
 if [ "$1" = "1" ]; then
@@ -477,11 +499,6 @@ ln -vsf %{install_spark_dest} /opt/%{apache_name}
 ln -vsf %{install_spark_conf} /etc/%{apache_name}
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-# mkdir -p /home/spark/logs
-# chmod -R 1777 /home/spark/logs
-# chown %{spark_uid}:%{spark_gid} /home/spark/
-# chown %{spark_uid}:%{spark_gid} /home/spark/logs
-# Added due to AE-1219, this should go to Chef for refactor
 # The symbolic link is version sensitive
 # TODO: Move to Chef later
 ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/
@@ -491,7 +508,6 @@ do
 done
 ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/
 ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
-
 
 %postun
 if [ "$1" = "0" ]; then
@@ -514,6 +530,8 @@ fi
 # Don't delete the users after uninstallation.
 
 %changelog
+* Wed Nov 18 2015 Andrew Lee 20151118
+- Added new devel package, and fix permission mode in files directive, add new licenses
 * Fri Nov 13 2015 Andrew Lee 20151113
 - Update spark version to 1.6 
 * Fri Aug 21 2015 Andrew Lee 20150821
