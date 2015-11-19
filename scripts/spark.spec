@@ -411,6 +411,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,spark,spark,0755)
+%attr(0444,spark,spark) %{install_spark_dest}/THIS_IS_A_SNAPSHOT_BUILD.txt
 %{install_spark_dest}/project
 %{install_spark_dest}/assembly
 %{install_spark_dest}/bin
@@ -479,13 +480,13 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files devel
 %defattr(0644,spark,spark,0644)
-%{install_spark_dest}/core/target/*.jar
-%{install_spark_dest}/sql/catalyst/target/*.jar
-%{install_spark_dest}/sql/core/target/*.jar
-%{install_spark_dest}/sql/hive/target/*.jar
-%{install_spark_dest}/launcher/target/*.jar
-%{install_spark_dest}/unsafe/target/*.jar
-%{install_spark_dest}/yarn/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/core/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/sql/catalyst/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/sql/core/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/sql/hive/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/launcher/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/unsafe/target/*.jar
+%attr(0644,spark,spark) %{install_spark_dest}/yarn/target/*.jar
 
 %post
 if [ "$1" = "1" ]; then
