@@ -117,7 +117,7 @@ if [ "x${JAVA_HOME}" = "x" ] ; then
 fi
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
-echo "build - spark core in %{_builddir}"
+echo "build - entire spark project in %{_builddir}"
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/
 
@@ -220,7 +220,7 @@ else
 fi
 
 popd
-echo "ok - build spark core completed successfully!"
+echo "ok - build spark project completed successfully!"
 
 echo "ok - start building spark test case in %{_builddir}/%{build_service_name}/test_spark"
 pushd `pwd`
@@ -411,6 +411,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,spark,spark,0755)
+%attr(0444,spark,spark) %{install_spark_dest}/THIS_IS_A_SNAPSHOT_BUILD.txt
 %{install_spark_dest}/project
 %{install_spark_dest}/assembly
 %{install_spark_dest}/bin
@@ -479,13 +480,48 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files devel
 %defattr(0644,spark,spark,0644)
-%{install_spark_dest}/core/target/*.jar
-%{install_spark_dest}/sql/catalyst/target/*.jar
-%{install_spark_dest}/sql/core/target/*.jar
-%{install_spark_dest}/sql/hive/target/*.jar
-%{install_spark_dest}/launcher/target/*.jar
-%{install_spark_dest}/unsafe/target/*.jar
-%{install_spark_dest}/yarn/target/*.jar
+%{install_spark_dest}/core/target/original-spark-core_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/launcher/target/original-spark-launcher_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/sql/catalyst/target/original-spark-catalyst_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/sql/core/target/original-spark-sql_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/sql/hive/target/original-spark-hive_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/unsafe/target/original-spark-unsafe_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/yarn/target/original-spark-yarn_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}.jar
+%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-test-sources.jar
 
 %post
 if [ "$1" = "1" ]; then
