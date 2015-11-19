@@ -13,6 +13,8 @@ build_timeout=14400
 maven_settings="$HOME/.m2/settings.xml"
 maven_settings_spec="$curr_dir/alti-maven-settings.spec"
 
+git_hash=""
+
 if [ -f "$curr_dir/setup_env.sh" ]; then
   set -a
   # source "$curr_dir/setup_env.sh"
@@ -66,6 +68,7 @@ fi
   git checkout $SPARK_BRANCH_NAME
   git fetch --all
   git pull
+  git_hash=$(git rev-parse HEAD | tr -d '\n')
 popd
 
 echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
@@ -106,6 +109,7 @@ sed -i "s/SPARK_GID/$SPARK_GID/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/SPARK_UID/$SPARK_UID/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/BUILD_TIME/$BUILD_TIME/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/ALTISCALE_RELEASE/$ALTISCALE_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
+sed -i "s/GITHASH_REV_RELEASE/$git_hash/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 
 rpmbuild -vvv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/ $WORKSPACE/rpmbuild/SPECS/spark.spec
 if [ $? -ne "0" ] ; then
