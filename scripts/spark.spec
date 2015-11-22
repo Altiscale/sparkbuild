@@ -70,6 +70,7 @@ This package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node 
 %package devel
 Summary: Spark module JARs and libraries compiled by maven
 Group: Development/Libraries
+Requires: %{rpm_package_name}-%{spark_version}
 
 %description devel
 This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-launcher, spark-kinesis-asl spark-gangalia-lgpl jars, etc.
