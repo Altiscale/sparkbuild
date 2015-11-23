@@ -452,7 +452,8 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/R
 %{install_spark_dest}/repl
 %{install_spark_dest}/sbin
-%{install_spark_dest}/sql
+%attr(0644,spark,spark) %{install_spark_dest}/sql
+%attr(0644,spark,spark) %{install_spark_dest}/sql/hive-thriftserver
 %{install_spark_dest}/streaming
 %{install_spark_dest}/tools
 %docdir %{install_spark_dest}/docs
@@ -481,48 +482,13 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files devel
 %defattr(0644,spark,spark,0644)
-%{install_spark_dest}/core/target/original-spark-core_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/core/target/spark-core_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/launcher/target/original-spark-launcher_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/launcher/target/spark-launcher_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/sql/catalyst/target/original-spark-catalyst_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/sql/catalyst/target/spark-catalyst_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/sql/core/target/original-spark-sql_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/sql/core/target/spark-sql_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/sql/hive/target/original-spark-hive_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/unsafe/target/original-spark-unsafe_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/unsafe/target/spark-unsafe_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/yarn/target/original-spark-yarn_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/yarn/target/spark-yarn_2.10-%{spark_plain_version}-test-sources.jar
+%attr(0644,spark,spark) %{install_spark_dest}/core
+%attr(0644,spark,spark) %{install_spark_dest}/sql/catalyst
+%attr(0644,spark,spark) %{install_spark_dest}/sql/core
+%attr(0644,spark,spark) %{install_spark_dest}/sql/hive
+%attr(0644,spark,spark) %{install_spark_dest}/launcher
+%attr(0644,spark,spark) %{install_spark_dest}/unsafe
+%attr(0644,spark,spark) %{install_spark_dest}/yarn
 
 %post
 if [ "$1" = "1" ]; then
