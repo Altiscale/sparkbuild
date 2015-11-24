@@ -418,7 +418,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/bin
 %{install_spark_dest}/data
 %{install_spark_dest}/dev
-%{install_spark_dest}/docs
 %{install_spark_dest}/bagel
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
@@ -430,6 +429,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/mllib
 %{install_spark_dest}/network/common
 %{install_spark_dest}/network/shuffle
+%dir %{install_spark_dest}/network/yarn
 %{install_spark_dest}/network/yarn/pom.xml
 %{install_spark_dest}/network/yarn/src
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
@@ -452,11 +452,12 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/R
 %{install_spark_dest}/repl
 %{install_spark_dest}/sbin
-%attr(0644,spark,spark) %{install_spark_dest}/sql
+%dir %{install_spark_dest}/sql
 %attr(0644,spark,spark) %{install_spark_dest}/sql/hive-thriftserver
 %{install_spark_dest}/streaming
 %{install_spark_dest}/tools
 %docdir %{install_spark_dest}/docs
+%{install_spark_dest}/docs
 %doc %{install_spark_label}
 %doc %{install_spark_dest}/LICENSE
 %doc %{install_spark_dest}/README.md
@@ -518,6 +519,7 @@ ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain
 %postun
 if [ "$1" = "0" ]; then
   ret=$(rpm -qa | grep %{rpm_package_name} | grep -v test | wc -l)
+  # The rpm is already uninstall and shouldn't appear in the counts
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark version, no need to clean up symbolic links"
     echo "ok - cleaning up version specific directories only regarding this uninstallation"
@@ -535,7 +537,35 @@ if [ "$1" = "0" ]; then
 fi
 # Don't delete the users after uninstallation.
 
+%postun devel
+if [ "$1" = "0" ]; then
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep devel | grep -v test | wc -l)
+  # The rpm is already uninstall and shouldn't appear in the counts
+  if [ "x${ret}" != "x0" ] ; then
+    echo "ok - detected other spark development package version"
+    echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
+    rm -vrf %{install_spark_dest}/core
+    rm -vrf %{install_spark_dest}/sql/catalyst
+    rm -vrf %{install_spark_dest}/sql/core
+    rm -vrf %{install_spark_dest}/sql/hive
+    rm -vrf %{install_spark_dest}/launcher
+    rm -vrf %{install_spark_dest}/unsafe
+    rm -vrf %{install_spark_dest}/yarn
+  else
+    echo "ok - uninstalling %{rpm_package_name} on system, removing everything related except the parent directoy /opt/%{apache_name}"
+    rm -vrf %{install_spark_dest}/core
+    rm -vrf %{install_spark_dest}/sql/catalyst
+    rm -vrf %{install_spark_dest}/sql/core
+    rm -vrf %{install_spark_dest}/sql/hive
+    rm -vrf %{install_spark_dest}/launcher
+    rm -vrf %{install_spark_dest}/unsafe
+    rm -vrf %{install_spark_dest}/yarn
+  fi
+fi
+
 %changelog
+* Mon Nov 23 2015 Andrew Lee 20151123
+- Fix directory permission with dir directive, add postun for subpackages
 * Wed Nov 18 2015 Andrew Lee 20151118
 - Added new devel package, and fix permission mode in files directive, add new licenses
 * Fri Nov 13 2015 Andrew Lee 20151113
