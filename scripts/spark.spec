@@ -26,7 +26,7 @@ Name: %{rpm_package_name}-%{spark_version}
 Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with warnings
 Version: %{spark_version}
 Release: %{altiscale_release_ver}.%{build_release}%{?dist}
-License: ASL 2.0
+License: Apache Software License 2.0
 Group: Development/Libraries
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
@@ -73,7 +73,16 @@ Group: Development/Libraries
 Requires: %{rpm_package_name}-%{spark_version}
 
 %description devel
-This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-launcher, spark-kinesis-asl spark-gangalia-lgpl jars, etc.
+This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-launcher, etc. that are under Apache License 2. Other components that has a different license will be under different package for distribution.
+
+%package kinesis
+Summary: Amazon Kinesis libraries to integrate with Spark Streaming compiled by maven
+License: Amazon Software License
+Group: Development/Libraries
+Requires: %{rpm_package_name}-%{spark_version}
+
+%description kinesis
+This package provides the artifact for kinesis integration for Spark. Aware, this is under Amazon Software License (ASL), see: https://aws.amazon.com/asl/ for more information.
 
 %pre
 # Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
@@ -421,7 +430,10 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/bagel
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
-%{install_spark_dest}/extras
+%dir %{install_spark_dest}/extras
+%{install_spark_dest}/extras/java8-tests/
+%{install_spark_dest}/extras/spark-ganglia-lgpl/
+%{install_spark_dest}/extras/README.md
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
 %{install_spark_dest}/lib_managed
@@ -467,7 +479,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0755,spark,spark) %{install_spark_conf}/spark-env.sh
 %attr(0644,spark,spark) %{install_spark_conf}/log4j.properties
 %attr(0644,spark,spark) %{install_spark_conf}/spark-defaults.conf
-%attr(0644,spark,spark) %{install_spark_conf}/java-opts
 %attr(0644,spark,spark) %{install_spark_conf}/*.template
 %attr(0444,spark,spark) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
 %attr(1777,spark,spark) %{install_spark_logs}
@@ -490,6 +501,11 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0644,spark,spark) %{install_spark_dest}/launcher
 %attr(0644,spark,spark) %{install_spark_dest}/unsafe
 %attr(0644,spark,spark) %{install_spark_dest}/yarn
+
+%files kinesis
+%defattr(0644,spark,spark,0644)
+%{install_spark_dest}/extras/kinesis-asl
+%{install_spark_dest}/extras/kinesis-asl-assembly
 
 %post
 if [ "$1" = "1" ]; then
@@ -552,7 +568,7 @@ if [ "$1" = "0" ]; then
     rm -vrf %{install_spark_dest}/unsafe
     rm -vrf %{install_spark_dest}/yarn
   else
-    echo "ok - uninstalling %{rpm_package_name} on system, removing everything related except the parent directoy /opt/%{apache_name}"
+    echo "ok - uninstalling %{rpm_package_name}-devel on system, removing everything related except the parent directoy /opt/%{apache_name}"
     rm -vrf %{install_spark_dest}/core
     rm -vrf %{install_spark_dest}/sql/catalyst
     rm -vrf %{install_spark_dest}/sql/core
@@ -563,7 +579,25 @@ if [ "$1" = "0" ]; then
   fi
 fi
 
+%postun kinesis
+if [ "$1" = "0" ]; then
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep devel | grep -v test | wc -l)
+  # The rpm is already uninstall and shouldn't appear in the counts
+  if [ "x${ret}" != "x0" ] ; then
+    echo "ok - detected other spark kinesis package version"
+    echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl-assembly
+  else
+    echo "ok - uninstalling %{rpm_package_name}-kinesis on system, removing everything related except the parent directoy /opt/%{apache_name}"
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl-assembly
+  fi
+fi
+
 %changelog
+* Mon Nov 30 2015 Andrew Lee 20151130
+- Add new sub package for spark kinesis rpm
 * Mon Nov 23 2015 Andrew Lee 20151123
 - Fix directory permission with dir directive, add postun for subpackages
 * Wed Nov 18 2015 Andrew Lee 20151118
