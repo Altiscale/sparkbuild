@@ -215,14 +215,14 @@ if [ -f /etc/alti-maven-settings/settings.xml ] ; then
 else
   echo "ok - applying default repository form pom.xml"
   if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
+    echo "mvn -U -X -Phadoop-2.4 -Phadoop-provided -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
+    mvn -U -X -Phadoop-2.4 -Phadoop-provided -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
+    echo "mvn -U -X -Phadoop-2.6 -Phadoop-provided -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
+    mvn -U -X -Phadoop-2.6 -Phadoop-provided -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
   elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
+    echo "mvn -U -X -Phadoop-2.7 -Phadoop-provided -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
+    mvn -U -X -Phadoop-2.7 -Phadoop-provided -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
   else
     echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
     exit -9
