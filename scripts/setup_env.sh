@@ -148,4 +148,6 @@ export BUILD_TIME
 # Customize build OPTS for MVN
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
-
+if [ "x${PRODUCTION_RELEASE}" = "x" ] ; then
+  export PRODUCTION_RELEASE=false
+fi

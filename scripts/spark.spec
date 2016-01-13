@@ -2,6 +2,7 @@
 %global spark_uid             SPARK_UID
 %global spark_gid             SPARK_GID
 
+%define production_release    PRODUCTION_RELEASE
 %define git_hash_release      GITHASH_REV_RELEASE
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
@@ -197,37 +198,36 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 # hadoop-2.6 hadoop.version=2.6.0 yarn.version=2.6.0 hive.version=1.2.1.spark hive.short.version=1.2.1
 # hadoop-2.7 hadoop.version=2.7.1 yarn.version=2.7.1 hive.version=1.2.1.spark hive.short.version=1.2.1
 
+hadoop_profile_str=""
+if [[ %{hadoop_version} == 2.4.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.4"
+elif [[ %{hadoop_version} == 2.6.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.6"
+elif [[ %{hadoop_version} == 2.7.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.7"
+else
+  echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
+  exit -9
+fi
+xml_setting_str=""
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
-  if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  else
-    echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
-    exit -9
-  fi
+  xml_setting_str="--settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml"
 else
   echo "ok - applying default repository form pom.xml"
-  if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl -DskipTests install
-  else
-    echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
-    exit -9
-  fi
+  xml_setting_str=""
 fi
+
+mvn_release_flag=""
+if [ "x%{production_release}" == "xtrue" ] ; then
+  mvn_release_flag="-Preleases"
+else
+  mvn_release_flag="-Psnapshots"
+fi
+
+mvn_cmd="mvn -U -X $hadoop_profile_str $mvn_release_flag -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl $xml_setting_str -DskipTests install"
+echo "$mvn_cmd"
+$mvn_cmd
 
 popd
 echo "ok - build spark project completed successfully!"

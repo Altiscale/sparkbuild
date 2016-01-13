@@ -159,6 +159,7 @@ sed -i "s/SPARK_UID/$SPARK_UID/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/BUILD_TIME/$BUILD_TIME/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/ALTISCALE_RELEASE/$ALTISCALE_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/GITHASH_REV_RELEASE/$git_hash/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
+sed -i "s/PRODUCTION_RELEASE/$PRODUCTION_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 SCALA_HOME=$SCALA_HOME rpmbuild -vv -bs $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 
 if [ $? -ne "0" ] ; then
