@@ -218,14 +218,19 @@ else
   xml_setting_str=""
 fi
 
-mvn_release_flag=""
-if [ "x%{production_release}" == "xtrue" ] ; then
-  mvn_release_flag="-Preleases"
-else
-  mvn_release_flag="-Psnapshots"
-fi
+# TODO: This needs to align with Maven settings.xml, however, Maven looks for
+# -SNAPSHOT in pom.xml to determine which repo to use. This creates a chain reaction on 
+# legacy pom.xml design on other application since they are not implemented in the Maven way.
+# :-( 
+# Will need to create a work around with different repo URL and use profile Id to activate them accordingly
+# mvn_release_flag=""
+# if [ "x%{production_release}" == "xtrue" ] ; then
+#   mvn_release_flag="-Preleases"
+# else
+#   mvn_release_flag="-Psnapshots"
+# fi
 
-mvn_cmd="mvn -U -X $hadoop_profile_str $mvn_release_flag -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Psparkr -Pyarn -Phive -Phive-thriftserver -Pkinesis-asl $xml_setting_str -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
