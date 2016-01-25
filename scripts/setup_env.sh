@@ -134,10 +134,6 @@ else
 fi 
 export ALTISCALE_RELEASE
 
-if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.6
-fi
-
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
   export BUILD_TIMEOUT=86400
 fi
