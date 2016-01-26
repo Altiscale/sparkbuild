@@ -411,7 +411,6 @@ echo "git_rev=%{git_hash_release}" >> %{buildroot}/%{install_spark_label}
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, standalone mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_STANDALONE_MODE_NOT_SUPPORTED.why.txt
 echo "DO NOT HAND EDIT, DEPLOYED BY RPM and CHEF" >  %{buildroot}%{install_spark_conf}/DO_NOT_HAND_EDIT.txt
-# echo "THIS IS A SNAPSHOT BUILD, see VERSION file for more details" >  %{buildroot}%{install_spark_dest}/THIS_IS_A_SNAPSHOT_BUILD.txt
 
 # deploy test suite and scripts
 cp -rp %{_builddir}/%{build_service_name}/test_spark/target/*.jar %{buildroot}/%{install_spark_test}/
@@ -426,7 +425,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files
 %defattr(0755,spark,spark,0755)
-%attr(0444,spark,spark) %{install_spark_dest}/THIS_IS_A_SNAPSHOT_BUILD.txt
 %{install_spark_dest}/project
 %{install_spark_dest}/assembly
 %{install_spark_dest}/bin
