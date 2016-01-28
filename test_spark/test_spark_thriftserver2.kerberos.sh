@@ -14,6 +14,8 @@ spark_version=$SPARK_VERSION
 source /etc/profile
 source $spark_home/test_spark/init_spark.sh
 
+sparkts2_logical_hostname="$HIVESERVER2_HOST"
+
 # Default SPARK_HOME location is already checked by init_spark.sh
 if [ "x${spark_home}" = "x" ] ; then
   spark_home=/opt/spark
@@ -76,7 +78,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 
 echo "ok - starting thriftserver"
 
-ret=$(./start-thriftserver.sh --jars $spark_opts_extra --files $spark_files --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$(hostname) --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/)
+ret=$(./start-thriftserver.sh --jars $spark_opts_extra --files $spark_files --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$sparkts2_logical_hostname --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/)
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - can't start thriftserver, something went wrong, see $ret"
   exit -3
@@ -136,7 +138,6 @@ if [ "x${log_check_ts2}" = "false" -a "x${log_check_ts2}" = "false" -a "x${pid_c
   exit -5
 fi
 
-sparkts2_logical_hostname="$HIVESERVER2_HOST"
 kerberos_uri=";principal=hiveserver/$sparkts2_logical_hostname@SERVICE.ALTISCALE.COM"
 # TBD: A quick test to see if Spark ThriftServer2 is able to talk to Hive metastore to list tables
 jdbc_ret=$(beeline -u "jdbc:hive2://$sparkts2_logical_hostname:$spark_ts2_listen_port/$kerberos_uri" -n alti-test-01 -p "" -e "show tables;" 2>&1)
