@@ -53,12 +53,7 @@ hdfs dfs -put $spark_home/mllib/data/sample_tree_data.csv spark/test/decision_tr
 mkdir -p /tmp/spark_pmml_test/
 
 echo "ok - testing spark REPL shell with various algorithm"
-hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
-hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-# The guava JAR here does not match the Spark's pom.xml which is looking for version 14.0.1
-# Hive comes with Guava 11.0.2
-guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
-spark_opts_extra="$spark_opts_extra --jars $hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
+spark_opts_extra=""
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
