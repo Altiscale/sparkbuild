@@ -84,11 +84,8 @@ for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
 do
   spark_opts_extra="$spark_opts_extra --jars $i"
 done
-hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
-hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
 datanucleus_files=$(find $HIVE_HOME/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_opts_extra="/etc/spark/hive-site.xml,${datanucleus_files}$mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
+spark_opts_extra="/etc/spark/hive-site.xml,${datanucleus_files}$mysql_jars"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
