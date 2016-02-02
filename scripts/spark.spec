@@ -230,7 +230,7 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Psparkr -Pyarn -Phive-thriftserver -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Phive-thriftserver -Pkinesis-asl $xml_setting_str -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
