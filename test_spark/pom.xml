@@ -192,6 +192,12 @@
           <version>${spark.version}</version>
           <scope>compile</scope>
         </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-hive_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
         <!--
           The following dependencies are already present in the Spark assembly, so we want to force
           them to be provided.

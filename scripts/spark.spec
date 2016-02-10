@@ -199,12 +199,16 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 # hadoop-2.7 hadoop.version=2.7.1 yarn.version=2.7.1 hive.version=1.2.1.spark hive.short.version=1.2.1
 
 hadoop_profile_str=""
+testcase_hadoop_profile_str=""
 if [[ %{hadoop_version} == 2.4.* ]] ; then
   hadoop_profile_str="-Phadoop-2.4"
+  testcase_hadoop_profile_str="-Phadoop24-provided"
 elif [[ %{hadoop_version} == 2.6.* ]] ; then
   hadoop_profile_str="-Phadoop-2.6"
+  testcase_hadoop_profile_str="-Phadoop26-provided"
 elif [[ %{hadoop_version} == 2.7.* ]] ; then
   hadoop_profile_str="-Phadoop-2.7"
+  testcase_hadoop_profile_str="-Phadoop27-provided"
 else
   echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
   exit -9
@@ -230,7 +234,7 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Phive-thriftserver -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
@@ -251,29 +255,23 @@ if [ ! -d "%{current_workspace}/.m2" ] ; then
   # This usually happens in mock, the default local repository will be the same in this case
   # no need to specify it here.
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  # For Kafka Examples
+  # For Kafka Spark Streaming Examples
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
 else
-  # This applies to local hand build with a existing user
+  # This applies to local integration with Spark assembly JARs
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # For Kafka Examples
+  # For Kafka Spark Streaming Examples
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
   mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+  # For SparkSQL Hive integration examples, this is required when you use -Phive-provided
+  # spark-hive JAR needs to be provided to the test case in this case.
+  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-hive_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
 fi
 
 # Build our test case with our own pom.xml file
 # Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
-if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-  mvn -U -X package -Pspark-1.6 -Phadoop24-provided -Pkafka-provided
-elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-  mvn -U -X package -Pspark-1.6 -Phadoop26-provided -Pkafka-provided
-elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-  mvn -U -X package -Pspark-1.6 -Phadoop27-provided -Pkafka-provided
-else
-  echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION for test case test_spark, can't continue, exiting, no cleanup"
-  exit -9
-fi
+mvn -U -X package -Pspark-1.6 -Pkafka-provided $testcase_hadoop_profile_str
 
 popd
 echo "ok - build spark test case completed successfully!"
