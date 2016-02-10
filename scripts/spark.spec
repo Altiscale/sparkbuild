@@ -251,23 +251,24 @@ echo "ok - local repository will be installed under %{current_workspace}/.m2/rep
 # and include it in the test_case pom.xml. This is really annoying.
 # spark_version is different then spark_plain_Version
 
-if [ ! -d "%{current_workspace}/.m2" ] ; then
-  # This usually happens in mock, the default local repository will be the same in this case
-  # no need to specify it here.
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  # For Kafka Spark Streaming Examples
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-else
-  # This applies to local integration with Spark assembly JARs
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # For Kafka Spark Streaming Examples
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # For SparkSQL Hive integration examples, this is required when you use -Phive-provided
-  # spark-hive JAR needs to be provided to the test case in this case.
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-hive_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+# In mock environment, .m2 may end up somewhere differently, use default in mock.
+# explicitly if we detect .m2/repository in local sandbox, etc.
+mvn_install_target_repo=""
+if [ -d "%{current_workspace}/.m2" ] ; then
+  mvn_install_target_repo="-DlocalRepositoryPath=%{current_workspace}/.m2/repository"
 fi
+
+# This applies to local integration with Spark assembly JARs
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+
+# For Kafka Spark Streaming Examples
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+
+# For SparkSQL Hive integration examples, this is required when you use -Phive-provided
+# spark-hive JAR needs to be provided to the test case in this case.
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-hive_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
 
 # Build our test case with our own pom.xml file
 # Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
