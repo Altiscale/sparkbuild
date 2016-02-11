@@ -69,16 +69,14 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
 fi
 
 mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-spark_opts_extra=""
-spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_files="$spark_files$mysql_jars,${spark_conf}/hive-site.xml"
-
+hive_jars_colon=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
+hive_jars=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 # pyspark only supports yarn-client mode now
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name $spark_opts_extra $queue_name --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --files $spark_files --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
+./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing shell for Python SparkSQL on HiveQL/HiveContext failed!!"
