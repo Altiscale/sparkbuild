@@ -65,15 +65,6 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
-hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
-spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_opts_extra="${spark_files}$mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
-
-spark_files="$spark_files$mysql_jars,${spark_conf}/hive-site.xml"
-
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 table_uuid=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
@@ -99,15 +90,18 @@ test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
 test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
 
 hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | tr -d '\n')
+hive_jars=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+hive_jars_colon=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
+
 echo "ok - detected hadoop version $hadoop_ver for testing. CTAS does not work on Hive 0.13.1"
 # queue_name="--queue interactive"
 queue_name=""
 sql_ret_code=""
 if [ "x${hadoop_ver}" = "x2.4.1" ] ; then
-  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --files $spark_files --jars $spark_opts_extra $queue_name -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_select_sql1 ; $test_drop_table_sql1 ; "
+  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_select_sql1 ; $test_drop_table_sql1 ; "
   sql_ret_code=$?
 elif [ "x${hadoop_ver}" = "x2.7.1" ] ; then
-  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml --files $spark_files --jars $spark_opts_extra $queue_name -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; "
+  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; "
   sql_ret_code=$?
 else
   echo "fatal - hadoop version not supported, neither 2.7.1 nor 2.4.1"
