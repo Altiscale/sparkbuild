@@ -238,6 +238,12 @@ mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Pspark
 echo "$mvn_cmd"
 $mvn_cmd
 
+pushd %{_builddir}/%{build_service_name}/sql/
+mvn_spark_hs2_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn $xml_setting_str -DskipTests package"
+echo "$mvn_spark_hs2_cmd"
+$mvn_spark_hs2_cmd
+popd
+
 popd
 echo "ok - build spark project completed successfully!"
 
