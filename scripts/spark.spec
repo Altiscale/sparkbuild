@@ -473,6 +473,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/network/shuffle
 %dir %{install_spark_dest}/network
 %dir %{install_spark_dest}/network/yarn
+%dir %{install_spark_dest}/network/target
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
@@ -483,8 +484,8 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/repl
 %{install_spark_dest}/sbin
 %dir %{install_spark_dest}/sql
-%attr(0644,spark,spark) %{install_spark_dest}/sql/hive
-%attr(0644,spark,spark) %{install_spark_dest}/sql/hive-thriftserver
+%{install_spark_dest}/sql/hive
+%{install_spark_dest}/sql/hive-thriftserver
 %{install_spark_dest}/streaming
 %{install_spark_dest}/tools
 %docdir %{install_spark_dest}/docs
