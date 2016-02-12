@@ -57,9 +57,10 @@ hdfs dfs -put "$spark_test_dir/src/main/resources/spam_sample.txt" spark/test/
 hdfs dfs -put "$spark_test_dir/src/main/resources/normal_sample.txt" spark/test/
 
 echo "ok - testing spark REPL shell with various algorithm"
-mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-hive_jars_colon=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
-hive_jars=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+
+sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
+hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
+hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
