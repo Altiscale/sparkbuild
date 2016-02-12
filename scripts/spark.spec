@@ -473,7 +473,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/network/shuffle
 %dir %{install_spark_dest}/network
 %dir %{install_spark_dest}/network/yarn
-%dir %{install_spark_dest}/network/target
+%dir %{install_spark_dest}/network/yarn/target
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
@@ -509,20 +509,20 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_test}
 
 %files yarn-shuffle
-%defattr(0644,spark,spark,0644)
-%{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar
+%defattr(0755,spark,spark,0755)
+%{install_spark_dest}/network/yarn/target/scala-2.10/
 
 %files devel
-%defattr(0644,spark,spark,0644)
-%attr(0644,spark,spark) %{install_spark_dest}/core
-%attr(0644,spark,spark) %{install_spark_dest}/sql/catalyst
-%attr(0644,spark,spark) %{install_spark_dest}/sql/core
-%attr(0644,spark,spark) %{install_spark_dest}/launcher
-%attr(0644,spark,spark) %{install_spark_dest}/unsafe
-%attr(0644,spark,spark) %{install_spark_dest}/yarn
+%defattr(0755,spark,spark,0755)
+%{install_spark_dest}/core
+%{install_spark_dest}/sql/catalyst
+%{install_spark_dest}/sql/core
+%{install_spark_dest}/launcher
+%{install_spark_dest}/unsafe
+%{install_spark_dest}/yarn
 
 %files kinesis
-%defattr(0644,spark,spark,0644)
+%defattr(0755,spark,spark,0755)
 %{install_spark_dest}/extras/kinesis-asl
 %{install_spark_dest}/extras/kinesis-asl-assembly
 
