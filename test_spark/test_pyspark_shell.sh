@@ -57,22 +57,16 @@ hdfs dfs -put "$spark_test_dir/src/main/resources/spam_sample.txt" spark/test/
 hdfs dfs -put "$spark_test_dir/src/main/resources/normal_sample.txt" spark/test/
 
 echo "ok - testing spark REPL shell with various algorithm"
-mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-spark_opts_extra=""
-spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_files="$spark_files$mysql_jars,/etc/spark/hive-site.xml"
+
+sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
+hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
+hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client $spark_opts_extra $queue_name --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --files $spark_files --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
-
-# WARNING: The following commented example will not work for PySpark shell.
-# We couldn't redirect the output to stdin for PySpark shell, so we need to submit it as a spark job.
-# ./bin/pyspark --master yarn --deploy-mode client --queue research --driver-memory 512M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra << EOT
-# `cat $testcase_shell_file_01`
-# EOT
+./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing shell for various MLLib algorithm failed!"

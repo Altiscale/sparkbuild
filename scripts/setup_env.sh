@@ -22,7 +22,7 @@ if [ "x${SCALA_HOME}" = "x" ] ; then
   export SCALA_HOME=/opt/scala
 fi
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
-  export HADOOP_VERSION=2.4.1
+  export HADOOP_VERSION=2.7.1
 fi
 # Spark 1.5+ default Hive starts with 1.2.1, backward compatible with Hive 1.2.0
 if [ "x${HIVE_VERSION}" = "x" ] ; then
@@ -67,36 +67,8 @@ fi
 # Defines which Hadoop version to build against
 HADOOP_BUILD_VERSION=$HADOOP_VERSION
 
-# Define what goes into the RPM pkg name
-if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop22"
-elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
-elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
-elif [ "x${HADOOP_VERSION}" = "x2.6.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop26"
-elif [ "x${HADOOP_VERSION}" = "x2.7.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
-elif [ "x${HADOOP_VERSION}" = "x2.7.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
-else
-  echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION"
-fi
-
-if [ "x${HIVE_VERSION}" = "x0.12.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive12"
-elif [ "x${HIVE_VERSION}" = "x0.13.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive13"
-elif [ "x${HIVE_VERSION}" = "x0.13.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive13"
-elif [ "x${HIVE_VERSION}" = "x1.2.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive120"
-elif [ "x${HIVE_VERSION}" = "x1.2.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive121"
-else
-  echo "error - can't recognize altiscale's HIVE_VERSION=$HIVE_VERSION"
-fi
+# After AE-1667, no longer need to specify Hadoop and Hive version.
+# into the RPM pkg name
 
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
   if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
