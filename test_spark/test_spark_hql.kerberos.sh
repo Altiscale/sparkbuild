@@ -78,14 +78,6 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-spark_opts_extra=
-for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
-do
-  spark_opts_extra="$spark_opts_extra --jars $i"
-done
-datanucleus_files=$(find $HIVE_HOME/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_opts_extra="/etc/spark/hive-site.xml,${datanucleus_files}$mysql_jars"
 hive_jars=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 

@@ -59,26 +59,15 @@ fi
 
 pushd `pwd`
 cd $spark_home/sbin/
-mysql_jars=$(find /opt/mysql-connector/ -type f -name "mysql-*.jar")
-spark_opts_extra=
-for i in `find $hive_home/lib/ -type f -name "datanucleus*.jar"`
-do
-  spark_opts_extra="$spark_opts_extra $i"
-done
-hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
-hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
-spark_opts_extra=$(echo "$spark_opts_extra $mysql_jars,$hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar" | tr -s ' ' ' ' | tr -s ' ' ',')
 
-spark_files=$(find $hive_home/lib/ -type f -name "datanucleus*.jar" | tr -s '\n' ',')
-spark_files="$spark_files$mysql_jars,$spark_conf/hive-site.xml"
-
+hive_jars=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+hive_jars_colon=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 echo "ok - starting thriftserver"
 
-ret=$(./start-thriftserver.sh --jars $spark_opts_extra --files $spark_files --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$sparkts2_logical_hostname --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/)
+ret=$(./start-thriftserver.sh --driver-class-path hive-site.xml:$hive_jars_colon --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port --hiveconf hive.server2.thrift.bind.host=$sparkts2_logical_hostname --master yarn-client --queue research --executor-memory 1G --num-executors 4 --executor-cores 2 --driver-memory 1G --conf spark.locality.wait=10000 --conf spark.shuffle.manager=sort --conf spark.shuffle.consolidateFiles=true --conf spark.rdd.compress=true --conf spark.storage.memoryFraction=0.6 --conf spark.sql.inMemoryColumnarStorage.compressed=true --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 --conf spark.eventLog.dir=${spark_event_log_dir}$USER/)
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - can't start thriftserver, something went wrong, see $ret"
   exit -3
