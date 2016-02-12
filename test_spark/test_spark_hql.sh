@@ -78,7 +78,8 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-hive_jars=$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
+hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
