@@ -333,14 +333,26 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/bagel/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume-sink/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/mqtt/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/mqtt-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/twitter/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/zeromq/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/kinesis-asl/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/kinesis-asl-assembly/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/licenses/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/common/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/shuffle/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/yarn/target/scala-2.10/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
@@ -357,7 +369,9 @@ cp -rp %{_builddir}/%{build_service_name}/bagel/target/*.jar %{buildroot}%{insta
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
 # required for python and SQL
 cp -rp %{_builddir}/%{build_service_name}/examples/src %{buildroot}%{install_spark_dest}/examples/
-cp -rp %{_builddir}/%{build_service_name}/extras/* %{buildroot}%{install_spark_dest}/extras/
+cp -rp %{_builddir}/%{build_service_name}/extras/README.md %{buildroot}%{install_spark_dest}/extras/
+cp -rp %{_builddir}/%{build_service_name}/extras/kinesis-asl/target/*.jar %{buildroot}%{install_spark_dest}/extras/kinesis-asl/target/
+cp -rp %{_builddir}/%{build_service_name}/extras/kinesis-asl-assembly/target/*.jar %{buildroot}%{install_spark_dest}/extras/kinesis-asl-assembly/target/
 cp -rp %{_builddir}/%{build_service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
 cp -rp %{_builddir}/%{build_service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
 cp -rp %{_builddir}/%{build_service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
@@ -371,9 +385,21 @@ cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_des
 cp -rp %{_builddir}/%{build_service_name}/project %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/docs %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/dev %{buildroot}%{install_spark_dest}/
-cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
-cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
-cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/* %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kafka/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kafka-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/flume/target/*.jar %{buildroot}%{install_spark_dest}/external/flume/target/
+cp -rp %{_builddir}/%{build_service_name}/external/flume-sink/target/*.jar %{buildroot}%{install_spark_dest}/external/flume-sink/target/
+cp -rp %{_builddir}/%{build_service_name}/external/flume-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/flume-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/mqtt/target/*.jar %{buildroot}%{install_spark_dest}/external/mqtt/target/
+cp -rp %{_builddir}/%{build_service_name}/external/mqtt-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/mqtt-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/twitter/target/*.jar %{buildroot}%{install_spark_dest}/external/twitter/target/
+cp -rp %{_builddir}/%{build_service_name}/external/zeromq/target/*.jar %{buildroot}%{install_spark_dest}/external/zeromq/target/
+cp -rp %{_builddir}/%{build_service_name}/network/common/target/*.jar %{buildroot}%{install_spark_dest}/network/common/target/
+cp -rp %{_builddir}/%{build_service_name}/network/shuffle/target/*.jar %{buildroot}%{install_spark_dest}/network/shuffle/target/
+cp -rp %{_builddir}/%{build_service_name}/network/yarn/target/*.jar %{buildroot}%{install_spark_dest}/network/yarn/target/
+cp -rp %{_builddir}/%{build_service_name}/network/yarn/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/network/yarn/target/scala-2.10/
+cp -rp %{_builddir}/%{build_service_name}/sql/hive/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
 cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{install_spark_dest}/lib_managed/jars/
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
@@ -382,14 +408,12 @@ cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_de
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/core/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/catalyst/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/core/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/launcher/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/unsafe/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/yarn/target/
 cp -rp %{_builddir}/%{build_service_name}/core/target/*.jar %{buildroot}%{install_spark_dest}/core/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/catalyst/target/*.jar %{buildroot}%{install_spark_dest}/sql/catalyst/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/core/target/*.jar %{buildroot}%{install_spark_dest}/sql/core/target/
-cp -rp %{_builddir}/%{build_service_name}/sql/hive/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive/target/
 cp -rp %{_builddir}/%{build_service_name}/launcher/target/*.jar %{buildroot}%{install_spark_dest}/launcher/target/
 cp -rp %{_builddir}/%{build_service_name}/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/unsafe/target/
 cp -rp %{_builddir}/%{build_service_name}/yarn/target/*.jar %{buildroot}%{install_spark_dest}/yarn/target/
@@ -439,8 +463,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
 %dir %{install_spark_dest}/extras
-%{install_spark_dest}/extras/java8-tests/
-%{install_spark_dest}/extras/spark-ganglia-lgpl/
 %{install_spark_dest}/extras/README.md
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
@@ -449,30 +471,19 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/mllib
 %{install_spark_dest}/network/common
 %{install_spark_dest}/network/shuffle
+%dir %{install_spark_dest}/network
 %dir %{install_spark_dest}/network/yarn
-%{install_spark_dest}/network/yarn/pom.xml
-%{install_spark_dest}/network/yarn/src
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-javadoc.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/network/yarn/target/.plxarc
-%{install_spark_dest}/network/yarn/target/analysis
-%{install_spark_dest}/network/yarn/target/antrun
-%{install_spark_dest}/network/yarn/target/generated-sources
-%{install_spark_dest}/network/yarn/target/maven-archiver
-%{install_spark_dest}/network/yarn/target/maven-shared-archive-resources
-%{install_spark_dest}/network/yarn/target/maven-status
-%{install_spark_dest}/network/yarn/target/scala-2.10/classes
-%{install_spark_dest}/network/yarn/target/scala-2.10/test-classes
-%{install_spark_dest}/network/yarn/target/scalastyle-output.xml
-%{install_spark_dest}/network/yarn/target/site
 %{install_spark_dest}/python
 %{install_spark_dest}/R
 %{install_spark_dest}/repl
 %{install_spark_dest}/sbin
 %dir %{install_spark_dest}/sql
+%attr(0644,spark,spark) %{install_spark_dest}/sql/hive
 %attr(0644,spark,spark) %{install_spark_dest}/sql/hive-thriftserver
 %{install_spark_dest}/streaming
 %{install_spark_dest}/tools
@@ -505,7 +516,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0644,spark,spark) %{install_spark_dest}/core
 %attr(0644,spark,spark) %{install_spark_dest}/sql/catalyst
 %attr(0644,spark,spark) %{install_spark_dest}/sql/core
-%attr(0644,spark,spark) %{install_spark_dest}/sql/hive
 %attr(0644,spark,spark) %{install_spark_dest}/launcher
 %attr(0644,spark,spark) %{install_spark_dest}/unsafe
 %attr(0644,spark,spark) %{install_spark_dest}/yarn
