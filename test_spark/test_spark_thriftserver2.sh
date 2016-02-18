@@ -10,6 +10,7 @@ spark_logs=""
 spark_home=${SPARK_HOME:='/opt/spark'}
 spark_conf=""
 spark_version=$SPARK_VERSION
+spark_test_dir="$spark_home/test_spark"
 
 source $spark_home/test_spark/init_spark.sh
 
@@ -22,6 +23,10 @@ elif [ ! -d "$spark_home" ] ; then
   exit -2
 else
   echo "ok - applying Spark home $spark_home"
+fi
+if [ ! -d "$spark_test_dir/test_data" ] ; then
+  >&2 echo "fail - $spark_test_dir/test_data does not exist, this is required to create hive tables for testing, can't continue, exiting!"
+  exit -2
 fi
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
 spark_conf=$SPARK_CONF_DIR
@@ -138,6 +143,37 @@ fi
 # This table spark_hive_test_yarn_cluster_table should be created prior to this test case
 # If not, then your Spark is not well tested nor deployed correctly, BE AWARE.
 jdbc_ret=$(beeline -u "jdbc:hive2://$(hostname):$spark_ts2_listen_port" -n alti-test-01 -p "" -e "SELECT COUNT(*) FROM spark_hive_test_yarn_cluster_table;" 2>&1)
+error_str=$(echo $jdbc_ret | grep -io "Error:" | head -n 1 | tr [:upper:] [:lower:])
+if [ "x${error_str}" = "xerror:" ] ; then
+  >&2 echo "fail - beeline can't query hive table spark_hive_test_yarn_cluster_table via Spark ThriftServer2 due to $jdbc_ret"
+else
+  echo "ok - query Hive table spark_hive_test_yarn_cluster_table successfully, we see: $jdbc_ret"
+fi
+
+table_uuid=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
+db_name="spark_test_db_${table_uuid}"
+table_name="spark_hive_test_table_${table_uuid}"
+new_table_name="new_spark_hive_test_table_${table_uuid}"
+orc_table_name="orc_spark_hive_test_table_${table_uuid}"
+parquet_table_name="parquet_spark_hive_test_table_${table_uuid}"
+
+test_create_database_sql1="CREATE DATABASE IF NOT EXISTS ${db_name}"
+test_create_table_sql1="CREATE TABLE $table_name (key INT, value STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE"
+test_alter_table_sql1="ALTER TABLE $table_name RENAME TO $new_table_name"
+test_describe_table_sql1="DESCRIBE FORMATTED $new_table_name"
+test_truncate_table_sql1="TRUNCATE TABLE $new_table_name"
+test_load_data_sql1="LOAD DATA LOCAL INPATH '${spark_test_dir}/test_data/sparksql_testdata2.csv' INTO TABLE $new_table_name"
+test_select_sql1="SELECT SUM(key) FROM $new_table_name"
+# Only works with Hive 1.2.x. Bug on Hive 0.13.1
+test_create_orc_sql1="CREATE TABLE $orc_table_name STORED AS ORC AS SELECT key,value FROM $new_table_name"
+test_create_parquet_sql1="CREATE TABLE $parquet_table_name STORED AS PARQUET AS SELECT * FROM $new_table_name"
+test_select_orc_sql1="SELECT SUM(key) FROM $orc_table_name"
+test_select_parquet_sql1="SELECT SUM(key) FROM $parquet_table_name"
+test_drop_table_sql1="DROP TABLE $new_table_name"
+test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
+test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
+
+jdbc_ret=$(beeline -u "jdbc:hive2://$(hostname):$spark_ts2_listen_port" -n alti-test-01 -p "" -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_describe_table_sql1; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; " 2>&1)
 error_str=$(echo $jdbc_ret | grep -io "Error:" | head -n 1 | tr [:upper:] [:lower:])
 if [ "x${error_str}" = "xerror:" ] ; then
   >&2 echo "fail - beeline can't query hive table spark_hive_test_yarn_cluster_table via Spark ThriftServer2 due to $jdbc_ret"
