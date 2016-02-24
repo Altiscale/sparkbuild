@@ -1,4 +1,4 @@
-%global apache_name           SPARK_USER
+%global apache_name           SPARK_PKG_NAME
 %global spark_uid             SPARK_UID
 %global spark_gid             SPARK_GID
 
@@ -20,7 +20,7 @@
 %define install_spark_conf    /etc/%{spark_folder_name}
 %define install_spark_logs    /service/log/%{apache_name}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
-%define spark_release_dir     /opt/%{apache_name}/lib
+%define spark_release_dir     /opt/%{spark_folder_name}/lib
 %define build_release         BUILD_TIME
 
 Name: %{rpm_package_name}-%{spark_version}
@@ -171,14 +171,9 @@ else
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
 
-# Always build with YARN
-export SPARK_YARN=true
-# Build SPARK with Hive
-export SPARK_HIVE=true
-
 env | sort
 
-echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION SPARK_YARN=$SPARK_YARN SPARK_HIVE=$SPARK_HIVE"
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION"
 
 # PURGE LOCAL CACHE for clean build
 # mvn dependency:purge-local-repository
@@ -532,17 +527,19 @@ if [ "$1" = "1" ]; then
 elif [ "$1" = "2" ]; then
   echo "ok - upgrading system"
 fi
-rm -vf /opt/%{apache_name}/logs
-rm -vf /opt/%{apache_name}/conf
-rm -vf /opt/%{apache_name}/test_spark
+# TODO: Move to Chef later. The symbolic link is version sensitive
+# CLean up old symlink
+rm -vf %{install_spark_dest}/logs
+rm -vf %{install_spark_dest}/conf
+# Delete symlink before re-linking them
 rm -vf /opt/%{apache_name}
 rm -vf /etc/%{apache_name}
+# This MUST happen first
 ln -vsf %{install_spark_dest} /opt/%{apache_name}
 ln -vsf %{install_spark_conf} /etc/%{apache_name}
+# Restore conf and logs symlink
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-# The symbolic link is version sensitive
-# TODO: Move to Chef later
 ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/
 for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
 do
@@ -553,7 +550,7 @@ ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain
 
 %postun
 if [ "$1" = "0" ]; then
-  ret=$(rpm -qa | grep %{rpm_package_name} | grep -v test | wc -l)
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep -v example | grep -v yarn-shuffle | wc -l)
   # The rpm is already uninstall and shouldn't appear in the counts
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark version, no need to clean up symbolic links"
@@ -562,20 +559,20 @@ if [ "$1" = "0" ]; then
     rm -vrf %{install_spark_conf}
   else
     echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
-    rm -vf /opt/%{apache_name}/logs
-    rm -vf /opt/%{apache_name}/conf
-    rm -vf /opt/%{apache_name}
-    rm -vf /etc/%{apache_name}
+    rm -vf %{install_spark_dest}/logs
+    rm -vf %{install_spark_dest}/conf
     rm -vrf %{install_spark_dest}
     rm -vrf %{install_spark_conf}
+    rm -vf /opt/%{apache_name}
+    rm -vf /etc/%{apache_name}
   fi
 fi
 # Don't delete the users after uninstallation.
 
 %postun devel
 if [ "$1" = "0" ]; then
-  ret=$(rpm -qa | grep %{rpm_package_name} | grep devel | grep -v test | wc -l)
-  # The rpm is already uninstall and shouldn't appear in the counts
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep devel | grep -v example | wc -l)
+  # The devel rpm is already uninstall and shouldn't appear in the counts
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark development package version"
     echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
@@ -600,8 +597,8 @@ fi
 
 %postun kinesis
 if [ "$1" = "0" ]; then
-  ret=$(rpm -qa | grep %{rpm_package_name} | grep devel | grep -v test | wc -l)
-  # The rpm is already uninstall and shouldn't appear in the counts
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep kinesis | grep -v example | wc -l)
+  # The kinesis rpm is already uninstall and shouldn't appear in the counts
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark kinesis package version"
     echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
@@ -615,6 +612,8 @@ if [ "$1" = "0" ]; then
 fi
 
 %changelog
+* Wed Feb 24 2016 Andrew Lee 20160224
+- Remove SPARK_YARN and SPARK_HIVE, fix symlink logic
 * Mon Nov 30 2015 Andrew Lee 20151130
 - Add new sub package for spark kinesis rpm
 * Mon Nov 23 2015 Andrew Lee 20151123
@@ -661,5 +660,3 @@ fi
 - Rename Spark pkg name to vcc-spark so we can identify our own build
 * Wed Mar 19 2014 Andrew Lee 20140319
 - Initial Creation of spec file for Spark 0.9.1
-
-

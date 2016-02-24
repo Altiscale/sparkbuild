@@ -42,8 +42,8 @@ export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_H
 
 # Define default spark uid:gid and build version
 # and all other Spark build related env
-if [ "x${SPARK_USER}" = "x" ] ; then
-  export SPARK_USER=spark
+if [ "x${SPARK_PKG_NAME}" = "x" ] ; then
+  export SPARK_PKG_NAME=spark
 fi
 if [ "x${SPARK_GID}" = "x" ] ; then
   export SPARK_GID=411460017
@@ -56,12 +56,6 @@ if [ "x${SPARK_VERSION}" = "x" ] ; then
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
   export SPARK_PLAIN_VERSION=1.6.0
-fi
-if [ "x${SPARK_YARN}" = "x" ] ; then
-  export SPARK_YARN=true
-fi
-if [ "x${SPARK_HIVE}" = "x" ] ; then
-  export SPARK_HIVE=true
 fi
 
 # Defines which Hadoop version to build against
