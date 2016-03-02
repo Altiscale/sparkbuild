@@ -46,7 +46,7 @@ if [ "x${spark_version}" = "x" ] ; then
   exit -2
 fi
 
-spark_ts2_listen_port=20000
+spark_ts2_listen_port=28150
 running_user=`whoami`
 # This needs to align with /etc/spark/log4j.properties
 spark_logs=${HOME}/Hadooplogs/spark/logs/spark.log
