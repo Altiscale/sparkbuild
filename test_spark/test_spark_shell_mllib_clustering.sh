@@ -58,14 +58,13 @@ hdfs dfs -put $spark_home/mllib/data/kmeans/kmeans_data.txt spark/test/kmean/
 # To create local directory when generating PMML XML file locally on workbench
 mkdir -p /tmp/spark_pmml_test/
 
-echo "ok - testing spark REPL shell with various algorithm"
-spark_opts_extra=""
+echo "ok - testing spark REPL shell with Clustering algorithm"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra $queue_name << EOT
+./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $queue_name << EOT
 `cat $testcase_shell_file_01`
 EOT
 

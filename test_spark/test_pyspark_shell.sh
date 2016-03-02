@@ -66,7 +66,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' /etc/spark/spark-defaults.conf |
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
+./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing shell for various MLLib algorithm failed!"
