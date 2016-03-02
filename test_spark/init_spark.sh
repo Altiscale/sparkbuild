@@ -62,5 +62,5 @@ if [ ! -f $spark_conf_tmp ] ; then
 fi
 
 # Prepare Spark user event log HDFS directory for every new users running Spark for the first time
-event_log_dir=$(grep 'spark.history.fs.logDirectory' $spark_conf_tmp | tr -s ' ' '\t' | cut -f2)
+event_log_dir=$(grep 'spark.eventLog.dir' $spark_conf_tmp | tr -s ' ' '\t' | cut -f2)
 hdfs dfs -mkdir $event_log_dir/$USER

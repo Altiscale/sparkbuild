@@ -76,7 +76,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 # pyspark only supports yarn-client mode now
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
+./bin/spark-submit --verbose --master yarn --deploy-mode client $queue_name --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py $spark_home/test_spark/src/main/python/pyspark_hql.py
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing shell for Python SparkSQL on HiveQL/HiveContext failed!!"

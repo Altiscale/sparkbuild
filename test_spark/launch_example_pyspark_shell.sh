@@ -74,7 +74,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 # Launch a pyspark shell prompt for ppl to use
 # queue_name="--queue interactive"
 queue_name=""
-./bin/pyspark --master yarn --deploy-mode client --driver-memory 512M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra $queue_name
+./bin/pyspark --master yarn --deploy-mode client --driver-memory 512M --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $spark_opts_extra $queue_name
 
 popd
 

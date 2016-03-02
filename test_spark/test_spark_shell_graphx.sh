@@ -51,16 +51,13 @@ hdfs dfs -mkdir -p spark/test/graphx/followers
 hdfs dfs -put ${spark_home}/graphx/data/followers.txt spark/test/graphx/followers/
 hdfs dfs -put ${spark_home}/graphx/data/users.txt spark/test/graphx/followers/
 
-echo "ok - testing spark REPL shell with various algorithm"
-# The guava JAR here does not match the Spark's pom.xml which is looking for version 14.0.1
-# Hive comes with Guava 11.0.2
-spark_opts_extra=""
+echo "ok - testing spark REPL shell with GraphX's algorithm"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1536M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra $queue_name << EOT
+./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1536M --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $queue_name << EOT
 `cat $testcase_shell_file_01`
 EOT
 

@@ -63,7 +63,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 # queue_name=""
 # SPARK-6797 SparkR does not support YARN (yarn-client, yarn-cluster), only local mode available
 # Please make sure Workbench has sufficient memory for your tasks/jobs
-./bin/sparkR --verbose --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra
+./bin/sparkR --verbose --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $spark_opts_extra
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing SparkR shell for various algorithm failed!"
