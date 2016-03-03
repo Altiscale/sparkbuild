@@ -10,8 +10,9 @@
   <packaging>jar</packaging>
   <version>1.6</version>
 
+  <!-- Define default values -->
   <properties>
-    <spark.version>1.6.0</spark.version>
+    <spark.version>1.6.1</spark.version>
     <hadoop.version>2.4.1</hadoop.version>
     <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
     <hive.version>1.2.1.spark</hive.version>
@@ -46,6 +47,9 @@
   <profiles>
     <profile>
       <id>spark-1.4</id>
+      <properties>
+        <spark.version>1.4.2</spark.version>
+      </properties>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -97,6 +101,9 @@
 
     <profile>
       <id>spark-1.5</id>
+      <properties>
+        <spark.version>1.5.2</spark.version>
+      </properties>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -152,6 +159,9 @@
 
     <profile>
       <id>spark-1.6</id>
+      <properties>
+        <spark.version>1.6.1</spark.version>
+      </properties>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
