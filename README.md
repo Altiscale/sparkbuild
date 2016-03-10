@@ -1,3 +1,5 @@
+# DO NOT USE THIS BRANCH, WE HAVE SWITCH TO `branch-1.6-alti`
+
 sparkbuild
 ==========
 
