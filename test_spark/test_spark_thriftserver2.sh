@@ -172,8 +172,9 @@ test_select_parquet_sql1="SELECT SUM(key) FROM $parquet_table_name"
 test_drop_table_sql1="DROP TABLE $new_table_name"
 test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
 test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
+test_drop_database_sql1="DROP DATABASE IF EXISTS ${db_name}"
 
-jdbc_ret=$(beeline -u "jdbc:hive2://$(hostname):$spark_ts2_listen_port" -n alti-test-01 -p "" -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_describe_table_sql1; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; " 2>&1)
+jdbc_ret=$(beeline -u "jdbc:hive2://$(hostname):$spark_ts2_listen_port" -n alti-test-01 -p "" -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_describe_table_sql1; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; $test_drop_database_sql1; " 2>&1)
 error_str=$(echo $jdbc_ret | grep -io "Error:" | head -n 1 | tr [:upper:] [:lower:])
 if [ "x${error_str}" = "xerror:" ] ; then
   >&2 echo "fail - beeline can't query hive table spark_hive_test_yarn_cluster_table via Spark ThriftServer2 due to $jdbc_ret"
