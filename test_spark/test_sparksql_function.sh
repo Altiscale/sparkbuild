@@ -88,7 +88,7 @@ test_select_parquet_sql1="SELECT SUM(key) FROM $parquet_table_name"
 test_drop_table_sql1="DROP TABLE $new_table_name"
 test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
 test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
-test_drop_database_sql1="CREATE DATABASE IF EXISTS ${db_name}"
+test_drop_database_sql1="DROP DATABASE IF EXISTS ${db_name}"
 
 hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | tr -d '\n')
 sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
