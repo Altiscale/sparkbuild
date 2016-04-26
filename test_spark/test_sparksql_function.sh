@@ -112,8 +112,8 @@ else
   exit -5
 fi
 
-if [ $? -ne "0" ] ; then
-  >&2 echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
+if [ "$sql_ret_code" -ne "0" ] ; then
+  >&2 echo "fail - testing DDL for SparkSQL on HiveQL/HiveContext failed!!"
   exit -4
 fi
 
