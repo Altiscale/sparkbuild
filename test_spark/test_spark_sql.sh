@@ -64,7 +64,7 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode cluster --driver-java-options "-Djava.library.path=/opt/hadoop/lib/native/" --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $queue_name --class SparkSQLTestCase1SQLContextApp $spark_test_dir/${app_name}-${app_ver}.jar
+./bin/spark-submit --verbose --master yarn --deploy-mode client --jars /etc/spark/hive-site.xml --driver-java-options "-Djava.library.path=/opt/hadoop/lib/native/" --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $queue_name --class SparkSQLTestCase1SQLContextApp $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing shell for SparkSQL SQLContext failed!!"
