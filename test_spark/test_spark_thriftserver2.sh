@@ -46,7 +46,7 @@ if [ "x${spark_version}" = "x" ] ; then
   exit -2
 fi
 
-spark_ts2_listen_port=28150
+spark_ts2_listen_port=48600
 running_user=`whoami`
 # This needs to align with /etc/spark/log4j.properties
 spark_logs=${HOME}/Hadooplogs/spark/logs/spark.log
@@ -62,8 +62,8 @@ fi
 pushd `pwd`
 cd $spark_home/sbin/
 
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
-sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_2.10-${spark_version}.jar"
+sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
 hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$sparksql_hivejars:$sparksql_hivethriftjars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 

@@ -10,16 +10,19 @@ if [ "x${ANT_HOME}" = "x" ] ; then
   export ANT_HOME=/opt/apache-ant
 fi
 if [ "x${MAVEN_HOME}" = "x" ] ; then
-  export MAVEN_HOME=/opt/apache-maven
+  export MAVEN_HOME=/usr/share/apache-maven
 fi
 if [ "x${M2_HOME}" = "x" ] ; then
-  export M2_HOME=/opt/apache-maven
+  export M2_HOME=/usr/share/apache-maven
 fi
 if [ "x${MAVEN_OPTS}" = "x" ] ; then
   export MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024M -XX:ReservedCodeCacheSize=512m"
 fi
 if [ "x${SCALA_HOME}" = "x" ] ; then
   export SCALA_HOME=/opt/scala
+fi
+if [ "x${SCALA_VERSION}" = "x" ] ; then
+  export SCALA_VERSION=2.11
 fi
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
   export HADOOP_VERSION=2.7.1
@@ -30,7 +33,8 @@ if [ "x${HIVE_VERSION}" = "x" ] ; then
 fi
 # AE-1226 temp fix on the R PATH
 if [ "x${R_HOME}" = "x" ] ; then
-  export R_HOME=$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep bin | head -n 1))
+  # AE-1222 an ugly way to guess where is R_HOME
+  export R_HOME=$(dirname $(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep bin | head -n 1)))
   if [ "x${R_HOME}" = "x" ] ; then
     echo "warn - R_HOME not defined, CRAN R isn't installed properly in the current env"
   else
@@ -52,10 +56,10 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.6.1
+  export SPARK_VERSION=2.0.0
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  export SPARK_PLAIN_VERSION=1.6.1
+  export SPARK_PLAIN_VERSION=2.0.0
 fi
 
 # Defines which Hadoop version to build against

@@ -85,14 +85,14 @@ test_window_sql1="SELECT * FROM (
               FROM $table_name) t
               WHERE rank=1;"
 
-test_window_sql2="SELECT name, country, revenue, PERCENT_RANK() over (PARTITION by country ORDER BY revenue DESC rows between unbounded preceding and unbounded following) percent_rank FROM $table_name;"
+test_window_sql2="SELECT name, country, revenue, PERCENT_RANK() over (PARTITION by country ORDER BY revenue DESC) AS percent_rank FROM $table_name;"
 
 drop_table_sql="DROP TABLE $table_name"
 drop_database_sql="DROP DATABASE IF EXISTS ${db_name}"
 
 hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | tr -d '\n')
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
-sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_2.10-${spark_version}.jar"
+sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
 hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$sparksql_hivejars:$sparksql_hivethriftjars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
@@ -105,15 +105,15 @@ if [ "x${hadoop_ver}" = "x2.4.1" ] ; then
   ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ; "
   sql_ret_code=$?
 elif [ "x${hadoop_ver}" = "x2.7.1" ] ; then
-  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ;"
+  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --jars /etc/spark/hive-site.xml,$hive_jars $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ;"
   sql_ret_code=$?
 else
   echo "fatal - hadoop version not supported, neither 2.7.1 nor 2.4.1"
   exit -5
 fi
 
-if [ $? -ne "0" ] ; then
-  >&2 echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
+if [ "$sql_ret_code" -ne "0" ] ; then
+  >&2 echo "fail - testing SparkSQL Windowing Function on HiveQL/HiveContext failed!!"
   exit -4
 fi
 

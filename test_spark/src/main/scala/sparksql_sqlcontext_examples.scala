@@ -1,41 +1,50 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
-
-case class Person(name: String, age: Int)
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.Row
 
 object SparkSQLTestCase1SQLContextApp {
- def main(args: Array[String]) {
 
-  val conf = new SparkConf().setAppName("Spark SQL Context TestCase Application")
-  val sc = new SparkContext(conf)
+  case class Person(name: String, age: Int)
+  def parsePerson(str: Row): Person = {
+    val fields = str.mkString(",").split(",")
+    assert(fields.size == 2)
+    Person(fields(0), fields(1).trim.toInt)
+  }
 
-  // sc is an existing SparkContext.
-  val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+  def main(args: Array[String]) {
+    val mySqlContext = SparkSession
+      .builder
+      .appName("Spark SQL Context TestCase Application")
+      .getOrCreate()
 
-  // SPARK-1.2 createSchemaRDD obsolete, used to implicitly convert an RDD to a SchemaRDD.
-  // import sqlContext.createSchemaRDD
+    println("SQLContext has been init by SparkSession, inspecting configuration now for debugging purpose")
+    val sc = mySqlContext.sparkContext
+    val sconf = sc.getConf.toDebugString
+    println(sconf)
 
-  // SPARK-1.3 This is used to implicitly convert an RDD to a DataFrame.
-  import sqlContext.implicits._
+    import mySqlContext.implicits._
 
-  // Define the schema using a case class.
-  // Note: Case classes in Scala 2.10 can support only up to 22 fields. To work around this limit,
-  // you can use custom classes that implement the Product interface.
-  
-  // Create an RDD of Person objects and register it as a table.
-  // val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))
-  // SPARK-1.3, applying toDF() function here.
-  val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt)).toDF()
-  people.registerTempTable("people")
+    // Define the schema using a case class.
+    // Note: Case classes in Scala 2.10 can support only up to 22 fields. To work around this limit,
+    // you can use custom classes that implement the Product interface.
 
-  // SQL statements can be run by using the sql methods provided by sqlContext.
-  val teenagers = sqlContext.sql("SELECT name FROM people WHERE age >= 13 AND age <= 19")
+    // Create an RDD of Person objects and register it as a table.
+    // val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))
+    // SPARK-1.3, applying toDF() function here.
+    // val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt)).toDF()
+    // Due to SPARK-2243, we will re-use the same SparkContext from SparkSession to load the file
+    val people = mySqlContext.read.text("spark/test/resources/people.txt")
+          .map(parsePerson)
+          .toDF()
+    people.createOrReplaceTempView("people")
 
-  // The results of SQL queries are SchemaRDDs and support all the normal RDD operations.
-  // The columns of a row in the result can be accessed by ordinal.
-  teenagers.map(t => "Name: " + t(0)).collect().foreach(println)
+    // SQL statements can be run by using the sql methods provided by sqlContext.
+    val teenagers = mySqlContext.sql("SELECT name FROM people WHERE age >= 13 AND age <= 19")
+
+    // The results of SQL queries are SchemaRDDs and support all the normal RDD operations.
+    // The columns of a row in the result can be accessed by ordinal.
+    teenagers.collect().foreach(println)
   }
 }
-
-

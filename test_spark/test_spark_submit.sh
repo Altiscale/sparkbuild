@@ -44,7 +44,7 @@ cd $spark_home
 
 echo "ok - testing spark REPL shell with various algorithm"
 
-SPARK_EXAMPLE_JAR=$(find ${spark_home}/examples/target/spark-examples_*-${spark_version}.jar)
+SPARK_EXAMPLE_JAR=$(find ${spark_home}/examples/target/scala-${SPARK_SCALA_VERSION}/jars/spark-examples_*-${spark_version}.jar)
 
 if [ ! -f "${SPARK_EXAMPLE_JAR}" ] ; then
   >&2 echo "fail - cannot detect example jar for this $spark_version $spark_installed build!"

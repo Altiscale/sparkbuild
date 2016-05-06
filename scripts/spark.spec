@@ -12,6 +12,7 @@
 %define hadoop_version        HADOOP_VERSION_REPLACE
 %define hadoop_build_version  HADOOP_BUILD_VERSION_REPLACE
 %define hive_version          HIVE_VERSION_REPLACE
+%define scala_build_version   SCALA_BUILD_VERSION_REPLACE
 %define build_service_name    alti-spark
 %define spark_folder_name     %{rpm_package_name}-%{spark_version}
 %define spark_testsuite_name  %{spark_folder_name}
@@ -32,12 +33,12 @@ Group: Development/Libraries
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
-Requires: scala = 2.10.5
+Requires: scala = 2.11.8
 Requires: %{rpm_package_name}-%{spark_version}-example
 Requires: %{rpm_package_name}-%{spark_version}-yarn-shuffle
 # BuildRequires: vcc-hive-%{hive_version}
-BuildRequires: scala = 2.10.5
-BuildRequires: apache-maven >= 3.3.3
+BuildRequires: scala = 2.11.8
+BuildRequires: apache-maven >= 3.3.9
 BuildRequires: jdk >= 1.7.0.51
 # The whole purpose for this req is just to repackage the JAR with JDK 1.6
 BuildRequires: java-1.6.0-openjdk-devel
@@ -74,7 +75,7 @@ Group: Development/Libraries
 Requires: %{rpm_package_name}-%{spark_version}
 
 %description devel
-This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-launcher, etc. that are under Apache License 2. Other components that has a different license will be under different package for distribution.
+This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-tags, spark-sketch, spark-launcher, etc. that are under Apache License 2. Other components that has a different license will be under different package for distribution.
 
 %package kinesis
 Summary: Amazon Kinesis libraries to integrate with Spark Streaming compiled by maven
@@ -113,7 +114,7 @@ if [ "x${SCALA_HOME}" = "x" ] ; then
 fi
 # AE-1226 temp fix on the R PATH
 if [ "x${R_HOME}" = "x" ] ; then
-  export R_HOME=$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep bin | head -n 1))
+  export R_HOME=$(dirname $(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep bin | head -n 1)))
   if [ "x${R_HOME}" = "x" ] ; then
     echo "warn - R_HOME not defined, CRAN R isn't installed properly in the current env"
   else
@@ -173,7 +174,7 @@ fi
 
 env | sort
 
-echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION"
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION scala=scala-%{scala_build_version}"
 
 # PURGE LOCAL CACHE for clean build
 # mvn dependency:purge-local-repository
@@ -260,49 +261,28 @@ if [ -d "%{current_workspace}/.m2" ] ; then
 fi
 
 # This applies to local integration with Spark assembly JARs
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../core/target/spark-core_%{scala_build_version}-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-core_%{scala_build_version} -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
 
 # For Kafka Spark Streaming Examples
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka-0-8/target/spark-streaming-kafka-0-8_%{scala_build_version}-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka-0-8_%{scala_build_version} -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
 
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_%{scala_build_version}-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_%{scala_build_version} -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
 
 # For SparkSQL Hive integration examples, this is required when you use -Phive-provided
 # spark-hive JAR needs to be provided to the test case in this case.
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-hive_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/core/target/spark-sql_%{scala_build_version}-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-sql_%{scala_build_version} -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/catalyst/target/spark-catalyst_%{scala_build_version}-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-catalyst_%{scala_build_version} -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/hive/target/spark-hive_%{scala_build_version}-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-hive_%{scala_build_version} -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
 
 # Build our test case with our own pom.xml file
 # Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
-mvn -U -X package -Pspark-1.6 -Pkafka-provided $testcase_hadoop_profile_str
+mvn -U -X package -Pspark-2.0 -Pkafka-provided $testcase_hadoop_profile_str
 
 popd
 echo "ok - build spark test case completed successfully!"
 
-echo "ok - start repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
-pushd `pwd`
-cd %{_builddir}/%{build_service_name}/
-%{__mkdir} -p %{_builddir}/%{build_service_name}/tmp/
-# AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with 
-# JDK 1.6 while not breaking the bytecode, etc. In other word, only the JAR format matters
-# and we don't want to compile it with JDK 1.6.
-ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-
-cp -p %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-
-ls -al %{_builddir}/%{build_service_name}/tmp/ORG-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-
-pushd %{_builddir}/%{build_service_name}/tmp/
-unzip -d tweak_spark ORG-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-cd tweak_spark
-/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvmf META-INF/MANIFEST.MF %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar .
-popd
-popd
-
-ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-ls -al %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-cp -fp %{_builddir}/%{build_service_name}/tmp/REWRAP-spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-
-echo "ok - complete repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
+# In AE-1919, we no longer repackage JAR with JDK 6
+echo "ok - we no longer repackge assembly JAR with jdk 1.6, see AE-1919 and SPARK-11157"
 
 # AE-1369
 echo "ok - start packging a sparkr.zip for YARN distributed cache, this assumes user isn't going to customize this file"
@@ -324,27 +304,22 @@ echo "test install spark dest = %{buildroot}/%{install_spark_dest}"
 echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}/etc/%{install_spark_dest}/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/bagel/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-%{scala_build_version}/jars
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/scala-2.11/jars/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka-0-8/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka-0-8-assembly/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume-sink/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume-assembly/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/mqtt/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/mqtt-assembly/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/twitter/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/zeromq/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/kinesis-asl/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/kinesis-asl-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kinesis-asl/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kinesis-asl-assembly/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/licenses/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/common/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/shuffle/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/yarn/target/scala-2.10/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/common/network-common/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/common/network-shuffle/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive/target/
@@ -359,14 +334,13 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
 %{__mkdir} -p %{buildroot}%{install_spark_test}
 # copy all necessary jars
-cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-cp -rp %{_builddir}/%{build_service_name}/bagel/target/*.jar %{buildroot}%{install_spark_dest}/bagel/target/
+cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-%{scala_build_version}/jars/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-%{scala_build_version}/jars/
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
+cp -rp %{_builddir}/%{build_service_name}/examples/target/scala-2.11/jars/*.jar %{buildroot}%{install_spark_dest}/examples/target/scala-2.11/jars/
 # required for python and SQL
 cp -rp %{_builddir}/%{build_service_name}/examples/src %{buildroot}%{install_spark_dest}/examples/
-cp -rp %{_builddir}/%{build_service_name}/extras/README.md %{buildroot}%{install_spark_dest}/extras/
-cp -rp %{_builddir}/%{build_service_name}/extras/kinesis-asl/target/*.jar %{buildroot}%{install_spark_dest}/extras/kinesis-asl/target/
-cp -rp %{_builddir}/%{build_service_name}/extras/kinesis-asl-assembly/target/*.jar %{buildroot}%{install_spark_dest}/extras/kinesis-asl-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kinesis-asl/target/*.jar %{buildroot}%{install_spark_dest}/external/kinesis-asl/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kinesis-asl-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/kinesis-asl-assembly/target/
 cp -rp %{_builddir}/%{build_service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
 cp -rp %{_builddir}/%{build_service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
 cp -rp %{_builddir}/%{build_service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
@@ -380,22 +354,18 @@ cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_des
 cp -rp %{_builddir}/%{build_service_name}/project %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/docs %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/dev %{buildroot}%{install_spark_dest}/
-cp -rp %{_builddir}/%{build_service_name}/external/kafka/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka/target/
-cp -rp %{_builddir}/%{build_service_name}/external/kafka-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kafka-0-8/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka-0-8/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kafka-0-8-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka-0-8-assembly/target/
 cp -rp %{_builddir}/%{build_service_name}/external/flume/target/*.jar %{buildroot}%{install_spark_dest}/external/flume/target/
 cp -rp %{_builddir}/%{build_service_name}/external/flume-sink/target/*.jar %{buildroot}%{install_spark_dest}/external/flume-sink/target/
 cp -rp %{_builddir}/%{build_service_name}/external/flume-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/flume-assembly/target/
-cp -rp %{_builddir}/%{build_service_name}/external/mqtt/target/*.jar %{buildroot}%{install_spark_dest}/external/mqtt/target/
-cp -rp %{_builddir}/%{build_service_name}/external/mqtt-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/mqtt-assembly/target/
-cp -rp %{_builddir}/%{build_service_name}/external/twitter/target/*.jar %{buildroot}%{install_spark_dest}/external/twitter/target/
-cp -rp %{_builddir}/%{build_service_name}/external/zeromq/target/*.jar %{buildroot}%{install_spark_dest}/external/zeromq/target/
-cp -rp %{_builddir}/%{build_service_name}/network/common/target/*.jar %{buildroot}%{install_spark_dest}/network/common/target/
-cp -rp %{_builddir}/%{build_service_name}/network/shuffle/target/*.jar %{buildroot}%{install_spark_dest}/network/shuffle/target/
-cp -rp %{_builddir}/%{build_service_name}/network/yarn/target/*.jar %{buildroot}%{install_spark_dest}/network/yarn/target/
-cp -rp %{_builddir}/%{build_service_name}/network/yarn/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/network/yarn/target/scala-2.10/
+cp -rp %{_builddir}/%{build_service_name}/common/network-common/target/*.jar %{buildroot}%{install_spark_dest}/common/network-common/target/
+cp -rp %{_builddir}/%{build_service_name}/common/network-shuffle/target/*.jar %{buildroot}%{install_spark_dest}/common/network-shuffle/target/
+cp -rp %{_builddir}/%{build_service_name}/common/network-yarn/target/*.jar %{buildroot}%{install_spark_dest}/common/network-yarn/target/
+cp -rp %{_builddir}/%{build_service_name}/common/network-yarn/target/scala-%{scala_build_version}/*.jar %{buildroot}%{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/
 cp -rp %{_builddir}/%{build_service_name}/sql/hive/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
-cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{install_spark_dest}/lib_managed/jars/
+# cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{install_spark_dest}/lib_managed/jars/
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
 
@@ -404,13 +374,17 @@ cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_de
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/catalyst/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/core/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/launcher/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/unsafe/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/common/unsafe/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/common/tags/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/common/sketch/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/yarn/target/
 cp -rp %{_builddir}/%{build_service_name}/core/target/*.jar %{buildroot}%{install_spark_dest}/core/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/catalyst/target/*.jar %{buildroot}%{install_spark_dest}/sql/catalyst/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/core/target/*.jar %{buildroot}%{install_spark_dest}/sql/core/target/
 cp -rp %{_builddir}/%{build_service_name}/launcher/target/*.jar %{buildroot}%{install_spark_dest}/launcher/target/
-cp -rp %{_builddir}/%{build_service_name}/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/unsafe/target/
+cp -rp %{_builddir}/%{build_service_name}/common/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/common/unsafe/target/
+cp -rp %{_builddir}/%{build_service_name}/common/tags/target/*.jar %{buildroot}%{install_spark_dest}/common/tags/target/
+cp -rp %{_builddir}/%{build_service_name}/common/sketch/target/*.jar %{buildroot}%{install_spark_dest}/common/sketch/target/
 cp -rp %{_builddir}/%{build_service_name}/yarn/target/*.jar %{buildroot}%{install_spark_dest}/yarn/target/
 
 # test deploy the config folder
@@ -420,7 +394,7 @@ cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf
 cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}%{install_spark_dest}
+# cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}%{install_spark_dest}
 cp -p %{_builddir}/%{build_service_name}/licenses/* %{buildroot}%{install_spark_dest}/licenses/
 
@@ -454,26 +428,23 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/bin
 %{install_spark_dest}/data
 %{install_spark_dest}/dev
-%{install_spark_dest}/bagel
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
-%dir %{install_spark_dest}/extras
-%{install_spark_dest}/extras/README.md
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
 %{install_spark_dest}/lib_managed
 %{install_spark_dest}/licenses
 %{install_spark_dest}/mllib
-%{install_spark_dest}/network/common
-%{install_spark_dest}/network/shuffle
-%dir %{install_spark_dest}/network
-%dir %{install_spark_dest}/network/yarn
-%dir %{install_spark_dest}/network/yarn/target
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-javadoc.jar
-%{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-sources.jar
+%{install_spark_dest}/common/network-common
+%{install_spark_dest}/common/network-shuffle
+%dir %{install_spark_dest}/common/
+%dir %{install_spark_dest}/common/network-yarn
+%dir %{install_spark_dest}/common/network-yarn/target
+%{install_spark_dest}/common/network-yarn/target/spark-network-yarn_%{scala_build_version}-%{spark_plain_version}-tests.jar
+%{install_spark_dest}/common/network-yarn/target/spark-network-yarn_%{scala_build_version}-%{spark_plain_version}.jar
+%{install_spark_dest}/common/network-yarn/target/spark-network-yarn_%{scala_build_version}-%{spark_plain_version}-test-sources.jar
+%{install_spark_dest}/common/network-yarn/target/spark-network-yarn_%{scala_build_version}-%{spark_plain_version}-javadoc.jar
+%{install_spark_dest}/common/network-yarn/target/spark-network-yarn_%{scala_build_version}-%{spark_plain_version}-sources.jar
 %{install_spark_dest}/python
 %{install_spark_dest}/R
 %{install_spark_dest}/repl
@@ -489,7 +460,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %doc %{install_spark_dest}/LICENSE
 %doc %{install_spark_dest}/README.md
 %doc %{install_spark_dest}/NOTICE
-%doc %{install_spark_dest}/CHANGES.txt
+# %doc %{install_spark_dest}/CHANGES.txt
 %doc %{install_spark_dest}/CONTRIBUTING.md
 %attr(0755,spark,spark) %{install_spark_conf}/spark-env.sh
 %attr(0644,spark,spark) %{install_spark_conf}/log4j.properties
@@ -505,7 +476,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 
 %files yarn-shuffle
 %defattr(0755,spark,spark,0755)
-%{install_spark_dest}/network/yarn/target/scala-2.10/
+%{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/
 
 %files devel
 %defattr(0755,spark,spark,0755)
@@ -513,13 +484,15 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/sql/catalyst
 %{install_spark_dest}/sql/core
 %{install_spark_dest}/launcher
-%{install_spark_dest}/unsafe
+%{install_spark_dest}/common/unsafe
+%{install_spark_dest}/common/tags
+%{install_spark_dest}/common/sketch
 %{install_spark_dest}/yarn
 
 %files kinesis
 %defattr(0755,spark,spark,0755)
-%{install_spark_dest}/extras/kinesis-asl
-%{install_spark_dest}/extras/kinesis-asl-assembly
+%{install_spark_dest}/external/kinesis-asl
+%{install_spark_dest}/external/kinesis-asl-assembly
 
 %post
 if [ "$1" = "1" ]; then
@@ -540,13 +513,18 @@ ln -vsf %{install_spark_conf} /etc/%{apache_name}
 # Restore conf and logs symlink
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/
+
+for f in `find %{install_spark_dest}/assembly/target/scala-%{scala_build_version}/jars/ -name "*.jar"`
+do
+  ln -vsf $f %{spark_release_dir}/
+done
+
 for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
 do
   ln -vsf $f %{spark_release_dir}/
 done
-ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/
-ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/examples/target/scala-2.11/jars/spark-examples_%{scala_build_version}-%{spark_plain_version}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
 
 %postun
 if [ "$1" = "0" ]; then
@@ -581,7 +559,9 @@ if [ "$1" = "0" ]; then
     rm -vrf %{install_spark_dest}/sql/core
     rm -vrf %{install_spark_dest}/sql/hive
     rm -vrf %{install_spark_dest}/launcher
-    rm -vrf %{install_spark_dest}/unsafe
+    rm -vrf %{install_spark_dest}/common/unsafe
+    rm -vrf %{install_spark_dest}/common/tags
+    rm -vrf %{install_spark_dest}/common/sketch
     rm -vrf %{install_spark_dest}/yarn
   else
     echo "ok - uninstalling %{rpm_package_name}-devel on system, removing everything related except the parent directoy /opt/%{apache_name}"
@@ -590,7 +570,9 @@ if [ "$1" = "0" ]; then
     rm -vrf %{install_spark_dest}/sql/core
     rm -vrf %{install_spark_dest}/sql/hive
     rm -vrf %{install_spark_dest}/launcher
-    rm -vrf %{install_spark_dest}/unsafe
+    rm -vrf %{install_spark_dest}/common/unsafe
+    rm -vrf %{install_spark_dest}/common/tags
+    rm -vrf %{install_spark_dest}/common/sketch
     rm -vrf %{install_spark_dest}/yarn
   fi
 fi
@@ -602,12 +584,12 @@ if [ "$1" = "0" ]; then
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark kinesis package version"
     echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
-    rm -vrf %{install_spark_dest}/extras/kinesis-asl
-    rm -vrf %{install_spark_dest}/extras/kinesis-asl-assembly
+    rm -vrf %{install_spark_dest}/external/kinesis-asl
+    rm -vrf %{install_spark_dest}/external/kinesis-asl-assembly
   else
     echo "ok - uninstalling %{rpm_package_name}-kinesis on system, removing everything related except the parent directoy /opt/%{apache_name}"
-    rm -vrf %{install_spark_dest}/extras/kinesis-asl
-    rm -vrf %{install_spark_dest}/extras/kinesis-asl-assembly
+    rm -vrf %{install_spark_dest}/external/kinesis-asl
+    rm -vrf %{install_spark_dest}/external/kinesis-asl-assembly
   fi
 fi
 
