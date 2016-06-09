@@ -20,6 +20,7 @@
 %define install_spark_conf    /etc/%{spark_folder_name}
 %define install_spark_logs    /service/log/%{apache_name}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
+%define install_sparkts_initd /etc/init.d
 %define spark_release_dir     /opt/%{spark_folder_name}/lib
 %define build_release         BUILD_TIME
 
@@ -52,6 +53,14 @@ Origin source form https://github.com/apache/spark/tree/branch-1.4
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
 Hadoop 2.4.x with YARN 2.4.x enabled, and hive-1.2.1. This package should work with Altiscale 
 Hadoop 2.4.1 and Hive 1.2.1 (vcc-hadoop-2.4.1 and alti-hive-1.2.0).
+
+%package sparkts
+Summary: Spark Thrift Server system service scripts and configuration
+Group: Development/Libraries
+Requires: %{rpm_package_name}-%{spark_version}
+
+%description sparkts
+A RPM package that provides init.d script and default configuraiton for Spark Thrift Server
 
 %package example
 Summary: The test example package for Spark
@@ -399,6 +408,10 @@ cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{insta
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
 
+# Spark Thrift Server init.d related files
+%{__mkdir} -p %{buildroot}%{install_sparkts_initd}
+cp -rp %{_builddir}/%{build_service_name}/etc/init.d/* %{buildroot}%{install_sparkts_initd}/
+
 # devel package files
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/core/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/catalyst/target/
@@ -502,6 +515,9 @@ rm -rf %{buildroot}%{install_spark_dest}
 %files example
 %defattr(0755,spark,spark,0755)
 %{install_spark_test}
+
+%files sparkts
+%attr(0755,root,root) %{install_sparkts_initd}/sparktsd
 
 %files yarn-shuffle
 %defattr(0755,spark,spark,0755)
@@ -612,6 +628,8 @@ if [ "$1" = "0" ]; then
 fi
 
 %changelog
+* Thu Jun 9 2016 Andrew Lee 20160609
+- Add default initd and look for sysconfig for sparktsd
 * Wed Feb 24 2016 Andrew Lee 20160224
 - Remove SPARK_YARN and SPARK_HIVE, fix symlink logic
 * Mon Nov 30 2015 Andrew Lee 20151130
