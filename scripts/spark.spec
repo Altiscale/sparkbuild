@@ -51,8 +51,8 @@ Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.4 with
 build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.4 
 Origin source form https://github.com/apache/spark/tree/branch-1.4
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
-Hadoop 2.4.x with YARN 2.4.x enabled, and hive-1.2.1. This package should work with Altiscale 
-Hadoop 2.4.1 and Hive 1.2.1 (vcc-hadoop-2.4.1 and alti-hive-1.2.0).
+Hadoop 2.7.x with YARN 2.7.x enabled, and hive-1.2.1. This package should work with Altiscale 
+Hadoop 2.7.1 and Hive 1.2.1 (vcc-hadoop-2.7.1 and alti-hive-1.2.0/alti-hive-1.2.1).
 
 %package sparkts
 Summary: Spark Thrift Server system service scripts and configuration
@@ -461,10 +461,10 @@ echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_des
 rm -rf %{buildroot}%{install_spark_dest}
 
 %files
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
+%{install_spark_dest}/bin
 %{install_spark_dest}/project
 %{install_spark_dest}/assembly
-%{install_spark_dest}/bin
 %{install_spark_dest}/data
 %{install_spark_dest}/dev
 %{install_spark_dest}/bagel
@@ -504,27 +504,27 @@ rm -rf %{buildroot}%{install_spark_dest}
 %doc %{install_spark_dest}/NOTICE
 %doc %{install_spark_dest}/CHANGES.txt
 %doc %{install_spark_dest}/CONTRIBUTING.md
-%attr(0755,spark,spark) %{install_spark_conf}/spark-env.sh
-%attr(0644,spark,spark) %{install_spark_conf}/log4j.properties
-%attr(0644,spark,spark) %{install_spark_conf}/spark-defaults.conf
-%attr(0644,spark,spark) %{install_spark_conf}/*.template
-%attr(0444,spark,spark) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
-%attr(1777,spark,spark) %{install_spark_logs}
+%attr(0755,root,root) %{install_spark_conf}/spark-env.sh
+%attr(0644,root,root) %{install_spark_conf}/log4j.properties
+%attr(0644,root,root) %{install_spark_conf}/spark-defaults.conf
+%attr(0644,root,root) %{install_spark_conf}/*.template
+%attr(0444,root,root) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
+%attr(1777,root,root) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
 %files example
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_test}
 
 %files sparkts
 %attr(0755,root,root) %{install_sparkts_initd}/sparktsd
 
 %files yarn-shuffle
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/network/yarn/target/scala-2.10/
 
 %files devel
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/core
 %{install_spark_dest}/sql/catalyst
 %{install_spark_dest}/sql/core
@@ -533,7 +533,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/yarn
 
 %files kinesis
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/extras/kinesis-asl
 %{install_spark_dest}/extras/kinesis-asl-assembly
 
