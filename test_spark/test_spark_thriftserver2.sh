@@ -4,49 +4,38 @@
 # We will use beeline to test it via the JDBC driver
 # /bin/su - spark -c "./test_spark/test_spark_thriftserver2.sh"
 
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
-spark_logs=""
-spark_home=${SPARK_HOME:='/opt/spark'}
-spark_conf=""
-spark_version=$SPARK_VERSION
-spark_test_dir="$spark_home/test_spark"
-
-source $spark_home/test_spark/init_spark.sh
-
 # Default SPARK_HOME location is already checked by init_spark.sh
-if [ "x${spark_home}" = "x" ] ; then
-  spark_home=/opt/spark
-  echo "ok - applying default location $spark_home"
-elif [ ! -d "$spark_home" ] ; then
-  >&2 echo "fail - $spark_home does not exist, please check you Spark installation, exinting!"
+spark_home=${SPARK_HOME:='/opt/spark'}
+if [ ! -d "$spark_home" ] ; then
+  >&2 echo "fail - $spark_home does not exist, please check you Spark installation or SPARK_HOME env variable, exinting!"
   exit -2
 else
   echo "ok - applying Spark home $spark_home"
 fi
-if [ ! -d "$spark_test_dir/test_data" ] ; then
-  >&2 echo "fail - $spark_test_dir/test_data does not exist, this is required to create hive tables for testing, can't continue, exiting!"
-  exit -2
-fi
+
+source $spark_home/test_spark/init_spark.sh
+
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
-spark_conf=$SPARK_CONF_DIR
-if [ "x${spark_conf}" = "x" ] ; then
-  spark_conf=/etc/spark
-elif [ ! -d "$spark_conf" ] ; then
-  >&2 echo "fail - $spark_conf does not exist, please check you Spark installation or your SPARK_CONF_DIR env, exiting!"
+spark_conf=${SPARK_CONF_DIR:-"/etc/spark"}
+if [ ! -d "$spark_conf" ] ; then
+  >&2 echo "fail - $spark_conf does not exist, please check you Spark installation or your SPARK_CONF_DIR env value, exiting!"
   exit -2
 else
   echo "ok - applying spark config directory $spark_conf"
 fi
-echo "ok - applying Spark conf $spark_conf"
 
 spark_version=$SPARK_VERSION
 if [ "x${spark_version}" = "x" ] ; then
-  >&2 echo "fail - spark_version can not be identified, is end SPARK_VERSION defined? Exiting!"
+  >&2 echo "fail - SPARK_VERSION can not be identified or not defined, please review SPARK_VERSION env variable? Exiting!"
   exit -2
 fi
 
-spark_ts2_listen_port=28150
+curr_dir=`dirname $0`
+curr_dir=`cd $curr_dir; pwd`
+spark_logs=""
+spark_test_dir="$spark_home/test_spark"
+
+spark_ts2_listen_port=48600
 running_user=`whoami`
 # This needs to align with /etc/spark/log4j.properties
 spark_logs=${HOME}/Hadooplogs/spark/logs/spark.log
@@ -62,8 +51,8 @@ fi
 pushd `pwd`
 cd $spark_home/sbin/
 
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_2.10-${spark_version}.jar"
-sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_2.10-${spark_version}.jar"
+sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
 hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$sparksql_hivejars:$sparksql_hivethriftjars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 

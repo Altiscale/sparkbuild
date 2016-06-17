@@ -1,15 +1,29 @@
-#!/bin/bash -x
+#!/bin/bash
+
+# This script will honor what the user provides if they want to override the
+# critical env variables SPARK_HOME and SPARK_CONF_DIR, and SPARK_SCALA_VERSION
+# for their own Spark build. If they did specify any of these env variable,
+# our test case will honor them and run it with user's configuration.
+# To perform a sanity check, make sure you use the default test user alti-test-01
+# and apply all default values. If the test case complets, that usually means user's
+# has misconfigure something on their side and indicates an user error.
 
 # We want to honor SPARK_CONF_DIR if someone override this with their
-# own config. Our test case shall pass as well.
-spark_conf_dir_tmp=$SPARK_CONF_DIR
-if [ "x${spark_conf_dir_tmp}" = "x" ] ; then
-  spark_conf_dir_tmp=/etc/spark
-fi
-echo "ok - applying Spark conf $spark_conf_dir_tmp"
+# own config. Other wise, Spark looks for the runtime conf directory which will be under 
+# /opt/spark/conf. Our test case shall pass as well with default configuration provided
+# under /etc/alti-spark-x.x.x
 
+if [ -f "/etc/alti-spark-1.6.1/spark-env.sh" ] ; then
+  source /etc/alti-spark-1.6.1/spark-env.sh
+else
+  >&2 echo "fail - Spark 1.6.1 installation is broken, missing files or directory in /etc/alti-spark-1.6.1"
+  exit -1
+fi
+
+spark_conf_dir_tmp=${SPARK_CONF_DIR:-"/etc/alti-spark-$SPARK_VERSION"}
+echo "ok - applying default or customized Spark conf directory $spark_conf_dir_tmp"
 # Load other env variables defined in the SPARK_CONF_DIR such as SPARK_VERSION, etc.
-# This file must exist for all Spark installation
+# This file must exist for all Spark installation. Applying user customization config if applicable.
 if [ -f "$spark_conf_dir_tmp/spark-env.sh" ] ; then
   source $spark_conf_dir_tmp/spark-env.sh
 else
@@ -17,6 +31,8 @@ else
   exit -1
 fi
 
+# Do NOT apply default values to these local variables
+# We are performing SANITY check here
 spark_version=$SPARK_VERSION
 kerberos_enable=false
 spark_home_tmp=$SPARK_HOME
@@ -39,7 +55,7 @@ if [ "x${spark_home_tmp}" = "x" ] ; then
 fi
 
 # Check Spark RPM installation
-spark_installed=$(rpm -qa | grep alti-spark | grep $spark_version | grep -v test | grep -v example | wc -l)
+spark_installed=$(rpm -qa | grep alti-spark | grep $spark_version | grep -v -e example -e shuffle -e kinesis -e sparkts -e devel | wc -l)
 if [ "x${spark_installed}" = "x0" ] ; then
   >&2 echo "fail - spark for $spark_version not detected or installed, can't continue, exiting"
   >&2 echo "fail - you should install spark via RPM, if you install them from binary distros, you will need to tweak these test case"
