@@ -268,21 +268,22 @@ if [ -d "%{current_workspace}/.m2" ] ; then
   mvn_install_target_repo="-DlocalRepositoryPath=%{current_workspace}/.m2/repository"
 fi
 
+mvn_install_cmd="mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Duserdef.spark.version=%{spark_plain_version} -Duserdef.hadoop.version=%{hadoop_version} -Dversion=%{spark_plain_version} -Dpackaging=jar -DgroupId=local.org.apache.spark"
 # This applies to local integration with Spark assembly JARs
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+$mvn_install_cmd -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DartifactId=spark-assembly_2.10 $mvn_install_target_repo
 
 # For Kafka Spark Streaming Examples
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+$mvn_install_cmd -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DartifactId=spark-streaming-kafka_2.10 $mvn_install_target_repo
 
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+$mvn_install_cmd -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DartifactId=spark-streaming_2.10 $mvn_install_target_repo
 
 # For SparkSQL Hive integration examples, this is required when you use -Phive-provided
 # spark-hive JAR needs to be provided to the test case in this case.
-mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-hive_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar $mvn_install_target_repo
+$mvn_install_cmd -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DartifactId=spark-hive_2.10 $mvn_install_target_repo
 
 # Build our test case with our own pom.xml file
 # Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
-mvn -U -X package -Pspark-1.6 -Pkafka-provided $testcase_hadoop_profile_str
+mvn -U -X package -Duserdef.spark.version=%{spark_plain_version} -Duserdef.hadoop.version=%{hadoop_version} -Pspark-1.6 -Pkafka-provided $testcase_hadoop_profile_str
 
 popd
 echo "ok - build spark test case completed successfully!"

@@ -55,7 +55,7 @@ if [ "x${SPARK_VERSION}" = "x" ] ; then
   export SPARK_VERSION=1.6.1
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  export SPARK_PLAIN_VERSION=1.6.1
+  export SPARK_PLAIN_VERSION=$SPARK_VERSION
 fi
 
 # Defines which Hadoop version to build against
