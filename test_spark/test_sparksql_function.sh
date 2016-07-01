@@ -80,7 +80,7 @@ test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
 test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
 test_drop_database_sql1="DROP DATABASE IF EXISTS ${db_name}"
 
-hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | tr -d '\n')
+hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | cut -d"-" -f1 | tr -d '\n')
 sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
 sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
 hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
