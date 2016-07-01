@@ -52,7 +52,7 @@ if [ "x${SPARK_UID}" = "x" ] ; then
   export SPARK_UID=411460024
 fi
 if [ "x${SPARK_VERSION}" = "x" ] ; then
-  export SPARK_VERSION=1.6.1
+  export SPARK_VERSION=1.6.2
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
   export SPARK_PLAIN_VERSION=$SPARK_VERSION

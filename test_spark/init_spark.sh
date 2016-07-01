@@ -13,10 +13,10 @@
 # /opt/spark/conf. Our test case shall pass as well with default configuration provided
 # under /etc/alti-spark-x.x.x
 
-if [ -f "/etc/alti-spark-1.6.1/spark-env.sh" ] ; then
-  source /etc/alti-spark-1.6.1/spark-env.sh
+if [ -f "/etc/alti-spark-1.6.2/spark-env.sh" ] ; then
+  source /etc/alti-spark-1.6.2/spark-env.sh
 else
-  >&2 echo "fail - Spark 1.6.1 installation is broken, missing files or directory in /etc/alti-spark-1.6.1"
+  >&2 echo "fail - Spark 1.6.2 installation is broken, missing files or directory in /etc/alti-spark-1.6.2"
   exit -1
 fi
 
