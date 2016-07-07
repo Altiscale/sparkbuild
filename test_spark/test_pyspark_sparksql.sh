@@ -59,7 +59,7 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
 hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
@@ -71,7 +71,7 @@ queue_name=""
   --master yarn --deploy-mode client $queue_name \
   --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
-  --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars \
+  --jars /etc/spark/hive-site.xml,$hive_jars \
   --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py \
   $spark_home/test_spark/src/main/python/pyspark_hql.py
 

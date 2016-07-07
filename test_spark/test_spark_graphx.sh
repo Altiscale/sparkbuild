@@ -54,7 +54,7 @@ hdfs dfs -put $spark_home/graphx/data/users.txt spark/test/graphx/followers/
 echo "ok - testing spark REPL shell with various algorithm"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
-SPARK_EXAMPLE_JAR=$(find ${spark_home}/examples/target/spark-examples_*-${spark_version}.jar)
+SPARK_EXAMPLE_JAR=$(find ${spark_home}/lib/spark-examples_${SPARK_SCALA_VERSION}.jar)
 
 # Testing PageRank type
 # queue_name="--queue interactive"

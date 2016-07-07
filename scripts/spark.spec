@@ -558,13 +558,15 @@ ln -vsf %{install_spark_conf} /etc/%{apache_name}
 # Restore conf and logs symlink
 ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
 ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/spark-assembly-%{spark_plain_version}.jar
 for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
 do
   ln -vsf $f %{spark_release_dir}/
 done
-ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/spark-examples_2.10.jar
 ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive_2.10.jar
+ln -vsf %{install_spark_dest}/sql/hive-thriftserver/target/scala-2.10/spark-hive-thriftserver_2.10-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive-thriftserver_2.10.jar
 
 %postun
 if [ "$1" = "0" ]; then
