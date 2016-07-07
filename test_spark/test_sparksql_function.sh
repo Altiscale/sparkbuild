@@ -98,7 +98,7 @@ test_drop_table_sql1="DROP TABLE $new_table_name"
 test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
 test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
 
-hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | tr -d '\n')
+hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | cut -d"-" -f1 | tr -d '\n')
 echo "ok - detected hadoop version $hadoop_ver for testing. CTAS does not work on Hive 0.13.1"
 # queue_name="--queue interactive"
 queue_name=""
