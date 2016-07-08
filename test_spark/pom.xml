@@ -30,19 +30,7 @@
       <id>spark-localrepo</id>
       <url>file://${user.home}/.m2/repository</url>
     </repository>
-    <repository>
-      <id>scala-tools.org</id>
-      <name>Scala-tools Repository</name>
-      <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
-    </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>scala-tools.org</id>
-      <name>Scala-tools Repository</name>
-      <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <profiles>
     <profile>
