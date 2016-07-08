@@ -91,10 +91,10 @@ echo "ok - detected hadoop version $hadoop_ver for testing. CTAS does not work o
 queue_name=""
 sql_ret_code=""
 # Also demonstrate how to migrate command from Spark 1.4/1.5 to 1.6+
-if [ "x${hadoop_ver}" = "x2.4.1" ] ; then
+if [[ $hadoop_ver == 2.4.* ]] ; then
   ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_select_sql1 ; $test_drop_table_sql1 ; $test_drop_database_sql1 ; "
   sql_ret_code=$?
-elif [ "x${hadoop_ver}" = "x2.7.1" ] ; then
+elif [[ $hadoop_ver == 2.7.* ]] ; then
   ./bin/spark-sql --verbose \
     --master yarn --deploy-mode client --driver-memory 512M \
     --executor-memory 1G --executor-cores 2 \
@@ -106,7 +106,7 @@ elif [ "x${hadoop_ver}" = "x2.7.1" ] ; then
     -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; $test_drop_database_sql1;"
   sql_ret_code=$?
 else
-  echo "fatal - hadoop version not supported, neither 2.7.1 nor 2.4.1"
+  echo "fatal - hadoop version $hadoop_ver not supported, neither 2.7.* nor 2.4.*"
   exit -5
 fi
 
