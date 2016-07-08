@@ -92,14 +92,14 @@ echo "ok - detected hadoop version $hadoop_ver for testing. CTAS does not work o
 queue_name=""
 sql_ret_code=""
 # Also demonstrate how to migrate command from Spark 1.4/1.5 to 1.6+
-if [ "x${hadoop_ver}" = "x2.4.1" ] ; then
+if [[ $hadoop_ver == 2.4.* ]] ; then
   ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ; "
   sql_ret_code=$?
-elif [ "x${hadoop_ver}" = "x2.7.1" ] ; then
+elif [[ $hadoop_ver == 2.7.* ]] ; then
   ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ;"
   sql_ret_code=$?
 else
-  echo "fatal - hadoop version not supported, neither 2.7.1 nor 2.4.1"
+  echo "fatal - hadoop version $hadoop_ver not supported, neither 2.7.* nor 2.4.*"
   exit -5
 fi
 
