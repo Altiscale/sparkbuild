@@ -1,8 +1,7 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
-# Default SPARK_HOME location is already checked by init_spark.sh
 spark_home=${SPARK_HOME:='/opt/spark'}
 if [ ! -d "$spark_home" ] ; then
   >&2 echo "fail - $spark_home does not exist, please check you Spark installation or SPARK_HOME env variable, exinting!"
@@ -32,10 +31,7 @@ curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 spark_test_dir="$spark_home/test_spark"
 
-hive_home=$HIVE_HOME
-if [ "x${hive_home}" = "x" ] ; then
-  hive_home=/opt/hive
-fi
+hive_home=${HIVE_HOME:-"/opt/hive"}
 
 if [ ! -f "$spark_test_dir/pom.xml" ] ; then
   echo "warn - correcting test directory from $spark_test_dir to $curr_dir"
@@ -47,15 +43,6 @@ cd $spark_home
 # Perform sanity check on required files in test case
 if [ ! -f "$spark_home/examples/src/main/resources/kv1.txt" ] ; then
   >&2 echo "fail - missing test data $spark_home/examples/src/main/resources/kv1.txt to load, did the examples directory structure changed?"
-  exit -3
-fi
-# Deploy the test data we need from the current user that is running the test case
-# User does not share test data with other users
-hdfs dfs -mkdir -p spark/test/resources
-hdfs dfs -put $spark_home/examples/src/main/resources/kv1.txt spark/test/resources/
-hdfs dfs -test -e spark/test/resources/kv1.txt
-if [ $? -ne "0" ] ; then
-  >&2 echo "fail - missing example HDFS file under spark/test/resources/kv1.txt!! something went wrong with HDFS FsShell! exiting"
   exit -3
 fi
 
@@ -77,7 +64,21 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-submit --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 2048M --executor-cores 3 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars) --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
+
+# if /etc/spark/spark-env.sh already defined the SPARK_DIST_CLASSPATH for you for the spark-hive
+# or spark-hive-thriftserver name in the executor classpath, the spark.executor.extraClassPath here is redundant.
+# The spark.executor.extraClassPath here is just for demonstration, and explicitly telling people you 
+# need to be aware of this for the executor classpath
+./bin/spark-submit --verbose \
+  --master yarn --deploy-mode client \
+  --jars $spark_conf/hive-site.xml,$hive_jars \
+  --driver-memory 512M --executor-memory 2048M --executor-cores 3 \
+  --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties $queue_name \
+  --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=/opt/hadoop/lib/native/" \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=/opt/hadoop/lib/native/" \
+  --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
+  --class SparkSQLTestCase2HiveContextYarnClientApp \
+  $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
   >&2 echo "fail - testing $0 for SparkSQL on HiveQL/HiveContext failed!!"
