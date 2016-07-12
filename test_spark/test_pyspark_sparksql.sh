@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
@@ -69,9 +69,9 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 queue_name=""
 ./bin/spark-submit --verbose \
   --master yarn --deploy-mode client $queue_name \
-  --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon \
+  --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties:$hive_jars_colon \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
-  --jars /etc/spark/hive-site.xml,$hive_jars \
+  --jars $spark_conf/hive-site.xml,$hive_jars \
   --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py \
   $spark_home/test_spark/src/main/python/pyspark_hql.py
 

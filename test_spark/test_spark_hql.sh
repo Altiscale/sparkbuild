@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
@@ -31,10 +31,7 @@ curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 spark_test_dir="$spark_home/test_spark"
 
-hive_home=$HIVE_HOME
-if [ "x${hive_home}" = "x" ] ; then
-  hive_home=/opt/hive
-fi
+hive_home=${HIVE_HOME:-"/opt/hive"}
 
 if [ ! -f "$spark_test_dir/pom.xml" ] ; then
   echo "warn - correcting test directory from $spark_test_dir to $curr_dir"
@@ -70,6 +67,7 @@ fi
 
 sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
 hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
@@ -82,12 +80,11 @@ queue_name=""
 # need to be aware of this for the executor classpath
 ./bin/spark-submit --verbose \
   --master yarn --deploy-mode cluster \
+  --jars $spark_conf/hive-site.xml,$hive_jars \
   --driver-memory 512M --executor-memory 2048M --executor-cores 3 \
+  --driver-class-path hive-site.xml:yarncluster-driver-log4j.properties $queue_name \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarncluster-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
-  --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" \
-  --driver-class-path hive-site.xml:$(basename $sparksql_hivejars) $queue_name \
-  --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars \
-  --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars) \
   --class SparkSQLTestCase2HiveContextYarnClusterApp \
   $spark_test_dir/${app_name}-${app_ver}.jar
 
