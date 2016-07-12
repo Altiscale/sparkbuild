@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
@@ -67,9 +67,12 @@ queue_name=""
 ./bin/spark-submit --verbose \
   --master yarn --deploy-mode client \
   $queue_name \
-  --driver-class-path /etc/spark/hive-site.xml:$hive_jars_colon \
+  --driver-class-path /etc/spark/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties:$hive_jars_colon \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
-  --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars \
+  --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$spark_conf/executor-log4j.properties,$hive_jars \
+  --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.executor.extraJavaOptions="-Dlog4j.configuration=executor-log4j.properties -XX:+PrintReferenceGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -Djava.library.path=$HADOOP_HOME/lib/native/" \
   --py-files $spark_home/test_spark/src/main/python/pyspark_shell_examples.py \
   $spark_home/test_spark/src/main/python/pyspark_shell_examples.py
 

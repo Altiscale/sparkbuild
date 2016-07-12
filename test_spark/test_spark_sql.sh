@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
@@ -60,6 +60,10 @@ queue_name=""
 ./bin/spark-submit --verbose \
   --master yarn --deploy-mode cluster \
   --driver-java-options "-Djava.library.path=/opt/hadoop/lib/native/" \
+  --conf spark.yarn.dist.files=$spark_conf/yarnclient-driver-log4j.properties,$spark_conf/executor-log4j.properties \
+  --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.executor.extraJavaOptions="-Dlog4j.configuration=executor-log4j.properties -XX:+PrintReferenceGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -Djava.library.path=$HADOOP_HOME/lib/native/" \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $queue_name \
   --class SparkSQLTestCase1SQLContextApp \
   $spark_test_dir/${app_name}-${app_ver}.jar
