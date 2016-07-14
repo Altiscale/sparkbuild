@@ -18,7 +18,7 @@
 %define install_spark_dest    /opt/%{spark_folder_name}
 %define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
-%define install_spark_logs    /service/log/%{apache_name}
+%define install_spark_logs    /service/log/%{apache_name}/%{rpm_package_name}-%{spark_version}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
 %define install_sparkts_initd /etc/init.d
 %define spark_release_dir     /opt/%{spark_folder_name}/lib
@@ -548,22 +548,16 @@ fi
 # CLean up old symlink
 rm -vf %{install_spark_dest}/logs
 rm -vf %{install_spark_dest}/conf
-# Delete symlink before re-linking them
-rm -vf /opt/%{apache_name}
-rm -vf /etc/%{apache_name}
-# This MUST happen first
-ln -vsf %{install_spark_dest} /opt/%{apache_name}
-ln -vsf %{install_spark_conf} /etc/%{apache_name}
 # Restore conf and logs symlink
-ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
-ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
+ln -vsf %{install_spark_conf} %{install_spark_dest}/conf
+ln -vsf %{install_spark_logs} %{install_spark_dest}/logs
 ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/spark-assembly-%{spark_plain_version}.jar
 # For backward compatibility which requires hadoop version
 ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
-for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
-do
-  ln -vsf $f %{spark_release_dir}/
-done
+# for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
+# do
+#   ln -vsf $f %{spark_release_dir}/
+# done
 ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/
 ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
 ln -vsf %{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive_2.10.jar
@@ -584,8 +578,6 @@ if [ "$1" = "0" ]; then
     rm -vf %{install_spark_dest}/conf
     rm -vrf %{install_spark_dest}
     rm -vrf %{install_spark_conf}
-    rm -vf /opt/%{apache_name}
-    rm -vf /etc/%{apache_name}
   fi
 fi
 # Don't delete the users after uninstallation.
