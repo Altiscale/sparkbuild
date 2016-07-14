@@ -1,7 +1,11 @@
 #!/bin/sh
 
 # Run the test case as alti-test-01
-# /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
+# /bin/su - alti-test-01 -c "./test_spark/test_pyspark_shell.sh"
+
+curr_dir=`dirname $0`
+curr_dir=`cd $curr_dir; pwd`
+
 # Default SPARK_HOME location is already checked by init_spark.sh
 spark_home=${SPARK_HOME:='/opt/spark'}
 if [ ! -d "$spark_home" ] ; then
@@ -12,6 +16,7 @@ else
 fi
 
 source $spark_home/test_spark/init_spark.sh
+source $spark_home/test_spark/deploy_hive_jar.sh
 
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
 spark_conf=${SPARK_CONF_DIR:-"/etc/spark"}
@@ -28,9 +33,6 @@ if [ "x${spark_version}" = "x" ] ; then
   exit -2
 fi
 
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
-spark_version=$SPARK_VERSION
 spark_test_dir="$spark_home/test_spark"
 
 if [ ! -d "$spark_test_dir" ] ; then
@@ -49,19 +51,9 @@ if [ ! -f "$spark_home/examples/src/main/resources/kv1.txt" ] ; then
   exit -3
 fi
 
-echo "ok - testing spark SQL shell with simple queries"
+echo "ok - testing PySpark SQL shell yarn-client mode with simple queries"
 
-app_name=`grep "<artifactId>.*</artifactId>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1  | head -n 1`
-app_ver=`grep "<version>.*</version>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1 | head -n 1`
-
-if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
-  >&2 echo "fail - $spark_test_dir/${app_name}-${app_ver}.jar test jar does not exist, cannot continue testing, failing!"
-  exit -3
-fi
-
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
-hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
-hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 # pyspark only supports yarn-client mode now
@@ -69,9 +61,12 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 queue_name=""
 ./bin/spark-submit --verbose \
   --master yarn --deploy-mode client $queue_name \
-  --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties:$hive_jars_colon \
+  --jars $spark_conf/hive-site.xml,$sparksql_hivejars \
+  --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties \
+  --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
+  --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=/opt/hadoop/lib/native/" \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=/opt/hadoop/lib/native/" \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
-  --jars $spark_conf/hive-site.xml,$hive_jars \
   --py-files $spark_home/test_spark/src/main/python/pyspark_hql.py \
   $spark_home/test_spark/src/main/python/pyspark_hql.py
 

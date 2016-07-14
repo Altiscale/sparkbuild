@@ -13,6 +13,7 @@ else
 fi
 
 source $spark_home/test_spark/init_spark.sh
+source $spark_home/test_spark/deploy_hive_jar.sh
 
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
 spark_conf=${SPARK_CONF_DIR:-"/etc/spark"}
@@ -82,8 +83,8 @@ drop_table_sql="DROP TABLE $table_name"
 drop_database_sql="DROP DATABASE IF EXISTS ${db_name}"
 
 hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | cut -d"-" -f1 | tr -d '\n')
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
-sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
+sparksql_hivethriftjars="$spark_home/lib/spark-hive-thriftserver_${SPARK_SCALA_VERSION}.jar"
 hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$sparksql_hivejars:$sparksql_hivethriftjars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
@@ -98,9 +99,10 @@ if [[ $hadoop_ver == 2.4.* ]] ; then
 elif [[ $hadoop_ver == 2.7.* ]] ; then
   ./bin/spark-sql --verbose \
     --master yarn --deploy-mode client \
-    --jars $spark_conf/hive-site.xml,$hive_jars \
+    --jars $spark_conf/hive-site.xml,$sparksql_hivejars \
     --driver-memory 512M --executor-memory 1G --executor-cores 2 \
     --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties $queue_name \
+    --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
     --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=$HADOOP_HOME/lib/native/" \
     --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
     --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) \

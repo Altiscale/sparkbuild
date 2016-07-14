@@ -518,7 +518,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_test}
 
 %files sparkts
-%attr(0755,root,root) %{install_sparkts_initd}/sparktsd
+%attr(0755,root,root) %{install_sparkts_initd}/sparktsd-%{spark_plain_version}
 
 %files yarn-shuffle
 %defattr(0755,root,root,0755)

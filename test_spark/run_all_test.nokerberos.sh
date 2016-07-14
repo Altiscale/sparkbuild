@@ -14,40 +14,34 @@ all_kerberos_testcase=(test_spark_submit.sh test_spark_shell_graphx.sh test_spar
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 
-spark_home=$SPARK_HOME
-spark_version=$SPARK_VERSION
-
-if [ "x${spark_home}" = "x" ] ; then
-  spark_home=/opt/spark
-  echo "ok - applying default location /opt/spark"
-  if [[ ! -L "$spark_home" && ! -d "$spark_home" ]] ; then
-    >&2 echo "fail - $spark_home does not exist, can't continue, exiting! check spark installation."
-    exit -1
-  fi
-fi
-
-if [ ! -d "$spark_home/test_spark/" ] ; then
-  >&2 echo "fail - missing $spark_home/test_spark/, can't continue! Exiting!"
-  >&2 echo "fail - this script is designed for Spark general testcase only and requires test_spark directory in $spark_home"
-  >&2 echo "fail - you may create your own $spark_home/test_spark/ to reuse this script"
+export SPARK_VERSION="1.6.2"
+# Change this to your own home directory if necessary
+export SPARK_HOME="/opt/alti-spark-$SPARK_VERSION"
+# You can specify different settings for the same test case via SPARK_CONF_DIR
+export SPARK_CONF_DIR=${SPARK_CONF_DIR:-"/etc/alti-spark-$SPARK_VERSION"}
+if [ ! -d "$SPARK_CONF_DIR" ] ; then
+  >&2 echo "fail - Spark $SPARK_VERSION installation is broken, missing files or directory from $SPARK_CONF_DIR"
   exit -1
 fi
 
-source $spark_home/test_spark/init_spark.sh
-
-if [ "x${spark_version}" = "x" ] ; then
-  if [ "x${SPARK_VERSION}" = "x" ] ; then
-    >&2 echo "fail - SPARK_VERSION not set, can't continue, exiting!!!"
-    exit -1
-  else
-    spark_version=$SPARK_VERSION
-  fi
+if [[ ! -L "$SPARK_HOME" && ! -d "$SPARK_HOME" ]] ; then
+  >&2 echo "fail - $SPARK_HOME does not exist, can't continue, exiting! check spark installation."
+  exit -1
 fi
 
+if [ ! -d "$SPARK_HOME/test_spark" ] ; then
+  >&2 echo "fail - missing $SPARK_HOME/test_spark, can't continue! Exiting!"
+  >&2 echo "fail - this script is designed for Spark general testcase only and requires test_spark directory in $SPARK_HOME"
+  >&2 echo "fail - you may create your own $SPARK_HOME/test_spark to reuse this script"
+  exit -1
+fi
+
+source $SPARK_HOME/test_spark/init_spark.sh
+source $SPARK_HOME/test_spark/deploy_hive_jar.sh
 
 pushd `pwd`
-  cd $spark_home
-  pushd $spark_home/test_spark/
+  cd $SPARK_HOME
+  pushd $SPARK_HOME/test_spark
   for testcase in ${all_nonkerberos_testcase[*]}
   do
     echo "ok - ############################################"
@@ -65,5 +59,3 @@ pushd `pwd`
 popd
 
 exit 0
-
-

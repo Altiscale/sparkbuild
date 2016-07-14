@@ -11,6 +11,7 @@ else
 fi
 
 source $spark_home/test_spark/init_spark.sh
+source $spark_home/test_spark/deploy_hive_jar.sh
 
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
 spark_conf=${SPARK_CONF_DIR:-"/etc/spark"}
@@ -65,7 +66,7 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
 hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
@@ -80,11 +81,13 @@ queue_name=""
 # need to be aware of this for the executor classpath
 ./bin/spark-submit --verbose \
   --master yarn --deploy-mode cluster \
-  --jars $spark_conf/hive-site.xml,$hive_jars \
+  --jars $spark_conf/hive-site.xml,$sparksql_hivejars \
+  --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
   --driver-memory 512M --executor-memory 2048M --executor-cores 3 \
   --driver-class-path hive-site.xml:yarncluster-driver-log4j.properties $queue_name \
   --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarncluster-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
   --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
+  --conf spark.yarn.preserve.staging.files=true \
   --class SparkSQLTestCase2HiveContextYarnClusterApp \
   $spark_test_dir/${app_name}-${app_ver}.jar
 

@@ -51,10 +51,8 @@ fi
 pushd `pwd`
 cd $spark_home/sbin/
 
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
-sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
-hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
-hive_jars_colon=$sparksql_hivejars:$sparksql_hivethriftjars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
+sparksql_hivethriftjars="$spark_home/lib/spark-hive-thriftserver_${SPARK_SCALA_VERSION}.jar"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
@@ -62,10 +60,12 @@ echo "ok - starting thriftserver"
 
 ret=$(./start-thriftserver.sh --verbose \
   --master yarn-client \
-  --jars $spark_conf/hive-site.xml,$hive_jars \
   --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties \
-  --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=/opt/hadoop/lib/native/" \
-  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=/opt/hadoop/lib/native/" \
+  --jars $spark_conf/hive-site.xml,$sparksql_hivejars,$sparksql_hivethriftjars \
+  --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
+  --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.executor.extraJavaOptions="-Dlog4j.configuration=executor-log4j.properties -XX:+PrintReferenceGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -Djava.library.path=$HADOOP_HOME/lib/native/" \
   --executor-memory 1G \
   --num-executors 4 \
   --executor-cores 2 \
@@ -75,7 +75,6 @@ ret=$(./start-thriftserver.sh --verbose \
   --conf spark.shuffle.manager=sort \
   --conf spark.shuffle.consolidateFiles=true \
   --conf spark.rdd.compress=true \
-  --conf spark.storage.memoryFraction=0.6 \
   --conf spark.sql.inMemoryColumnarStorage.compressed=true \
   --conf spark.sql.inMemoryColumnarStorage.batchSize=10240 \
   --hiveconf hive.server2.thrift.port=$spark_ts2_listen_port \
@@ -108,7 +107,7 @@ start_log_line=$(grep -n "Starting SparkContext" $spark_logs | tail -n 1 | cut -
 if [ "x${start_log_line}" = "x" ] ; then
   >&2 echo "warn - log rotated so fast? can't find the starting string 'Starting SparkContext' to search for in $spark_logs"
 else
-  ts2_ret_str=$(tail -n +${start_log_line} $spark_logs | grep -i 'ThriftBinaryCLIService listening on')
+  ts2_ret_str=$(tail -n +${start_log_line} $spark_logs | grep -i 'Starting ThriftBinaryCLIService on port')
   ts2_yarn_app_id=$(tail -n +${start_log_line} $spark_logs | grep -io 'Submitted application .*' | tail -n 1 | cut -d" " -f3)
   if [ "x${ts2_ret_str}" = "x" ] ; then
     >&2 echo "fail - something is wrong, can't detect service listening string 'ThriftBinaryCLIService listening on', the service is taking longer then 60 seconds to start? This is odd on a fresh VPC, please manually check Spark TS2!"

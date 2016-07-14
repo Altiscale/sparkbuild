@@ -31,40 +31,24 @@ else
   exit -1
 fi
 
-# Do NOT apply default values to these local variables
-# We are performing SANITY check here
-spark_version=$SPARK_VERSION
-kerberos_enable=false
-spark_home_tmp=$SPARK_HOME
-
 # Sanity check on SPARK_VERSION
-if [ "x${spark_version}" = "x" ] ; then
+if [ "x${SPARK_VERSION}" = "x" ] ; then
   >&2 echo "fail - cannot detect SPARK_VERSION from $spark_conf_dir_tmp/spark-env.sh"
   >&2 echo "fail - you need to define SPARK_VERSOIN in $spark_conf_dir_tmp/spark-env.sh or SPARK_VERSION env variable"
   exit -1
 fi
 
-# Sanity check on SPARK_HOME
-if [ "x${spark_home_tmp}" = "x" ] ; then
-  spark_home_tmp=/opt/spark
-  if [[ ! -L "$spark_home_tmp" && ! -d "$spark_home_tmp" ]] ; then
-    >&2 echo "fail - $spark_home_tmp does not exist, can't continue, exiting! check spark installation."
-    exit -1
-  fi
-  echo "ok - applying default location $spark_home_tmp"
-fi
-
 # Check Spark RPM installation
-spark_installed=$(rpm -qa | grep alti-spark | grep $spark_version | grep -v -e example -e shuffle -e kinesis -e sparkts -e devel | wc -l)
+spark_installed=$(rpm -qa | grep alti-spark | grep $SPARK_VERSION | grep -v -e example -e shuffle -e kinesis -e sparkts -e devel | wc -l)
 if [ "x${spark_installed}" = "x0" ] ; then
-  >&2 echo "fail - spark for $spark_version not detected or installed, can't continue, exiting"
+  >&2 echo "fail - spark for $SPARK_VERSION not detected or installed, can't continue, exiting"
   >&2 echo "fail - you should install spark via RPM, if you install them from binary distros, you will need to tweak these test case"
   exit -2
 elif [ "x${spark_installed}" = "x1" ] ; then
-  echo "ok - detect one version of spark $spark_version installed that aligns with these test case"
-  echo "ok - $(rpm -q $(rpm -qa | grep alti-spark | grep $spark_version)) installed"
+  echo "ok - detect one version of spark $SPARK_VERSION installed that aligns with these test case"
+  echo "ok - $(rpm -q $(rpm -qa | grep alti-spark | grep $SPARK_VERSION)) installed"
 else
-  echo "warn - detected more than 1 spark $spark_version installed, be aware that test case may refer to different directories"
+  echo "warn - detected more than 1 spark $SPARK_VERSION installed, be aware that test case may refer to different directories"
 fi
 
 # Create HDFS folders for Spark Event logs
