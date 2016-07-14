@@ -239,12 +239,12 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
 pushd %{_builddir}/%{build_service_name}/sql/hive-thriftserver/
-mvn_spark_hs2_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn $xml_setting_str -DskipTests package"
+mvn_spark_hs2_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive -Psparkr -Pyarn $xml_setting_str -DskipTests package"
 echo "$mvn_spark_hs2_cmd"
 $mvn_spark_hs2_cmd
 popd

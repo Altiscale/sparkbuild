@@ -7,7 +7,7 @@ import org.apache.spark.sql.hive._
 object SparkSQLTestCase2HiveContextYarnClientApp {
  def main(args: Array[String]) {
 
-  val conf = new SparkConf().setAppName("Spark SQL Hive Context TestCase Application")
+  val conf = new SparkConf().setAppName("Spark SQL Hive Context yarn-client TestCase Application")
   val sc = new SparkContext(conf)
   val hiveContext = new org.apache.spark.sql.hive.HiveContext(sc)
 
