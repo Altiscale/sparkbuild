@@ -421,7 +421,7 @@ echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_des
 rm -rf %{buildroot}%{install_spark_dest}
 
 %files
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/project
 %{install_spark_dest}/assembly
 %{install_spark_dest}/bin
@@ -470,15 +470,15 @@ rm -rf %{buildroot}%{install_spark_dest}
 %config(noreplace) %{install_spark_conf}
 
 %files example
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_test}
 
 %files yarn-shuffle
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/
 
 %files devel
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/core
 %{install_spark_dest}/sql/catalyst
 %{install_spark_dest}/sql/core
@@ -489,7 +489,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/yarn
 
 %files kinesis
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_dest}/external/kinesis-asl
 %{install_spark_dest}/external/kinesis-asl-assembly
 
@@ -503,15 +503,9 @@ fi
 # CLean up old symlink
 rm -vf %{install_spark_dest}/logs
 rm -vf %{install_spark_dest}/conf
-# Delete symlink before re-linking them
-rm -vf /opt/%{apache_name}
-rm -vf /etc/%{apache_name}
-# This MUST happen first
-ln -vsf %{install_spark_dest} /opt/%{apache_name}
-ln -vsf %{install_spark_conf} /etc/%{apache_name}
 # Restore conf and logs symlink
-ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
-ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
+ln -vsf %{install_spark_conf} %{install_spark_dest}/conf
+ln -vsf %{install_spark_logs} %{install_spark_dest}/logs
 
 for f in `find %{install_spark_dest}/assembly/target/scala-%{scala_build_version}/jars/ -name "*.jar"`
 do
@@ -540,8 +534,6 @@ if [ "$1" = "0" ]; then
     rm -vf %{install_spark_dest}/conf
     rm -vrf %{install_spark_dest}
     rm -vrf %{install_spark_conf}
-    rm -vf /opt/%{apache_name}
-    rm -vf /etc/%{apache_name}
   fi
 fi
 # Don't delete the users after uninstallation.
