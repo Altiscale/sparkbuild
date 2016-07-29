@@ -461,12 +461,12 @@ rm -rf %{buildroot}%{install_spark_dest}
 %doc %{install_spark_dest}/NOTICE
 # %doc %{install_spark_dest}/CHANGES.txt
 %doc %{install_spark_dest}/CONTRIBUTING.md
-%attr(0755,spark,spark) %{install_spark_conf}/spark-env.sh
-%attr(0644,spark,spark) %{install_spark_conf}/log4j.properties
-%attr(0644,spark,spark) %{install_spark_conf}/spark-defaults.conf
-%attr(0644,spark,spark) %{install_spark_conf}/*.template
-%attr(0444,spark,spark) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
-%attr(1777,spark,spark) %{install_spark_logs}
+%attr(0755,root,root) %{install_spark_conf}/spark-env.sh
+%attr(0644,root,root) %{install_spark_conf}/log4j.properties
+%attr(0644,root,root) %{install_spark_conf}/spark-defaults.conf
+%attr(0644,root,root) %{install_spark_conf}/*.template
+%attr(0444,root,root) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
+%attr(1777,root,root) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
 %files example
