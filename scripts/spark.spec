@@ -230,7 +230,7 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
@@ -276,7 +276,7 @@ mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`
 
 # Build our test case with our own pom.xml file
 # Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
-mvn -U package -Pspark-2.0 -Pkafka-provided $testcase_hadoop_profile_str
+mvn -U -X package -Pspark-2.0 -Pkafka-provided $testcase_hadoop_profile_str
 
 popd
 echo "ok - build spark test case completed successfully!"
