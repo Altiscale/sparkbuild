@@ -25,6 +25,8 @@ object SparkSQLTestCase1SQLContextDebugApp {
     // Define the schema using a case class.
     // Note: Case classes in Scala 2.10 can support only up to 22 fields. To work around this limit,
     // you can use custom classes that implement the Product interface.
+    // See: https://issues.scala-lang.org/browse/SI-7296
+    // In Scala 2.11.0, this is fixed.
 
     // Create an RDD of Person objects and register it as a table.
     // val people = sc.textFile("spark/test/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))

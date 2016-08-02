@@ -1,52 +1,44 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
 
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
-spark_test_dir=""
-spark_home=${SPARK_HOME:='/opt/spark'}
-spark_conf=""
-spark_version=$SPARK_VERSION
-
-source $spark_home/test_spark/init_spark.sh
-
 # Default SPARK_HOME location is already checked by init_spark.sh
-if [ "x${spark_home}" = "x" ] ; then
-  spark_home=/opt/spark
-  echo "ok - applying default location $spark_home"
-elif [ ! -d "$spark_home" ] ; then
-  >&2 echo "fail - $spark_home does not exist, please check you Spark installation, exinting!"
+spark_home=${SPARK_HOME:='/opt/spark'}
+if [ ! -d "$spark_home" ] ; then
+  >&2 echo "fail - $spark_home does not exist, please check you Spark installation or SPARK_HOME env variable, exinting!"
   exit -2
 else
   echo "ok - applying Spark home $spark_home"
 fi
+
+source $spark_home/test_spark/init_spark.sh
+source $spark_home/test_spark/deploy_hive_jar.sh
+
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
-spark_conf=$SPARK_CONF_DIR
-if [ "x${spark_conf}" = "x" ] ; then
-  spark_conf=/etc/spark
-elif [ ! -d "$spark_conf" ] ; then
-  >&2 echo "fail - $spark_conf does not exist, please check you Spark installation or your SPARK_CONF_DIR env, exiting!"
+spark_conf=${SPARK_CONF_DIR:-"/etc/spark"}
+if [ ! -d "$spark_conf" ] ; then
+  >&2 echo "fail - $spark_conf does not exist, please check you Spark installation or your SPARK_CONF_DIR env value, exiting!"
   exit -2
 else
   echo "ok - applying spark config directory $spark_conf"
 fi
-echo "ok - applying Spark conf $spark_conf"
- 
+
 spark_version=$SPARK_VERSION
 if [ "x${spark_version}" = "x" ] ; then
-  >&2 echo "fail - spark_version can not be identified, is end SPARK_VERSION defined? Exiting!"
+  >&2 echo "fail - SPARK_VERSION can not be identified or not defined, please review SPARK_VERSION env variable? Exiting!"
   exit -2
 fi
 
+curr_dir=`dirname $0`
+curr_dir=`cd $curr_dir; pwd`
+spark_test_dir=""
 
 hive_home=$HIVE_HOME
 if [ "x${hive_home}" = "x" ] ; then
   hive_home=/opt/hive
 fi
 
-spark_test_dir=$spark_home/test_spark/
 if [ ! -f "$spark_test_dir/pom.xml" ] ; then
   echo "warn - correcting test directory from $spark_test_dir to $curr_dir"
   spark_test_dir=$curr_dir
@@ -88,11 +80,11 @@ test_window_sql1="SELECT * FROM (
 test_window_sql2="SELECT name, country, revenue, PERCENT_RANK() over (PARTITION by country ORDER BY revenue DESC) AS percent_rank FROM $table_name;"
 
 drop_table_sql="DROP TABLE $table_name"
-drop_database_sql="DROP DATABASE IF EXISTS ${db_name}"
+drop_database_sql="USE default; DROP DATABASE IF EXISTS ${db_name}"
 
-hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | tr -d '\n')
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
-sparksql_hivethriftjars="$spark_home/sql/hive-thriftserver/target/spark-hive-thriftserver_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | cut -d"-" -f1 | tr -d '\n')
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
+sparksql_hivethriftjars="$spark_home/lib/spark-hive-thriftserver_${SPARK_SCALA_VERSION}.jar"
 hive_jars=$sparksql_hivejars,$sparksql_hivethriftjars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
 hive_jars_colon=$sparksql_hivejars:$sparksql_hivethriftjars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
@@ -101,11 +93,21 @@ echo "ok - detected hadoop version $hadoop_ver for testing. CTAS does not work o
 queue_name=""
 sql_ret_code=""
 # Also demonstrate how to migrate command from Spark 1.4/1.5 to 1.6+
-if [ "x${hadoop_ver}" = "x2.4.1" ] ; then
-  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ; "
+if [[ $hadoop_ver == 2.4.* ]] ; then
+  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=$spark_conf/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ; "
   sql_ret_code=$?
-elif [ "x${hadoop_ver}" = "x2.7.1" ] ; then
-  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --jars /etc/spark/hive-site.xml,$hive_jars $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ;"
+elif [[ $hadoop_ver == 2.7.* ]] ; then
+  ./bin/spark-sql --verbose \
+    --master yarn --deploy-mode client \
+    --jars $spark_conf/hive-site.xml,$sparksql_hivejars \
+    --driver-memory 512M --executor-memory 1G --executor-cores 2 \
+    --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties $queue_name \
+    --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
+    --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=$HADOOP_HOME/lib/native/" \
+    --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
+    --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) \
+    --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
+    -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ;"
   sql_ret_code=$?
 else
   echo "fatal - hadoop version not supported, neither 2.7.1 nor 2.4.1"
@@ -113,7 +115,7 @@ else
 fi
 
 if [ "$sql_ret_code" -ne "0" ] ; then
-  >&2 echo "fail - testing SparkSQL Windowing Function on HiveQL/HiveContext failed!!"
+  >&2 echo "fail - testing $0 SparkSQL Windowing Function on HiveQL/HiveContext failed!!"
   exit -4
 fi
 

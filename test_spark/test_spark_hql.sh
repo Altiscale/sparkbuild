@@ -1,51 +1,39 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
-
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
 spark_home=${SPARK_HOME:='/opt/spark'}
-spark_conf=""
-spark_version=$SPARK_VERSION
-spark_test_dir="$spark_home/test_spark"
-
-source $spark_home/test_spark/init_spark.sh
-
-# Default SPARK_HOME location is already checked by init_spark.sh
-if [ "x${spark_home}" = "x" ] ; then
-  spark_home=/opt/spark
-  echo "ok - applying default location $spark_home"
-elif [ ! -d "$spark_home" ] ; then
-  >&2 echo "fail - $spark_home does not exist, please check you Spark installation, exinting!"
+if [ ! -d "$spark_home" ] ; then
+  >&2 echo "fail - $spark_home does not exist, please check you Spark installation or SPARK_HOME env variable, exinting!"
   exit -2
 else
   echo "ok - applying Spark home $spark_home"
 fi
+
+source $spark_home/test_spark/init_spark.sh
+source $spark_home/test_spark/deploy_hive_jar.sh
+
 # Default SPARK_CONF_DIR is already checked by init_spark.sh
-spark_conf=$SPARK_CONF_DIR
-if [ "x${spark_conf}" = "x" ] ; then
-  spark_conf=/etc/spark
-elif [ ! -d "$spark_conf" ] ; then
-  >&2 echo "fail - $spark_conf does not exist, please check you Spark installation or your SPARK_CONF_DIR env, exiting!"
+spark_conf=${SPARK_CONF_DIR:-"/etc/spark"}
+if [ ! -d "$spark_conf" ] ; then
+  >&2 echo "fail - $spark_conf does not exist, please check you Spark installation or your SPARK_CONF_DIR env value, exiting!"
   exit -2
 else
   echo "ok - applying spark config directory $spark_conf"
 fi
-echo "ok - applying Spark conf $spark_conf"
- 
+
 spark_version=$SPARK_VERSION
 if [ "x${spark_version}" = "x" ] ; then
-  >&2 echo "fail - spark_version can not be identified, is end SPARK_VERSION defined? Exiting!"
+  >&2 echo "fail - SPARK_VERSION can not be identified or not defined, please review SPARK_VERSION env variable? Exiting!"
   exit -2
 fi
 
-hive_home=$HIVE_HOME
-if [ "x${hive_home}" = "x" ] ; then
-  hive_home=/opt/hive
-fi
+curr_dir=`dirname $0`
+curr_dir=`cd $curr_dir; pwd`
+spark_test_dir="$spark_home/test_spark"
 
-spark_test_dir=$spark_home/test_spark/
+hive_home=${HIVE_HOME:-"/opt/hive"}
+
 if [ ! -f "$spark_test_dir/pom.xml" ] ; then
   echo "warn - correcting test directory from $spark_test_dir to $curr_dir"
   spark_test_dir=$curr_dir
@@ -78,8 +66,9 @@ if [ ! -f "$spark_test_dir/${app_name}-${app_ver}.jar" ] ; then
   exit -3
 fi
 
-sparksql_hivejars="$spark_home/sql/hive/target/spark-hive_${SPARK_SCALA_VERSION}-${spark_version}.jar"
+sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
 hive_jars=$sparksql_hivejars,$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ',')
+hive_jars_colon=$sparksql_hivejars:$(find $HIVE_HOME/lib/ -type f -name "*.jar" | tr -s '\n' ':')
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
@@ -90,10 +79,20 @@ queue_name=""
 # or spark-hive-thriftserver name in the executor classpath, the spark.executor.extraClassPath here is redundant.
 # The spark.executor.extraClassPath here is just for demonstration, and explicitly telling people you 
 # need to be aware of this for the executor classpath
-./bin/spark-submit --verbose --master yarn --deploy-mode cluster --driver-memory 512M --executor-memory 2048M --executor-cores 3 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --jars /etc/spark/hive-site.xml,$sparksql_hivejars $queue_name --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars) --class SparkSQLTestCase2HiveContextYarnClusterApp $spark_test_dir/${app_name}-${app_ver}.jar
+./bin/spark-submit --verbose \
+  --master yarn --deploy-mode cluster \
+  --jars $spark_conf/hive-site.xml,$sparksql_hivejars \
+  --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
+  --driver-memory 512M --executor-memory 2048M --executor-cores 3 \
+  --driver-class-path hive-site.xml:yarncluster-driver-log4j.properties $queue_name \
+  --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarncluster-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
+  --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
+  --conf spark.yarn.preserve.staging.files=true \
+  --class SparkSQLTestCase2HiveContextYarnClusterApp \
+  $spark_test_dir/${app_name}-${app_ver}.jar
 
 if [ $? -ne "0" ] ; then
-  >&2 echo "fail - testing shell for SparkSQL on HiveQL/HiveContext failed!!"
+  >&2 echo "fail - testing $0 for SparkSQL on HiveQL/HiveContext failed!!"
   exit -4
 fi
 

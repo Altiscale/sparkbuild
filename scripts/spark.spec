@@ -325,7 +325,6 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/R/lib/
 # Added due to AE-1219 to support Hive 1.2.0+ with Hive on Spark
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/lib/
@@ -364,7 +363,6 @@ cp -rp %{_builddir}/%{build_service_name}/common/network-yarn/target/*.jar %{bui
 cp -rp %{_builddir}/%{build_service_name}/common/network-yarn/target/scala-%{scala_build_version}/*.jar %{buildroot}%{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/
 cp -rp %{_builddir}/%{build_service_name}/sql/hive/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
-# cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{install_spark_dest}/lib_managed/jars/
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
 
@@ -431,7 +429,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/external
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
-%{install_spark_dest}/lib_managed
 %{install_spark_dest}/licenses
 %{install_spark_dest}/mllib
 %{install_spark_dest}/common/network-common
@@ -512,12 +509,10 @@ do
   ln -vsf $f %{spark_release_dir}/
 done
 
-for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
-do
-  ln -vsf $f %{spark_release_dir}/
-done
 ln -vsf %{install_spark_dest}/examples/target/scala-2.11/jars/spark-examples_%{scala_build_version}-%{spark_plain_version}.jar %{spark_release_dir}/
 ln -vsf %{install_spark_dest}/common/network-yarn/target/scala-%{scala_build_version}/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/sql/hive/target/spark-hive_%{scala_build_version}-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive_%{scala_build_version}.jar
+ln -vsf %{install_spark_dest}/sql/hive-thriftserver/target/spark-hive-thriftserver_%{scala_build_version}-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive-thriftserver_%{scala_build_version}.jar
 
 %postun
 if [ "$1" = "0" ]; then
