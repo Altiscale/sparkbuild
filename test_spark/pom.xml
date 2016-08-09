@@ -10,13 +10,14 @@
   <packaging>jar</packaging>
   <version>1.5</version>
 
+  <!-- Define default values -->
   <properties>
-    <spark.version>1.5.2</spark.version>
-    <hadoop.version>2.4.1</hadoop.version>
+    <spark.version>${userdef.spark.version}</spark.version>
+    <hadoop.version>${userdef.hadoop.version}</hadoop.version>
     <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
     <hive.version>1.2.1.spark</hive.version>
     <!-- hive.version>1.2.1.spark</hive.version -->
-    <yarn.version>2.4.1</yarn.version>
+    <yarn.version>${hadoop.version}</yarn.version>
     <avro.version>1.7.7</avro.version>
     <akka.group>com.typesafe.akka</akka.group>
     <akka.version>2.3.11</akka.version>
@@ -30,22 +31,17 @@
       <url>file://${user.home}/.m2/repository</url>
     </repository>
     <repository>
-      <id>scala-tools.org</id>
-      <name>Scala-tools Repository</name>
-      <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
+      <id>conjars.org</id>
+      <url>http://conjars.org/repo</url>
     </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>scala-tools.org</id>
-      <name>Scala-tools Repository</name>
-      <url>https://oss.sonatype.org/content/groups/scala-tools/</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <profiles>
     <profile>
       <id>spark-1.4</id>
+      <properties>
+        <spark.version>1.4.2</spark.version>
+      </properties>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -97,6 +93,9 @@
 
     <profile>
       <id>spark-1.5</id>
+      <properties>
+        <spark.version>${userdef.spark.version}</spark.version>
+      </properties>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -134,6 +133,12 @@
         <dependency>
           <groupId>local.org.apache.spark</groupId>
           <artifactId>spark-streaming_${scala.binary.version}</artifactId>
+          <version>${spark.version}</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>local.org.apache.spark</groupId>
+          <artifactId>spark-hive_${scala.binary.version}</artifactId>
           <version>${spark.version}</version>
           <scope>compile</scope>
         </dependency>
@@ -377,10 +382,10 @@
     <profile>
       <id>hadoop27-provided</id>
       <properties>
-        <hadoop.version>2.7.1</hadoop.version>
+        <hadoop.version>${userdef.hadoop.version}</hadoop.version>
         <!-- hive.version here refers to Spark custom built hive JARs with groupId org.spark-project.hive -->
         <hive.version>1.2.1.spark</hive.version>
-        <yarn.version>2.7.1</yarn.version>
+        <yarn.version>${userdef.hadoop.version}</yarn.version>
       </properties>
       <dependencies>
         <dependency>
