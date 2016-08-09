@@ -10,10 +10,10 @@ if [ "x${ANT_HOME}" = "x" ] ; then
   export ANT_HOME=/opt/apache-ant
 fi
 if [ "x${MAVEN_HOME}" = "x" ] ; then
-  export MAVEN_HOME=/opt/apache-maven
+  export MAVEN_HOME=/usr/share/apache-maven
 fi
 if [ "x${M2_HOME}" = "x" ] ; then
-  export M2_HOME=/opt/apache-maven
+  export M2_HOME=/usr/share/apache-maven
 fi
 if [ "x${MAVEN_OPTS}" = "x" ] ; then
   export MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=1024M -XX:ReservedCodeCacheSize=512m"
@@ -22,7 +22,7 @@ if [ "x${SCALA_HOME}" = "x" ] ; then
   export SCALA_HOME=/opt/scala
 fi
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
-  export HADOOP_VERSION=2.4.1
+  export HADOOP_VERSION=2.7.1
 fi
 # Spark 1.5+ default Hive starts with 1.2.1, backward compatible with Hive 1.2.0
 if [ "x${HIVE_VERSION}" = "x" ] ; then
@@ -42,8 +42,8 @@ export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_H
 
 # Define default spark uid:gid and build version
 # and all other Spark build related env
-if [ "x${SPARK_USER}" = "x" ] ; then
-  export SPARK_USER=spark
+if [ "x${SPARK_PKG_NAME}" = "x" ] ; then
+  export SPARK_PKG_NAME=spark
 fi
 if [ "x${SPARK_GID}" = "x" ] ; then
   export SPARK_GID=411460017
@@ -55,48 +55,11 @@ if [ "x${SPARK_VERSION}" = "x" ] ; then
   export SPARK_VERSION=1.5.2
 fi
 if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  export SPARK_PLAIN_VERSION=1.5.2
-fi
-if [ "x${SPARK_YARN}" = "x" ] ; then
-  export SPARK_YARN=true
-fi
-if [ "x${SPARK_HIVE}" = "x" ] ; then
-  export SPARK_HIVE=true
+  export SPARK_PLAIN_VERSION=$SPARK_VERSION
 fi
 
 # Defines which Hadoop version to build against
 HADOOP_BUILD_VERSION=$HADOOP_VERSION
-
-# Define what goes into the RPM pkg name
-if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop22"
-elif [ "x${HADOOP_VERSION}" = "x2.4.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
-elif [ "x${HADOOP_VERSION}" = "x2.4.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop24"
-elif [ "x${HADOOP_VERSION}" = "x2.6.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop26"
-elif [ "x${HADOOP_VERSION}" = "x2.7.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
-elif [ "x${HADOOP_VERSION}" = "x2.7.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hadoop27"
-else
-  echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION"
-fi
-
-if [ "x${HIVE_VERSION}" = "x0.12.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive12"
-elif [ "x${HIVE_VERSION}" = "x0.13.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive13"
-elif [ "x${HIVE_VERSION}" = "x0.13.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive13"
-elif [ "x${HIVE_VERSION}" = "x1.2.0" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive120"
-elif [ "x${HIVE_VERSION}" = "x1.2.1" ] ; then
-  export SPARK_VERSION="$SPARK_VERSION.hive121"
-else
-  echo "error - can't recognize altiscale's HIVE_VERSION=$HIVE_VERSION"
-fi
 
 if [ "x${ALTISCALE_RELEASE}" = "x" ] ; then
   if [ "x${HADOOP_VERSION}" = "x2.2.0" ] ; then
@@ -134,10 +97,6 @@ else
 fi 
 export ALTISCALE_RELEASE
 
-if [ "x${BRANCH_NAME}" = "x" ] ; then
-  export BRANCH_NAME=altiscale-branch-1.5
-fi
-
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
   export BUILD_TIMEOUT=86400
 fi
@@ -148,4 +107,6 @@ export BUILD_TIME
 # Customize build OPTS for MVN
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
-
+if [ "x${PRODUCTION_RELEASE}" = "x" ] ; then
+  export PRODUCTION_RELEASE=false
+fi

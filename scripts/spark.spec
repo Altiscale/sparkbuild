@@ -1,7 +1,9 @@
-%global apache_name           SPARK_USER
+%global apache_name           SPARK_PKG_NAME
 %global spark_uid             SPARK_UID
 %global spark_gid             SPARK_GID
 
+%define production_release    PRODUCTION_RELEASE
+%define git_hash_release      GITHASH_REV_RELEASE
 %define altiscale_release_ver ALTISCALE_RELEASE
 %define rpm_package_name      alti-spark
 %define spark_version         SPARK_VERSION_REPLACE
@@ -16,23 +18,24 @@
 %define install_spark_dest    /opt/%{spark_folder_name}
 %define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
-%define install_spark_logs    /service/log/%{apache_name}
+%define install_spark_logs    /service/log/%{apache_name}/%{rpm_package_name}-%{spark_version}
 %define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
-%define spark_release_dir     /opt/%{apache_name}/lib
+%define spark_release_dir     /opt/%{spark_folder_name}/lib
 %define build_release         BUILD_TIME
 
 Name: %{rpm_package_name}-%{spark_version}
-Summary: %{spark_folder_name} RPM Installer AE-576, cluster mode restricted with warnings
+Summary: %{spark_folder_name} RPM Installer without Apache Hadoop and Hive JARs.
 Version: %{spark_version}
 Release: %{altiscale_release_ver}.%{build_release}%{?dist}
-License: ASL 2.0
+License: Apache Software License 2.0
 Group: Development/Libraries
 Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
-Requires: scala >= 2.10.4
+Requires: scala = 2.10.4
 Requires: %{rpm_package_name}-%{spark_version}-example
 Requires: %{rpm_package_name}-%{spark_version}-yarn-shuffle
+Requires: %{rpm_package_name}-%{spark_version}-devel
 # BuildRequires: vcc-hive-%{hive_version}
 BuildRequires: scala = 2.10.4
 BuildRequires: apache-maven >= 3.3.3
@@ -44,12 +47,12 @@ BuildRequires: vcc-R_3.0.3
 
 Url: http://spark.apache.org/
 %description
-Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.4 with 
-build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.4 
-Origin source form https://github.com/apache/spark/tree/branch-1.4
+Build from https://github.com/Altiscale/spark/tree/altiscale-branch-1.5 with 
+build script https://github.com/Altiscale/sparkbuild/tree/altiscale-branch-1.45
+Origin source form https://github.com/apache/spark/tree/branch-1.5
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
-Hadoop 2.4.x with YARN 2.4.x enabled, and hive-1.2.1. This package should work with Altiscale 
-Hadoop 2.4.1 and Hive 1.2.1 (vcc-hadoop-2.4.1 and alti-hive-1.2.0).
+Hadoop 2.7.x with YARN 2.7.x enabled, and hive-1.2.1. This package should work with Altiscale 
+Hadoop 2.7.1 and Hive 1.2.1 (vcc-hadoop-2.7.1 and alti-hive-1.2.0/alti-hive-1.2.1).
 
 %package example
 Summary: The test example package for Spark
@@ -66,24 +69,26 @@ Group: Development/Libraries
 %description yarn-shuffle
 This package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath.
 
+%package devel
+Summary: Spark module JARs and libraries compiled by maven
+Group: Development/Libraries
+Requires: %{rpm_package_name}-%{spark_version}
+
+%description devel
+This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-yarn, spark-unsafe, spark-launcher, etc. that are under Apache License 2. Other components that has a different license will be under different package for distribution.
+
+%package kinesis
+Summary: Amazon Kinesis libraries to integrate with Spark Streaming compiled by maven
+License: Amazon Software License
+Group: Development/Libraries
+Requires: %{rpm_package_name}-%{spark_version}
+
+%description kinesis
+This package provides the artifact for kinesis integration for Spark. Aware, this is under Amazon Software License (ASL), see: https://aws.amazon.com/asl/ for more information.
+
 %pre
-# Soft creation for spark user if it doesn't exist. This behavior is idempotence to Chef deployment.
-# Should be harmless. MAKE SURE UID and GID is correct FIRST!!!!!!
-# getent group %{apache_name} >/dev/null || groupadd -f -g %{spark_gid} -r %{apache_name}
-# if ! getent passwd %{apache_name} >/dev/null ; then
-#    if ! getent passwd %{spark_uid} >/dev/null ; then
-#      useradd -r -u %{spark_uid} -g %{apache_name} -c "Soft creation of user and group of spark for manual deployment" %{apache_name}
-#    else
-#      useradd -r -g %{apache_name} -c "Soft adding user spark to group spark for manual deployment" %{apache_name}
-#    fi
-# fi
 
 %prep
-# copying files into BUILD/spark/ e.g. BUILD/spark/* 
-# echo "ok - copying files from %{_sourcedir} to folder  %{_builddir}/%{build_service_name}"
-# cp -r %{_sourcedir}/%{build_service_name} %{_builddir}/
-
-# %patch1 -p0
 
 %setup -q -n %{build_service_name}
 
@@ -109,7 +114,7 @@ if [ "x${JAVA_HOME}" = "x" ] ; then
 fi
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=1024m"
 
-echo "build - spark core in %{_builddir}"
+echo "build - entire spark project in %{_builddir}"
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/
 
@@ -128,6 +133,7 @@ rm -f %{_builddir}/%{build_service_name}/sbin/stop-all.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/slaves.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-daemons.sh
 rm -f %{_builddir}/%{build_service_name}/sbin/spark-executor
+rm -f %{_builddir}/%{build_service_name}/sbin/*mesos*.sh
 rm -f %{_builddir}/%{build_service_name}/conf/slaves
 
 if [ "x%{hadoop_version}" = "x" ] ; then
@@ -151,17 +157,9 @@ else
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
 
-# Always build with YARN
-export SPARK_YARN=true
-# Build SPARK with Hive
-export SPARK_HIVE=true
-
 env | sort
 
-echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION SPARK_YARN=$SPARK_YARN SPARK_HIVE=$SPARK_HIVE"
-
-# PURGE LOCAL CACHE for clean build
-# mvn dependency:purge-local-repository
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION"
 
 ########################
 # BUILD ENTIRE PACKAGE #
@@ -178,40 +176,54 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 # hadoop-2.6 hadoop.version=2.6.0 yarn.version=2.6.0 hive.version=1.2.1.spark hive.short.version=1.2.1
 # hadoop-2.7 hadoop.version=2.7.1 yarn.version=2.7.1 hive.version=1.2.1.spark hive.short.version=1.2.1
 
+hadoop_profile_str=""
+testcase_hadoop_profile_str=""
+if [[ %{hadoop_version} == 2.4.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.4"
+  testcase_hadoop_profile_str="-Phadoop24-provided"
+elif [[ %{hadoop_version} == 2.6.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.6"
+  testcase_hadoop_profile_str="-Phadoop26-provided"
+elif [[ %{hadoop_version} == 2.7.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.7"
+  testcase_hadoop_profile_str="-Phadoop27-provided"
+else
+  echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
+  exit -9
+fi
+xml_setting_str=""
 if [ -f /etc/alti-maven-settings/settings.xml ] ; then
   echo "ok - applying local maven repo settings.xml for first priority"
-  if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver --settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml -DskipTests install
-  else
-    echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
-    exit -9
-  fi
+  xml_setting_str="--settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml"
 else
   echo "ok - applying default repository form pom.xml"
-  if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.4 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.6 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
-  elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-    echo "mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install"
-    mvn -U -X -Phadoop-2.7 -Psparkr -Pyarn -Phive -Phive-thriftserver -DskipTests install
-  else
-    echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
-    exit -9
-  fi
+  xml_setting_str=""
 fi
 
+# TODO: This needs to align with Maven settings.xml, however, Maven looks for
+# -SNAPSHOT in pom.xml to determine which repo to use. This creates a chain reaction on 
+# legacy pom.xml design on other application since they are not implemented in the Maven way.
+# :-( 
+# Will need to create a work around with different repo URL and use profile Id to activate them accordingly
+# mvn_release_flag=""
+# if [ "x%{production_release}" == "xtrue" ] ; then
+#   mvn_release_flag="-Preleases"
+# else
+#   mvn_release_flag="-Psnapshots"
+# fi
+
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+echo "$mvn_cmd"
+$mvn_cmd
+
+pushd %{_builddir}/%{build_service_name}/sql/hive-thriftserver/
+mvn_spark_hs2_cmd="mvn -U $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn $xml_setting_str -DskipTests package"
+echo "$mvn_spark_hs2_cmd"
+$mvn_spark_hs2_cmd
 popd
-echo "ok - build spark core completed successfully!"
+
+popd
+echo "ok - build spark project completed successfully!"
 
 echo "ok - start building spark test case in %{_builddir}/%{build_service_name}/test_spark"
 pushd `pwd`
@@ -223,33 +235,29 @@ echo "ok - local repository will be installed under %{current_workspace}/.m2/rep
 # and include it in the test_case pom.xml. This is really annoying.
 # spark_version is different then spark_plain_Version
 
-if [ ! -d "%{current_workspace}/.m2" ] ; then
-  # This usually happens in mock, the default local repository will be the same in this case
-  # no need to specify it here.
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar 
-  # For Kafka Examples
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar
-else
-  # This applies to local hand build with a existing user
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-assembly_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  # For Kafka Examples
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming-kafka_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
-  mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DgroupId=local.org.apache.spark -DartifactId=spark-streaming_2.10 -Dversion=%{spark_plain_version} -Dpackaging=jar -DlocalRepositoryPath=%{current_workspace}/.m2/repository
+# In mock environment, .m2 may end up somewhere differently, use default in mock.
+# explicitly if we detect .m2/repository in local sandbox, etc.
+mvn_install_target_repo=""
+if [ -d "%{current_workspace}/.m2" ] ; then
+  mvn_install_target_repo="-DlocalRepositoryPath=%{current_workspace}/.m2/repository"
 fi
 
+mvn_install_cmd="mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Duserdef.spark.version=%{spark_plain_version} -Duserdef.hadoop.version=%{hadoop_version} -Dversion=%{spark_plain_version} -Dpackaging=jar -DgroupId=local.org.apache.spark"
+# This applies to local integration with Spark assembly JARs
+$mvn_install_cmd -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar -DartifactId=spark-assembly_2.10 $mvn_install_target_repo
+
+# For Kafka Spark Streaming Examples
+$mvn_install_cmd -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{spark_plain_version}.jar -DartifactId=spark-streaming-kafka_2.10 $mvn_install_target_repo
+
+$mvn_install_cmd -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{spark_plain_version}.jar -DartifactId=spark-streaming_2.10 $mvn_install_target_repo
+
+# For SparkSQL Hive integration examples, this is required when you use -Phive-provided
+# spark-hive JAR needs to be provided to the test case in this case.
+$mvn_install_cmd -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar -DartifactId=spark-hive_2.10 $mvn_install_target_repo
+
 # Build our test case with our own pom.xml file
-# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, and hadoop version hadoop24-provided or hadoop27-provided as well
-if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
-  mvn -U -X package -Pspark-1.5 -Phadoop24-provided -Pkafka-provided
-elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
-  mvn -U -X package -Pspark-1.5 -Phadoop26-provided -Pkafka-provided
-elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
-  mvn -U -X package -Pspark-1.5 -Phadoop27-provided -Pkafka-provided
-else
-  echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION for test case test_spark, can't continue, exiting, no cleanup"
-  exit -9
-fi
+# Update profile ID spark-1.4 for 1.4.1, spark-1.5 for 1.5.2, spark-1.6 for 1.6.0, and hadoop version hadoop24-provided or hadoop27-provided as well
+mvn -U  package -Duserdef.spark.version=%{spark_plain_version} -Duserdef.hadoop.version=%{hadoop_version} -Pspark-1.5 -Pkafka-provided $testcase_hadoop_profile_str
 
 popd
 echo "ok - build spark test case completed successfully!"
@@ -301,17 +309,31 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}/etc/%{install_spark_dest}/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/bagel/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/data/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/examples/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/kafka-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume-sink/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/flume-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/mqtt/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/mqtt-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/twitter/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/external/zeromq/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/kinesis-asl/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/extras/kinesis-asl-assembly/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/graphx/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/mllib/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/common/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/shuffle/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/network/yarn/target/scala-2.10/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/repl/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/streaming/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/tools/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/lib_managed/jars/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/R/lib/
 # Added due to AE-1219 to support Hive 1.2.0+ with Hive on Spark
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/lib/
@@ -321,9 +343,13 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 %{__mkdir} -p %{buildroot}%{install_spark_test}
 # copy all necessary jars
 cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
+cp -rp %{_builddir}/%{build_service_name}/bagel/target/*.jar %{buildroot}%{install_spark_dest}/bagel/target/
 cp -rp %{_builddir}/%{build_service_name}/examples/target/*.jar %{buildroot}%{install_spark_dest}/examples/target/
 # required for python and SQL
 cp -rp %{_builddir}/%{build_service_name}/examples/src %{buildroot}%{install_spark_dest}/examples/
+cp -rp %{_builddir}/%{build_service_name}/extras/README.md %{buildroot}%{install_spark_dest}/extras/
+cp -rp %{_builddir}/%{build_service_name}/extras/kinesis-asl/target/*.jar %{buildroot}%{install_spark_dest}/extras/kinesis-asl/target/
+cp -rp %{_builddir}/%{build_service_name}/extras/kinesis-asl-assembly/target/*.jar %{buildroot}%{install_spark_dest}/extras/kinesis-asl-assembly/target/
 cp -rp %{_builddir}/%{build_service_name}/tools/target/*.jar %{buildroot}%{install_spark_dest}/tools/target/
 cp -rp %{_builddir}/%{build_service_name}/mllib/data %{buildroot}%{install_spark_dest}/mllib/
 cp -rp %{_builddir}/%{build_service_name}/mllib/target/*.jar %{buildroot}%{install_spark_dest}/mllib/target/
@@ -337,22 +363,48 @@ cp -rp %{_builddir}/%{build_service_name}/python %{buildroot}%{install_spark_des
 cp -rp %{_builddir}/%{build_service_name}/project %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/docs %{buildroot}%{install_spark_dest}/
 cp -rp %{_builddir}/%{build_service_name}/dev %{buildroot}%{install_spark_dest}/
-cp -rp %{_builddir}/%{build_service_name}/external/* %{buildroot}%{install_spark_dest}/external/
-cp -rp %{_builddir}/%{build_service_name}/network/* %{buildroot}%{install_spark_dest}/network/
-cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/* %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kafka/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka/target/
+cp -rp %{_builddir}/%{build_service_name}/external/kafka-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/kafka-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/flume/target/*.jar %{buildroot}%{install_spark_dest}/external/flume/target/
+cp -rp %{_builddir}/%{build_service_name}/external/flume-sink/target/*.jar %{buildroot}%{install_spark_dest}/external/flume-sink/target/
+cp -rp %{_builddir}/%{build_service_name}/external/flume-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/flume-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/mqtt/target/*.jar %{buildroot}%{install_spark_dest}/external/mqtt/target/
+cp -rp %{_builddir}/%{build_service_name}/external/mqtt-assembly/target/*.jar %{buildroot}%{install_spark_dest}/external/mqtt-assembly/target/
+cp -rp %{_builddir}/%{build_service_name}/external/twitter/target/*.jar %{buildroot}%{install_spark_dest}/external/twitter/target/
+cp -rp %{_builddir}/%{build_service_name}/external/zeromq/target/*.jar %{buildroot}%{install_spark_dest}/external/zeromq/target/
+cp -rp %{_builddir}/%{build_service_name}/network/common/target/*.jar %{buildroot}%{install_spark_dest}/network/common/target/
+cp -rp %{_builddir}/%{build_service_name}/network/shuffle/target/*.jar %{buildroot}%{install_spark_dest}/network/shuffle/target/
+cp -rp %{_builddir}/%{build_service_name}/network/yarn/target/*.jar %{buildroot}%{install_spark_dest}/network/yarn/target/
+cp -rp %{_builddir}/%{build_service_name}/network/yarn/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/network/yarn/target/scala-2.10/
+cp -rp %{_builddir}/%{build_service_name}/sql/hive/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/hive-thriftserver/target/*.jar %{buildroot}%{install_spark_dest}/sql/hive-thriftserver/target/
 cp -rp %{_builddir}/%{build_service_name}/lib_managed/jars/* %{buildroot}%{install_spark_dest}/lib_managed/jars/
 cp -rp %{_builddir}/%{build_service_name}/data/* %{buildroot}%{install_spark_dest}/data/
 cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_dest}/R/lib/
+
+# devel package files
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/core/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/catalyst/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/sql/core/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/launcher/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/unsafe/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/yarn/target/
+cp -rp %{_builddir}/%{build_service_name}/core/target/*.jar %{buildroot}%{install_spark_dest}/core/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/catalyst/target/*.jar %{buildroot}%{install_spark_dest}/sql/catalyst/target/
+cp -rp %{_builddir}/%{build_service_name}/sql/core/target/*.jar %{buildroot}%{install_spark_dest}/sql/core/target/
+cp -rp %{_builddir}/%{build_service_name}/launcher/target/*.jar %{buildroot}%{install_spark_dest}/launcher/target/
+cp -rp %{_builddir}/%{build_service_name}/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/unsafe/target/
+cp -rp %{_builddir}/%{build_service_name}/yarn/target/*.jar %{buildroot}%{install_spark_dest}/yarn/target/
 
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
 
 # Inherit license, readme, etc
-cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}/%{install_spark_dest}
-cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}/%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/README.md %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/LICENSE %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/NOTICE %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CHANGES.txt %{buildroot}%{install_spark_dest}
+cp -p %{_builddir}/%{build_service_name}/CONTRIBUTING.md %{buildroot}%{install_spark_dest}
 
 # This will capture the installation property form this spec file for further references
 rm -f %{buildroot}/%{install_spark_label}
@@ -360,7 +412,7 @@ touch %{buildroot}/%{install_spark_label}
 echo "name=%{name}" >> %{buildroot}/%{install_spark_label}
 echo "version=%{spark_version}" >> %{buildroot}/%{install_spark_label}
 echo "release=%{name}-%{release}" >> %{buildroot}/%{install_spark_label}
-
+echo "git_rev=%{git_hash_release}" >> %{buildroot}/%{install_spark_label}
 
 # add dummy file to warn user that CLUSTER mode is not for Production
 echo "Currently, standalone mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_STANDALONE_MODE_NOT_SUPPORTED.why.txt
@@ -377,68 +429,74 @@ echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_des
 rm -rf %{buildroot}%{install_spark_dest}
 
 %files
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
+%{install_spark_dest}/bin
 %{install_spark_dest}/project
 %{install_spark_dest}/assembly
-%{install_spark_dest}/bin
 %{install_spark_dest}/data
 %{install_spark_dest}/dev
-%{install_spark_dest}/docs
+%{install_spark_dest}/bagel
 %{install_spark_dest}/examples
 %{install_spark_dest}/external
+%dir %{install_spark_dest}/extras
+%{install_spark_dest}/extras/README.md
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
 %{install_spark_dest}/lib_managed
 %{install_spark_dest}/mllib
 %{install_spark_dest}/network/common
 %{install_spark_dest}/network/shuffle
-%{install_spark_dest}/network/yarn/pom.xml
-%{install_spark_dest}/network/yarn/src
+%dir %{install_spark_dest}/network
+%dir %{install_spark_dest}/network/yarn
+%dir %{install_spark_dest}/network/yarn/target
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-tests.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-test-sources.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-javadoc.jar
 %{install_spark_dest}/network/yarn/target/spark-network-yarn_2.10-%{spark_plain_version}-sources.jar
-%{install_spark_dest}/network/yarn/target/.plxarc
-%{install_spark_dest}/network/yarn/target/analysis
-%{install_spark_dest}/network/yarn/target/antrun
-%{install_spark_dest}/network/yarn/target/generated-sources
-%{install_spark_dest}/network/yarn/target/maven-archiver
-%{install_spark_dest}/network/yarn/target/maven-shared-archive-resources
-%{install_spark_dest}/network/yarn/target/maven-status
-%{install_spark_dest}/network/yarn/target/scala-2.10/classes
-%{install_spark_dest}/network/yarn/target/scala-2.10/test-classes
-%{install_spark_dest}/network/yarn/target/scalastyle-output.xml
-%{install_spark_dest}/network/yarn/target/site
 %{install_spark_dest}/python
 %{install_spark_dest}/R
 %{install_spark_dest}/repl
 %{install_spark_dest}/sbin
-%{install_spark_dest}/sql
+%dir %{install_spark_dest}/sql
+%{install_spark_dest}/sql/hive
+%{install_spark_dest}/sql/hive-thriftserver
 %{install_spark_dest}/streaming
 %{install_spark_dest}/tools
 %docdir %{install_spark_dest}/docs
+%{install_spark_dest}/docs
 %doc %{install_spark_label}
 %doc %{install_spark_dest}/LICENSE
 %doc %{install_spark_dest}/README.md
 %doc %{install_spark_dest}/NOTICE
 %doc %{install_spark_dest}/CHANGES.txt
 %doc %{install_spark_dest}/CONTRIBUTING.md
-%attr(0755,spark,spark) %{install_spark_conf}/spark-env.sh
-%attr(0644,spark,spark) %{install_spark_conf}/log4j.properties
-%attr(0644,spark,spark) %{install_spark_conf}/spark-defaults.conf
-%attr(0644,spark,spark) %{install_spark_conf}/java-opts
-%attr(0644,spark,spark) %{install_spark_conf}/*.template
-%attr(1777,spark,spark) %{install_spark_logs}
+%attr(0644,root,root) %{install_spark_conf}/log4j.properties
+%attr(0644,root,root) %{install_spark_conf}/*.template
+%attr(1777,root,root) %{install_spark_logs}
 %config(noreplace) %{install_spark_conf}
 
 %files example
-%defattr(0755,spark,spark,0755)
+%defattr(0755,root,root,0755)
 %{install_spark_test}
 
 %files yarn-shuffle
-%defattr(0755,spark,spark,0755)
-%{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar
+%defattr(0755,root,root,0755)
+%{install_spark_dest}/network/yarn/target/scala-2.10/
+
+%files devel
+%defattr(0755,root,root,0755)
+%{install_spark_dest}/core
+%{install_spark_dest}/sql/catalyst
+%{install_spark_dest}/sql/core
+%{install_spark_dest}/launcher
+%{install_spark_dest}/unsafe
+%{install_spark_dest}/yarn
+
+%files kinesis
+%defattr(0755,root,root,0755)
+%{install_spark_dest}/extras/kinesis-asl
+%{install_spark_dest}/extras/kinesis-asl-assembly
 
 %post
 if [ "$1" = "1" ]; then
@@ -446,34 +504,29 @@ if [ "$1" = "1" ]; then
 elif [ "$1" = "2" ]; then
   echo "ok - upgrading system"
 fi
-rm -vf /opt/%{apache_name}/logs
-rm -vf /opt/%{apache_name}/conf
-rm -vf /opt/%{apache_name}/test_spark
-rm -vf /opt/%{apache_name}
-rm -vf /etc/%{apache_name}
-ln -vsf %{install_spark_dest} /opt/%{apache_name}
-ln -vsf %{install_spark_conf} /etc/%{apache_name}
-ln -vsf %{install_spark_conf} /opt/%{apache_name}/conf
-ln -vsf %{install_spark_logs} /opt/%{apache_name}/logs
-# mkdir -p /home/spark/logs
-# chmod -R 1777 /home/spark/logs
-# chown %{spark_uid}:%{spark_gid} /home/spark/
-# chown %{spark_uid}:%{spark_gid} /home/spark/logs
-# Added due to AE-1219, this should go to Chef for refactor
-# The symbolic link is version sensitive
-# TODO: Move to Chef later
-ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/
-for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
-do
-  ln -vsf $f %{spark_release_dir}/
-done
+# TODO: Move to Chef later. The symbolic link is version sensitive
+# CLean up old symlink
+rm -vf %{install_spark_dest}/logs
+rm -vf %{install_spark_dest}/conf
+# Restore conf and logs symlink
+ln -vsf %{install_spark_conf} %{install_spark_dest}/conf
+ln -vsf %{install_spark_logs} %{install_spark_dest}/logs
+ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/spark-assembly-%{spark_plain_version}.jar
+# For backward compatibility which requires hadoop version
+ln -vsf %{install_spark_dest}/assembly/target/scala-2.10/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar %{spark_release_dir}/spark-assembly-%{spark_plain_version}-hadoop%{hadoop_build_version}.jar
+# for f in `find %{install_spark_dest}/lib_managed/jars/ -name "datanucleus-*.jar"`
+# do
+#   ln -vsf $f %{spark_release_dir}/
+# done
 ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{spark_plain_version}.jar %{spark_release_dir}/
 ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{spark_plain_version}-yarn-shuffle.jar %{spark_release_dir}/
-
+ln -vsf %{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive_2.10.jar
+ln -vsf %{install_spark_dest}/sql/hive-thriftserver/target/spark-hive-thriftserver_2.10-%{spark_plain_version}.jar %{spark_release_dir}/spark-hive-thriftserver_2.10.jar
 
 %postun
 if [ "$1" = "0" ]; then
-  ret=$(rpm -qa | grep %{rpm_package_name} | grep -v test | wc -l)
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep -v example | grep -v yarn-shuffle | wc -l)
+  # The rpm is already uninstall and shouldn't appear in the counts
   if [ "x${ret}" != "x0" ] ; then
     echo "ok - detected other spark version, no need to clean up symbolic links"
     echo "ok - cleaning up version specific directories only regarding this uninstallation"
@@ -481,17 +534,59 @@ if [ "$1" = "0" ]; then
     rm -vrf %{install_spark_conf}
   else
     echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
-    rm -vf /opt/%{apache_name}/logs
-    rm -vf /opt/%{apache_name}/conf
-    rm -vf /opt/%{apache_name}
-    rm -vf /etc/%{apache_name}
+    rm -vf %{install_spark_dest}/logs
+    rm -vf %{install_spark_dest}/conf
     rm -vrf %{install_spark_dest}
     rm -vrf %{install_spark_conf}
   fi
 fi
 # Don't delete the users after uninstallation.
 
+%postun devel
+if [ "$1" = "0" ]; then
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep devel | grep -v example | wc -l)
+  # The devel rpm is already uninstall and shouldn't appear in the counts
+  if [ "x${ret}" != "x0" ] ; then
+    echo "ok - detected other spark development package version"
+    echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
+    rm -vrf %{install_spark_dest}/core
+    rm -vrf %{install_spark_dest}/sql/catalyst
+    rm -vrf %{install_spark_dest}/sql/core
+    rm -vrf %{install_spark_dest}/sql/hive
+    rm -vrf %{install_spark_dest}/launcher
+    rm -vrf %{install_spark_dest}/unsafe
+    rm -vrf %{install_spark_dest}/yarn
+  else
+    echo "ok - uninstalling %{rpm_package_name}-devel on system, removing everything related except the parent directoy /opt/%{apache_name}"
+    rm -vrf %{install_spark_dest}/core
+    rm -vrf %{install_spark_dest}/sql/catalyst
+    rm -vrf %{install_spark_dest}/sql/core
+    rm -vrf %{install_spark_dest}/sql/hive
+    rm -vrf %{install_spark_dest}/launcher
+    rm -vrf %{install_spark_dest}/unsafe
+    rm -vrf %{install_spark_dest}/yarn
+  fi
+fi
+
+%postun kinesis
+if [ "$1" = "0" ]; then
+  ret=$(rpm -qa | grep %{rpm_package_name} | grep kinesis | grep -v example | wc -l)
+  # The kinesis rpm is already uninstall and shouldn't appear in the counts
+  if [ "x${ret}" != "x0" ] ; then
+    echo "ok - detected other spark kinesis package version"
+    echo "ok - cleaning up version specific directories only regarding ${ret} uninstallation"
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl-assembly
+  else
+    echo "ok - uninstalling %{rpm_package_name}-kinesis on system, removing everything related except the parent directoy /opt/%{apache_name}"
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl
+    rm -vrf %{install_spark_dest}/extras/kinesis-asl-assembly
+  fi
+fi
+
 %changelog
+* Tue Aug 9 2016 Andrew Lee 20160809
+- Breakup Spark 1.5 to multiple packages and refactor spec file
 * Fri Aug 21 2015 Andrew Lee 20150821
 - Update RPM file listing
 * Tue Aug 11 2015 Andrew Lee 20150811
@@ -530,5 +625,3 @@ fi
 - Rename Spark pkg name to vcc-spark so we can identify our own build
 * Wed Mar 19 2014 Andrew Lee 20140319
 - Initial Creation of spec file for Spark 0.9.1
-
-
