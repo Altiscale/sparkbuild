@@ -1,7 +1,8 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
+
 # Default SPARK_HOME location is already checked by init_spark.sh
 spark_home=${SPARK_HOME:='/opt/spark'}
 if [ ! -d "$spark_home" ] ; then
@@ -33,7 +34,10 @@ curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
 spark_test_dir=""
 
-hive_home=${HIVE_HOME:-"/opt/hive"}
+hive_home=$HIVE_HOME
+if [ "x${hive_home}" = "x" ] ; then
+  hive_home=/opt/hive
+fi
 
 if [ ! -f "$spark_test_dir/pom.xml" ] ; then
   echo "warn - correcting test directory from $spark_test_dir to $curr_dir"
@@ -43,7 +47,7 @@ fi
 pushd `pwd`
 cd $spark_home
 
-echo "ok - testing spark SQL shell with simple queries"
+echo "ok - Testing windowing function with spark-sql"
 
 app_name=`grep "<artifactId>.*</artifactId>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1  | head -n 1`
 app_ver=`grep "<version>.*</version>" $spark_test_dir/pom.xml | cut -d">" -f2- | cut -d"<" -f1 | head -n 1`
@@ -57,26 +61,26 @@ spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.con
 
 table_uuid=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
 db_name="spark_test_db_${table_uuid}"
-table_name="spark_hive_test_table_${table_uuid}"
-new_table_name="new_spark_hive_test_table_${table_uuid}"
-orc_table_name="orc_spark_hive_test_table_${table_uuid}"
-parquet_table_name="parquet_spark_hive_test_table_${table_uuid}"
+echo "[Window] dn_name=$db_name"
+table_name="test_windowing_${table_uuid}"
+echo "[Window] table_name=$table_name"
 
-test_create_database_sql1="CREATE DATABASE IF NOT EXISTS ${db_name}"
-test_create_table_sql1="CREATE TABLE $table_name (key INT, value STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE"
-test_alter_table_sql1="ALTER TABLE $table_name RENAME TO $new_table_name"
-test_truncate_table_sql1="TRUNCATE TABLE $new_table_name"
-test_load_data_sql1="LOAD DATA LOCAL INPATH '${spark_test_dir}/test_data/sparksql_testdata2.csv' INTO TABLE $new_table_name"
-test_select_sql1="SELECT SUM(key) FROM $new_table_name"
-# Only works with Hive 1.2.x. Bug on Hive 0.13.1
-test_create_orc_sql1="CREATE TABLE $orc_table_name STORED AS ORC AS SELECT key,value FROM $new_table_name"
-test_create_parquet_sql1="CREATE TABLE $parquet_table_name STORED AS PARQUET AS SELECT * FROM $new_table_name"
-test_select_orc_sql1="SELECT SUM(key) FROM $orc_table_name"
-test_select_parquet_sql1="SELECT SUM(key) FROM $parquet_table_name"
-test_drop_table_sql1="DROP TABLE $new_table_name"
-test_drop_orc_table_sql1="DROP TABLE $orc_table_name"
-test_drop_parquet_table_sql1="DROP TABLE $parquet_table_name"
-test_drop_database_sql1="DROP DATABASE IF EXISTS ${db_name}"
+create_database_sql="CREATE DATABASE IF NOT EXISTS ${db_name}"
+create_table_sql="CREATE TABLE $table_name (name STRING, country STRING, revenue INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE"
+load_data_sql="LOAD DATA LOCAL INPATH '${spark_test_dir}/test_data/sales' INTO TABLE $table_name"
+
+test_window_sql1="SELECT * FROM ( 
+              SELECT name, country, revenue,
+              RANK() over 
+                  (PARTITION BY country
+                  ORDER BY revenue DESC) as rank
+              FROM $table_name) t
+              WHERE rank=1;"
+
+test_window_sql2="SELECT name, country, revenue, PERCENT_RANK() over (PARTITION by country ORDER BY revenue DESC) AS percent_rank FROM $table_name;"
+
+drop_table_sql="DROP TABLE $table_name"
+drop_database_sql="DROP DATABASE IF EXISTS ${db_name}"
 
 hadoop_ver=$(hadoop version | head -n 1 | grep -o 2.*.* | cut -d"-" -f1 | tr -d '\n')
 sparksql_hivejars="$spark_home/lib/spark-hive_${SPARK_SCALA_VERSION}.jar"
@@ -90,28 +94,28 @@ queue_name=""
 sql_ret_code=""
 # Also demonstrate how to migrate command from Spark 1.4/1.5 to 1.6+
 if [[ $hadoop_ver == 2.4.* ]] ; then
-  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=/etc/spark/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=$HADOOP_HOME/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_select_sql1 ; $test_drop_table_sql1 ; $test_drop_database_sql1 ; "
+  ./bin/spark-sql --verbose --master yarn --deploy-mode client --driver-memory 512M --executor-memory 1G --executor-cores 2 --conf spark.eventLog.dir=${spark_event_log_dir}/$USER --conf spark.yarn.dist.files=$spark_conf/hive-site.xml,$hive_jars --driver-java-options "-XX:MaxPermSize=1024M -Djava.library.path=/opt/hadoop/lib/native/" --driver-class-path hive-site.xml:$hive_jars_colon $queue_name -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ; "
   sql_ret_code=$?
 elif [[ $hadoop_ver == 2.7.* ]] ; then
   ./bin/spark-sql --verbose \
-    --master yarn --deploy-mode client --driver-memory 512M \
+    --master yarn --deploy-mode client \
     --jars $spark_conf/hive-site.xml,$sparksql_hivejars \
-    --executor-memory 1G --executor-cores 2 \
+    --driver-memory 512M --executor-memory 1G --executor-cores 2 \
     --driver-class-path $spark_conf/hive-site.xml:$spark_conf/yarnclient-driver-log4j.properties $queue_name \
     --archives hdfs:///user/$USER/apps/$(basename $(readlink -f $HIVE_HOME))-lib.zip#hive \
     --conf spark.yarn.am.extraJavaOptions="-Djava.library.path=$HADOOP_HOME/lib/native/" \
     --conf spark.eventLog.dir=${spark_event_log_dir}/$USER \
     --conf spark.executor.extraClassPath=$(basename $sparksql_hivejars):$(basename $sparksql_hivethriftjars) \
     --conf spark.driver.extraJavaOptions="-Dlog4j.configuration=yarnclient-driver-log4j.properties -Djava.library.path=$HADOOP_HOME/lib/native/" \
-    -e "$test_create_database_sql1; USE $db_name; $test_create_table_sql1 ; $test_alter_table_sql1 ; $test_truncate_table_sql1 ; $test_load_data_sql1 ; $test_create_orc_sql1; $test_create_parquet_sql1; $test_select_sql1 ; $test_select_orc_sql1; $test_select_parquet_sql1; $test_drop_table_sql1 ; $test_drop_orc_table_sql1; $test_drop_parquet_table_sql1; $test_drop_database_sql1;"
+    -e "$create_database_sql; USE $db_name; $create_table_sql ; $load_data_sql ; $test_window_sql1 ; $test_window_sql2 ; $drop_table_sql ; $drop_database_sql ;"
   sql_ret_code=$?
 else
-  echo "fatal - hadoop version $hadoop_ver not supported, neither 2.7.* nor 2.4.*"
+  echo "fatal - hadoop version not supported, neither 2.7.1 nor 2.4.1"
   exit -5
 fi
 
 if [ "$sql_ret_code" -ne "0" ] ; then
-  >&2 echo "fail - testing DDL for SparkSQL on HiveQL/HiveContext failed!!"
+  >&2 echo "fail - testing $0 SparkSQL Windowing Function on HiveQL/HiveContext failed!!"
   exit -4
 fi
 
