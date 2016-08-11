@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Run the test case as alti-test-01
 # /bin/su - alti-test-01 -c "./test_spark/test_spark_shell.sh"
@@ -51,19 +51,13 @@ hdfs dfs -put $spark_home/mllib/data/ridge-data/lpsa.data spark/test/linear_regr
 # To create local directory when generating PMML XML file locally on workbench
 mkdir -p /tmp/spark_pmml_test/
 
-echo "ok - testing spark REPL shell with various algorithm"
-hadoop_snappy_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "snappy-java-*.jar")
-hadoop_lzo_jar=$(find $HADOOP_HOME/share/hadoop/common/lib/ -type f -name "hadoop-lzo-*.jar")
-# The guava JAR here does not match the Spark's pom.xml which is looking for version 14.0.1
-# Hive comes with Guava 11.0.2
-guava_jar=$(find $HIVE_HOME/lib/ -type f -name "guava-*.jar")
-spark_opts_extra="$spark_opts_extra --jars $hadoop_lzo_jar,$hadoop_snappy_jar,$guava_jar"
+echo "ok - testing spark REPL shell with Regression algorithm"
 
 spark_event_log_dir=$(grep 'spark.eventLog.dir' ${spark_conf}/spark-defaults.conf | tr -s ' ' '\t' | cut -f2)
 
 # queue_name="--queue interactive"
 queue_name=""
-./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}$USER/ $spark_opts_extra  $queue_name << EOT
+./bin/spark-shell --verbose --master yarn --deploy-mode client --driver-memory 1024M --conf spark.eventLog.dir=${spark_event_log_dir}/$USER $queue_name << EOT
 `cat $testcase_shell_file_01`
 EOT
 
