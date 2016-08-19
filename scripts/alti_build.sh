@@ -12,6 +12,7 @@ spark_git_dir=$workspace_dir/../spark
 spark_spec="$curr_dir/spark.spec"
 git_hash=""
 mvn_settings="$HOME/.m2/settings.xml"
+mvn_runtime_settings="$curr_dir/settings.xml"
 mvn_macros_def_list=
 additional_mvn_build_args=
 builddir_mvn_settings="/tmp/settings.xml"
@@ -77,8 +78,16 @@ spec_name=$(basename $spark_spec)
 echo "ok - applying version number $SPARK_VERSION and other env variables to $(pwd)/$spec_name via rpm macros"
 
 if [ -f "$mvn_settings" ] ; then
-  mvn_macros_def_list="_mvn_settings $builddir_mvn_settings"
-  additional_mvn_build_args="--copyin=$mvn_settings:$builddir_mvn_settings"
+  diff -q $mvn_settings $mvn_runtime_settings
+  if [ $? -eq "0" ] ; then
+    echo "ok - $mvn_settings content is the same as local copy, apply local copy due to permission tweak 644"
+    mvn_macros_def_list="_mvn_settings $builddir_mvn_settings"
+    additional_mvn_build_args="--copyin=$mvn_runtime_settings:$builddir_mvn_settings"
+  else
+    echo "ok - $mvn_settings content is different from the local copy, use $mvn_settings for safety"
+    mvn_macros_def_list="_mvn_settings $builddir_mvn_settings"
+    additional_mvn_build_args="--copyin=$mvn_settings:$builddir_mvn_settings"
+  fi
 else
   2>&1 echo "warn - $mvn_settings not found, env is incorrect and may expose to public repo directly!!!!!"
 fi
