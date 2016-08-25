@@ -28,13 +28,6 @@ else
   echo "ok - SPARK_VERSION=$SPARK_VERSION"
 fi
 
-if [ "x${SPARK_PLAIN_VERSION}" = "x" ] ; then
-  echo >&2 "fail - SPARK_PLAIN_VERSION can't be empty"
-  exit -8
-else
-  echo "ok - SPARK_PLAIN_VERSION=$SPARK_PLAIN_VERSION"
-fi
-
 if [ "x${BUILD_TIMEOUT}" = "x" ] ; then
   build_timeout=28800
 else
@@ -102,10 +95,7 @@ if [ "x${SPARK_BRANCH_NAME}" = "x" ] ; then
   exit -9
 fi
 echo "ok - switching to spark branch $SPARK_BRANCH_NAME and refetch the files"
-git checkout $SPARK_BRANCH_NAME
-git fetch --all
 git_hash=$(git rev-parse HEAD | tr -d '\n')
-cat pom.xml
 popd
 
 echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
@@ -147,20 +137,19 @@ fi
 # cp $WORKSPACE/patches/* $WORKSPACE/rpmbuild/SOURCES/
 
 echo "ok - applying version number $SPARK_VERSION and release number $BUILD_TIME, the pattern delimiter is / here"
-sed -i "s/SPARK_VERSION_REPLACE/$SPARK_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/SPARK_PLAINVERSION_REPLACE/$SPARK_PLAIN_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s:CURRENT_WORKSPACE_REPLACE:$WORKSPACE:g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/HADOOP_VERSION_REPLACE/$HADOOP_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/HADOOP_BUILD_VERSION_REPLACE/$HADOOP_BUILD_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/HIVE_VERSION_REPLACE/$HIVE_VERSION/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/SPARK_PKG_NAME/$SPARK_PKG_NAME/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/SPARK_GID/$SPARK_GID/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/SPARK_UID/$SPARK_UID/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/BUILD_TIME/$BUILD_TIME/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/ALTISCALE_RELEASE/$ALTISCALE_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/GITHASH_REV_RELEASE/$git_hash/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-sed -i "s/PRODUCTION_RELEASE/$PRODUCTION_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
-SCALA_HOME=$SCALA_HOME rpmbuild -vv -bs $WORKSPACE/rpmbuild/SPECS/spark.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
+SCALA_HOME=$SCALA_HOME rpmbuild -vv \
+  -bs $WORKSPACE/rpmbuild/SPECS/spark.spec \
+  --define "_topdir $WORKSPACE/rpmbuild" \
+  --define "_current_workspace $WORKSPACE" \
+  --define "_spark_version $SPARK_VERSION" \
+  --define "_git_hash_release $git_hash" \
+  --define "_hadoop_version $HADOOP_VERSION" \
+  --define "_hive_version $HIVE_VERSION" \
+  --define "_altiscale_release_ver $ALTISCALE_RELEASE" \
+  --define "_apache_name $SPARK_PKG_NAME" \
+  --define "_build_release $BUILD_TIME" \
+  --define "_production_release $PRODUCTION_RELEASE" \
+  --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 
 if [ $? -ne "0" ] ; then
   echo "fail - spark SRPM build failed"
@@ -189,7 +178,21 @@ mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --ini
 
 mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-clean --no-cleanup-after --install $WORKSPACE/rpmbuild/RPMS/noarch/alti-maven-settings-1.0-1.el6.noarch.rpm
 
-mock -vvv --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --no-clean --rpmbuild_timeout=$build_timeout --resultdir=$WORKSPACE/rpmbuild/RPMS/ --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
+mock -vvv --configdir=$curr_dir \
+  -r altiscale-spark-centos-6-x86_64.runtime \
+  --no-clean \
+  --rpmbuild_timeout=$build_timeout \
+  --resultdir=$WORKSPACE/rpmbuild/RPMS/ \
+  --define "_current_workspace $WORKSPACE" \
+  --define "_spark_version $SPARK_VERSION" \
+  --define "_git_hash_release $git_hash" \
+  --define "_hadoop_version $HADOOP_VERSION" \
+  --define "_hive_version $HIVE_VERSION" \
+  --define "_altiscale_release_ver $ALTISCALE_RELEASE" \
+  --define "_apache_name $SPARK_PKG_NAME" \
+  --define "_build_release $BUILD_TIME" \
+  --define "_production_release $PRODUCTION_RELEASE" \
+  --rebuild $WORKSPACE/rpmbuild/SRPMS/alti-spark-${SPARK_VERSION}-${SPARK_VERSION}-${ALTISCALE_RELEASE}.${BUILD_TIME}.el6.src.rpm
 
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
