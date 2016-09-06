@@ -4,8 +4,6 @@
 # Multiple invocation will result in corrupted zip file
 # Last run wins
 
-source /etc/alti-spark-1.6.2/spark-env.sh
-
 mypid=$$
 tmp_hive_fname_zip=$(basename $(readlink -f $HIVE_HOME))-lib.zip
 tmp_hive_lib_zip_tmp=/tmp/$USER-$tmp_hive_fname_zip-$mypid

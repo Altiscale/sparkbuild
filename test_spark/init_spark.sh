@@ -13,12 +13,8 @@
 # /opt/spark/conf. Our test case shall pass as well with default configuration provided
 # under /etc/alti-spark-x.x.x
 
-if [ -f "/etc/alti-spark-2.0.0/spark-env.sh" ] ; then
-  source /etc/alti-spark-2.0.0/spark-env.sh
-else
-  >&2 echo "fail - Spark 2.0.0 installation is broken, missing files or directory in /etc/alti-spark-2.0.0"
-  exit -1
-fi
+# Apply default version first, and let user override them if necessary
+[ -f /etc/alti-spark-2.0.0/spark-env.sh ] && . /etc/alti-spark-2.0.0/spark-env.sh
 
 spark_conf_dir_tmp=${SPARK_CONF_DIR:-"/etc/alti-spark-$SPARK_VERSION"}
 echo "ok - applying default or customized Spark conf directory $spark_conf_dir_tmp"
