@@ -45,7 +45,7 @@ else
   exit -1
 fi
 # Sanity check on RPM label integration and Altiscale release label
-if [ $TARGET_ALTISCALE_RELEASE -ne $ALTISCALE_RELEASE ] ; then
+if [ "$TARGET_ALTISCALE_RELEASE" != "$ALTISCALE_RELEASE" ] ; then
   2>&1 echo "fatal - you specified $ALTISCALE_RELEASE that is not verified by $SPARK_VERSION yet"
   2>&1 echo "fatal - releasing this will potentially break Spark installaion or Hadoop compatibility, exiting!"
   exit -2
