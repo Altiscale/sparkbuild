@@ -43,9 +43,11 @@ Hadoop 2.7.x and Hive 1.2.1 (vcc-hadoop-2.7.1/2 and alti-hive-1.2.0/alti-hive-1.
 Summary: Spark Thrift Server system service scripts and configuration
 Group: Development/Libraries
 Requires: %{rpm_package_name}-%{_spark_version}
+Requires: alti-hive-%{_hive_version}
 
 %description sparkts
 A RPM package that provides init.d script and default configuraiton for Spark Thrift Server
+Requires Spark and Hive RPM installed.
 
 %package yarn-shuffle
 Summary: The pluggable spark_shuffle RPM to install spark_shuffle JAR
@@ -532,6 +534,8 @@ if [ "$1" = "0" ]; then
 fi
 
 %changelog
+* Tue Sep 13 2016 Andrew Lee 20160913
+- Add hive dependency to sparkts pkg
 * Thu Sep 8 2016 Andrew Lee 20160908
 - Remove spark example pkg
 * Thu Aug 25 2016 Andrew Lee 20160825
