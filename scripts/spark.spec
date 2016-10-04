@@ -18,7 +18,6 @@ Source: %{_sourcedir}/%{build_service_name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{release}-root-%{build_service_name}
 Requires(pre): shadow-utils
 Requires: scala = 2.11.8
-Requires: alti-hive-%{_hive_version} >= 1.2.1
 Requires: %{rpm_package_name}-%{_spark_version}-yarn-shuffle
 # BuildRequires: vcc-hive-%{_hive_version}
 BuildRequires: scala = 2.11.8
