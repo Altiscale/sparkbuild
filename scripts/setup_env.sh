@@ -14,7 +14,7 @@ export HADOOP_VERSION=${HADOOP_VERSION:-"2.7.1"}
 # Spark 1.5+ default Hive starts with 1.2.1, backward compatible with Hive 1.2.0
 export HIVE_VERSION=${HIVE_VERSION:-"1.2.1"}
 # AE-1226 temp fix on the R PATH
-export R_HOME=${R_HOME:-$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep bin | head -n 1))}
+export R_HOME=${R_HOME:-$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep -o .*bin | head -n 1))}
 if [ "x${R_HOME}" = "x" ] ; then
   echo "warn - R_HOME not defined, CRAN R isn't installed properly in the current env"
 else
@@ -28,7 +28,7 @@ export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_H
 export SPARK_PKG_NAME=${SPARK_PKG_NAME:-"spark"}
 export SPARK_GID=${SPARK_GID:-"411460017"}
 export SPARK_UID=${SPARK_UID:-"411460024"}
-export SPARK_VERSION=${SPARK_VERSION:-"2.0.0"}
+export SPARK_VERSION=${SPARK_VERSION:-"2.0.1"}
 export SCALA_VERSION=${SCALA_VERSION:-"2.11"}
 
 if [[ $SPARK_VERSION == 2.* ]] ; then

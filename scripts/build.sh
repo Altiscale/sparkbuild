@@ -142,6 +142,7 @@ SCALA_HOME=$SCALA_HOME rpmbuild -vv \
   --define "_topdir $WORKSPACE/rpmbuild" \
   --define "_current_workspace $WORKSPACE" \
   --define "_spark_version $SPARK_VERSION" \
+  --define "_scala_build_version $SCALA_VERSION" \
   --define "_git_hash_release $git_hash" \
   --define "_hadoop_version $HADOOP_VERSION" \
   --define "_hive_version $HIVE_VERSION" \
@@ -185,6 +186,7 @@ mock -vvv --configdir=$curr_dir \
   --resultdir=$WORKSPACE/rpmbuild/RPMS/ \
   --define "_current_workspace $WORKSPACE" \
   --define "_spark_version $SPARK_VERSION" \
+  --define "_scala_build_version $SCALA_VERSION" \
   --define "_git_hash_release $git_hash" \
   --define "_hadoop_version $HADOOP_VERSION" \
   --define "_hive_version $HIVE_VERSION" \
@@ -198,7 +200,7 @@ if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
   cleanup_secrets
   # mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --clean
-  mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
+  # mock --configdir=$curr_dir -r altiscale-spark-centos-6-x86_64.runtime --scrub=all
   exit -99
 fi
 
