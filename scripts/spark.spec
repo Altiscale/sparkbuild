@@ -530,6 +530,7 @@ do
   ln -vsf $f %{spark_release_dir}/
 done
 ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{_spark_version}.jar %{spark_release_dir}/
+ln -vsf %{install_spark_dest}/examples/target/spark-examples_2.10-%{_spark_version}.jar %{spark_release_dir}/spark-examples_2.10.jar
 ln -vsf %{install_spark_dest}/network/yarn/target/scala-2.10/spark-%{_spark_version}-yarn-shuffle.jar %{spark_release_dir}/
 ln -vsf %{install_spark_dest}/sql/hive/target/spark-hive_2.10-%{_spark_version}.jar %{spark_release_dir}/spark-hive_2.10.jar
 ln -vsf %{install_spark_dest}/sql/hive-thriftserver/target/spark-hive-thriftserver_2.10-%{_spark_version}.jar %{spark_release_dir}/spark-hive-thriftserver_2.10.jar
