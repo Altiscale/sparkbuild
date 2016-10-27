@@ -341,7 +341,11 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/data
 %{install_spark_dest}/dev
 %{install_spark_dest}/examples
-%{install_spark_dest}/external
+%{install_spark_dest}/external/flume
+%{install_spark_dest}/external/flume-sink
+%{install_spark_dest}/external/flume-assembly
+%{install_spark_dest}/external/kafka-0-8
+%{install_spark_dest}/external/kafka-0-8-assembly
 %{install_spark_dest}/graphx
 %{install_spark_dest}/lib
 %{install_spark_dest}/licenses
