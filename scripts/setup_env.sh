@@ -28,7 +28,7 @@ export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_H
 export SPARK_PKG_NAME=${SPARK_PKG_NAME:-"spark"}
 export SPARK_GID=${SPARK_GID:-"411460017"}
 export SPARK_UID=${SPARK_UID:-"411460024"}
-export SPARK_VERSION=${SPARK_VERSION:-"1.6.2"}
+export SPARK_VERSION=${SPARK_VERSION:-"1.6.3"}
 
 # Defines which Hadoop version to build against. Always use the latest as default.
 export ALTISCALE_RELEASE=${ALTISCALE_RELEASE:-"4.0.0"}

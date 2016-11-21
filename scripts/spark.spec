@@ -1,7 +1,6 @@
 %define rpm_package_name      alti-spark
 %define build_service_name    alti-spark
 %define spark_folder_name     %{rpm_package_name}-%{_spark_version}
-%define spark_testsuite_name  %{spark_folder_name}
 %define install_spark_dest    /opt/%{spark_folder_name}
 %define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
@@ -32,8 +31,8 @@ BuildRequires: vcc-R_3.0.3
 
 Url: http://spark.apache.org/
 %description
-Build from https://github.com/Altiscale/spark/tree/branch-1.6.2-alti with 
-build script https://github.com/Altiscale/sparkbuild/tree/branch-1.6.2-alti
+Build from https://github.com/Altiscale/spark/tree/branch-1.6.3-alti with 
+build script https://github.com/Altiscale/sparkbuild/tree/branch-1.6.3-alti
 Origin source form https://github.com/apache/spark/tree/branch-1.6
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
 Hadoop 2.7.x with YARN 2.7.x enabled, and hive-1.2.1. This package should work with Altiscale 

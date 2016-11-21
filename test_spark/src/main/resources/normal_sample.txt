@@ -1,4 +1,0 @@
-Hi Andrew, I think people need to spend more time on the data science and not on the Hadoop infrastructure. 
-Customers are finding Altiscale’s optimized solution faster, more reliable, easier to use, and more affordable than alternatives.
-You can also try out Spark on YARN with Altiscale, and this provide some examples to run some pyspark MLLib APIs 
-on Spark. Try it out and let me know how it goes.

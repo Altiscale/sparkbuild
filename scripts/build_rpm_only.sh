@@ -75,7 +75,7 @@ echo "ok - tar zip source file, preparing for build/compile by rpmbuild"
 mkdir -p $WORKSPACE/rpmbuild/{BUILD,BUILDROOT,RPMS,SPECS,SOURCES,SRPMS}/
 cp -f "$spark_spec" $WORKSPACE/rpmbuild/SPECS/spark.spec
 pushd $WORKSPACE
-tar --exclude .git --exclude .gitignore -cf $WORKSPACE/rpmbuild/SOURCES/spark.tar spark test_spark
+tar --exclude .git --exclude .gitignore -cf $WORKSPACE/rpmbuild/SOURCES/spark.tar spark 
 popd
 
 pushd "$WORKSPACE/rpmbuild/SOURCES/"
@@ -84,7 +84,6 @@ if [ -d alti-spark ] ; then
   rm -rf alti-spark
 fi
 mv spark alti-spark
-cp -rp test_spark alti-spark/
 tar --exclude .git --exclude .gitignore -cpzf alti-spark.tar.gz alti-spark
 stat alti-spark.tar.gz
 
@@ -112,13 +111,38 @@ sed -i "s/ALTISCALE_RELEASE/$ALTISCALE_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spa
 sed -i "s/GITHASH_REV_RELEASE/$git_hash/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 sed -i "s/PRODUCTION_RELEASE/$PRODUCTION_RELEASE/g" "$WORKSPACE/rpmbuild/SPECS/spark.spec"
 
-rpmbuild -vvv -ba --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/ $WORKSPACE/rpmbuild/SPECS/spark.spec
+rpmbuild -vvv -ba \
+  --define "_topdir $WORKSPACE/rpmbuild" \
+  --define "_current_workspace $WORKSPACE" \
+  --define "_spark_version $SPARK_VERSION" \
+  --define "_git_hash_release $git_hash" \
+  --define "_hadoop_version $HADOOP_VERSION" \
+  --define "_hive_version $HIVE_VERSION" \
+  --define "_altiscale_release_ver $ALTISCALE_RELEASE" \
+  --define "_apache_name $SPARK_PKG_NAME" \
+  --define "_build_release $BUILD_TIME" \
+  --define "_production_release $PRODUCTION_RELEASE" \
+  --buildroot $WORKSPACE/rpmbuild/BUILDROOT/ \
+  $WORKSPACE/rpmbuild/SPECS/spark.spec
 if [ $? -ne "0" ] ; then
   echo "fail - rpmbuild -ba RPM build failed"
   exit -96
 fi
 
-rpmbuild -vvv -bi --short-circuit --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/ $WORKSPACE/rpmbuild/SPECS/spark.spec
+rpmbuild -vvv -bi --short-circuit \
+  --define "_topdir $WORKSPACE/rpmbuild" \
+  --define "_current_workspace $WORKSPACE" \
+  --define "_spark_version $SPARK_VERSION" \
+  --define "_git_hash_release $git_hash" \
+  --define "_hadoop_version $HADOOP_VERSION" \
+  --define "_hive_version $HIVE_VERSION" \
+  --define "_altiscale_release_ver $ALTISCALE_RELEASE" \
+  --define "_apache_name $SPARK_PKG_NAME" \
+  --define "_build_release $BUILD_TIME" \
+  --define "_production_release $PRODUCTION_RELEASE" \
+  --buildroot $WORKSPACE/rpmbuild/BUILDROOT/ \
+  $WORKSPACE/rpmbuild/SPECS/spark.spec
+
 if [ $? -ne "0" ] ; then
   echo "fail - rpmbuild -bi --short-circuit RPM build failed"
   exit -97
