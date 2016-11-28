@@ -1,5 +1,5 @@
 cd $WORKSPACE
-ALTISCALE_RELEASE=${ALTISCALE_RELEASE:-0.1.0}
+ALTISCALE_RELEASE=${ALTISCALE_RELEASE:-4.0.0}
 RPM_DESCRIPTION="Apache spark ${ARTIFACT_VERSION}\n\n${DESCRIPTION}"
 SPARK_HOME=${WORKSPACE}/spark
 
@@ -80,8 +80,6 @@ done
 ETC_DIR=${INSTALL_DIR}/etc/alti-spark-${ARTIFACT_VERSION}
 mkdir -p --mode 0755 ${ETC_DIR}
 cp -rp ${SPARK_HOME}/conf/* ${ETC_DIR}
-echo "DO NOT HAND EDIT, DEPLOYED BY RPM and CHEF" >  ${ETC_DIR}/DO_NOT_HAND_EDIT.txt
-ln -s /etc/alti-spark-${ARTIFACT_VERSION} ${DISTDIR}/conf
 
 # 2.3 Copy sources to source directory
 mkdir -p --mode 0755 ${DISTDIR}/sources
