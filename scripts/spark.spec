@@ -6,7 +6,6 @@
 %define install_spark_label   /opt/%{spark_folder_name}/VERSION
 %define install_spark_conf    /etc/%{spark_folder_name}
 %define install_spark_logs    /service/log/%{_apache_name}/%{rpm_package_name}-%{_spark_version}
-%define install_spark_test    /opt/%{spark_testsuite_name}/test_spark
 %define install_sparkts_initd /etc/init.d
 %define spark_release_dir     /opt/%{spark_folder_name}/lib
 
@@ -222,43 +221,6 @@ popd
 popd
 echo "ok - build spark project completed successfully!"
 
-echo "ok - start building spark test case in %{_builddir}/%{build_service_name}/test_spark"
-pushd `pwd`
-cd %{_builddir}/%{build_service_name}/test_spark
-
-echo "ok - local repository will be installed under %{_current_workspace}/.m2/repository"
-# TODO: Install local JARs to local repo so we apply the latest built assembly JARs from above
-# This is a workaround(hack). A better way is to deploy it to SNAPSHOT on Archiva via maven-deploy plugin,
-# and include it in the test_case pom.xml. This is really annoying.
-# spark_version is different then spark_plain_Version
-
-# In mock environment, .m2 may end up somewhere differently, use default in mock.
-# explicitly if we detect .m2/repository in local sandbox, etc.
-mvn_install_target_repo=""
-if [ -d "%{_current_workspace}/.m2" ] ; then
-  mvn_install_target_repo="-DlocalRepositoryPath=%{_current_workspace}/.m2/repository"
-fi
-
-mvn_install_cmd="mvn -U org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Duserdef.spark.version=%{_spark_version} -Duserdef.hadoop.version=%{_hadoop_version} -Dversion=%{_spark_version} -Dpackaging=jar -DgroupId=local.org.apache.spark"
-# This applies to local integration with Spark assembly JARs
-$mvn_install_cmd -Dfile=`pwd`/../assembly/target/scala-2.10/spark-assembly-%{_spark_version}-hadoop%{_hadoop_version}.jar -DartifactId=spark-assembly_2.10 $mvn_install_target_repo
-
-# For Kafka Spark Streaming Examples
-$mvn_install_cmd -Dfile=`pwd`/../external/kafka/target/spark-streaming-kafka_2.10-%{_spark_version}.jar -DartifactId=spark-streaming-kafka_2.10 $mvn_install_target_repo
-
-$mvn_install_cmd -Dfile=`pwd`/../streaming/target/spark-streaming_2.10-%{_spark_version}.jar -DartifactId=spark-streaming_2.10 $mvn_install_target_repo
-
-# For SparkSQL Hive integration examples, this is required when you use -Phive-provided
-# spark-hive JAR needs to be provided to the test case in this case.
-$mvn_install_cmd -Dfile=`pwd`/../sql/hive/target/spark-hive_2.10-%{_spark_version}.jar -DartifactId=spark-hive_2.10 $mvn_install_target_repo
-
-# Build our test case with our own pom.xml file
-# Update profile ID spark-1.4 for 1.4.2, spark-1.5 for 1.5.2, spark-1.6 for 1.6.1/2, and hadoop version hadoop24-provided or hadoop27-provided as well
-mvn -U  package -Duserdef.spark.version=%{_spark_version} -Duserdef.hadoop.version=%{_hadoop_version} -Pspark-1.6 -Pkafka-provided $testcase_hadoop_profile_str
-
-popd
-echo "ok - build spark test case completed successfully!"
-
 echo "ok - start repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/
@@ -338,7 +300,6 @@ echo "test install spark label spark_folder_name = %{spark_folder_name}"
 # work and logs folder is for runtime, this is a dummy placeholder here to set the right permission within RPMs
 # logs folder should coordinate with log4j and be redirected to /var/log for syslog/flume to pick up
 %{__mkdir} -p %{buildroot}%{install_spark_logs}
-%{__mkdir} -p %{buildroot}%{install_spark_test}
 # copy all necessary jars
 cp -rp %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/*.jar %{buildroot}%{install_spark_dest}/assembly/target/scala-2.10/
 cp -rp %{_builddir}/%{build_service_name}/bagel/target/*.jar %{buildroot}%{install_spark_dest}/bagel/target/
@@ -421,13 +382,7 @@ echo "git_rev=%{_git_hash_release}" >> %{buildroot}/%{install_spark_label}
 echo "Currently, standalone mode is DISABLED, and it is not suitable for Production environment" >  %{buildroot}%{install_spark_dest}/sbin/CLUSTER_STANDALONE_MODE_NOT_SUPPORTED.why.txt
 echo "DO NOT HAND EDIT, DEPLOYED BY RPM and CHEF" >  %{buildroot}%{install_spark_conf}/DO_NOT_HAND_EDIT.txt
 
-# deploy test suite and scripts
-cp -rp %{_builddir}/%{build_service_name}/test_spark/target/*.jar %{buildroot}/%{install_spark_test}/
-cp -rp %{_builddir}/%{build_service_name}/test_spark/* %{buildroot}/%{install_spark_test}/
 # manual cleanup on unnecessary files
-rm -rf %{buildroot}/%{install_spark_test}/target
-rm -rf %{buildroot}/%{install_spark_test}/project/target
-
 %clean
 echo "ok - cleaning up temporary files, deleting %{buildroot}%{install_spark_dest}"
 rm -rf %{buildroot}%{install_spark_dest}
@@ -483,10 +438,6 @@ rm -rf %{buildroot}%{install_spark_dest}
 %attr(0444,root,root) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
 %attr(1777,root,root) %{install_spark_logs}
 %config %{install_spark_conf}
-
-%files example
-%defattr(0755,root,root,0755)
-%{install_spark_test}
 
 %files sparkts
 %attr(0755,root,root) %{install_sparkts_initd}/sparktsd-%{_spark_version}
@@ -597,6 +548,8 @@ if [ "$1" = "0" ]; then
 fi
 
 %changelog
+* Tue Dec 13 2016 Andrew Lee 20161213
+- Remove spark example subpkg and test case
 * Thu Aug 25 2016 Andrew Lee 20160825
 - Breakup Spark 1.6 to multiple packages and refactor spec file with rpm macros
 * Thu Jun 9 2016 Andrew Lee 20160609
