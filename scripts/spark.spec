@@ -431,13 +431,9 @@ rm -rf %{buildroot}%{install_spark_dest}
 %doc %{install_spark_dest}/NOTICE
 %doc %{install_spark_dest}/CHANGES.txt
 %doc %{install_spark_dest}/CONTRIBUTING.md
-%attr(0755,root,root) %{install_spark_conf}/spark-env.sh
-%attr(0644,root,root) %{install_spark_conf}/log4j.properties
-%attr(0644,root,root) %{install_spark_conf}/spark-defaults.conf
 %attr(0644,root,root) %{install_spark_conf}/*.template
 %attr(0444,root,root) %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
 %attr(1777,root,root) %{install_spark_logs}
-%config %{install_spark_conf}
 
 %files sparkts
 %attr(0755,root,root) %{install_sparkts_initd}/sparktsd-%{_spark_version}
@@ -494,13 +490,15 @@ if [ "$1" = "0" ]; then
     echo "ok - detected other spark version, no need to clean up symbolic links"
     echo "ok - cleaning up version specific directories only regarding this uninstallation"
     rm -vrf %{install_spark_dest}
-    rm -vrf %{install_spark_conf}
+    rm -vrf %{install_spark_conf}/*.template
+    rm -vrf %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
   else
     echo "ok - uninstalling %{rpm_package_name} on system, removing symbolic links"
     rm -vf %{install_spark_dest}/logs
     rm -vf %{install_spark_dest}/conf
     rm -vrf %{install_spark_dest}
-    rm -vrf %{install_spark_conf}
+    rm -vrf %{install_spark_conf}/*.template
+    rm -vrf %{install_spark_conf}/DO_NOT_HAND_EDIT.txt
   fi
 fi
 # Don't delete the users after uninstallation.
