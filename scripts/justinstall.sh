@@ -105,13 +105,12 @@ fpm --verbose \
 --vendor Altiscale \
 --provides ${RPM_NAME} \
 --replaces alti-spark \
---depends 'lzo > 2.0' \
 --url ${GITREPO} \
 --license "Apache License v2" \
 -s dir \
 -t rpm \
 -n ${RPM_NAME}  \
--v ${ALTISCALE_RELEASE} \
+-v ${ARTIFACT_VERSION} \
 --iteration ${DATE_STRING} \
 --description "${RPM_DESCRIPTION}" \
 ${CONFIG_FILES} \
