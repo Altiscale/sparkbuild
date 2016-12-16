@@ -13,6 +13,8 @@ mkdir -p --mode 0755 ${DISTDIR}
 
 # Make directory for spark packages
 # 1. This code is from spark/dev/make-distributed.sh
+# 1.0 ADD RELEASE FILE
+echo "Spark ${ARTIFACT_VERSION} built for Hadoop ${HADOOP_VERSION}" > ${DISTDIR}/RELEASE
 # 1.1 copy jars
 mkdir -p --mode 0755 "${DISTDIR}/jars"
 cp "$SPARK_HOME"/assembly/target/scala*/jars/* "$DISTDIR/jars"
