@@ -55,7 +55,6 @@ This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-y
 Summary: Amazon Kinesis libraries to integrate with Spark Streaming compiled by maven
 License: Amazon Software License
 Group: Development/Libraries
-Requires: %{rpm_package_name}-%{_spark_version}
 
 %description kinesis
 This package provides the artifact for kinesis integration for Spark. Aware, this is under Amazon Software License (ASL), see: https://aws.amazon.com/asl/ for more information.
