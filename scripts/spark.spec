@@ -42,8 +42,6 @@ Hadoop 2.7.x and Hive 1.2.1 (vcc-hadoop-2.7.1/2 and alti-hive-1.2.0/alti-hive-1.
 %package sparkts
 Summary: Spark Thrift Server system service scripts and configuration
 Group: Development/Libraries
-Requires: %{rpm_package_name}-%{_spark_version}
-Requires: alti-hive-%{_hive_version}
 
 %description sparkts
 A RPM package that provides init.d script and default configuraiton for Spark Thrift Server
@@ -67,7 +65,6 @@ This package provides spark-core, spark-catalyst, spark-sql, spark-hive, spark-y
 Summary: Amazon Kinesis libraries to integrate with Spark Streaming compiled by maven
 License: Amazon Software License
 Group: Development/Libraries
-Requires: %{rpm_package_name}-%{_spark_version}
 
 %description kinesis
 This package provides the artifact for kinesis integration for Spark. Aware, this is under Amazon Software License (ASL), see: https://aws.amazon.com/asl/ for more information.
