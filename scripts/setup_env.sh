@@ -11,8 +11,8 @@ export M2_HOME=${M2_HOME:-"/usr/share/apache-maven"}
 export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2g -XX:MaxPermSize=1024M -XX:ReservedCodeCacheSize=512m"}
 export SCALA_HOME=${SCALA_HOME:-"/opt/scala"}
 export HADOOP_VERSION=${HADOOP_VERSION:-"2.7.1"}
-# Spark 1.5+ default Hive starts with 1.2.1, backward compatible with Hive 1.2.0
-export HIVE_VERSION=${HIVE_VERSION:-"1.2.1"}
+# Spark 2.1 default is still Hive 1.2.1. Testing against Hive 2.1.1 here.
+export HIVE_VERSION=${HIVE_VERSION:-"2.1.1"}
 # AE-1226 temp fix on the R PATH
 export R_HOME=${R_HOME:-$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep -o .*bin | head -n 1))}
 if [ "x${R_HOME}" = "x" ] ; then
