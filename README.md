@@ -6,6 +6,19 @@ You will only need to update `scripts/setup_env.sh` variable `SPARK_VERSION` def
 This will ensure if the user forgot to specify the `SPARK_VERSION`, it will still fall back to the
 expected default version for this branch.
 
+Note: branch name for `spark` and `sparkbuild` repositories align. For example,
+
+* Spark 1.6.1 => `spark` branch `branch-1.6-alti` : `sparkbuild` branch `branch-1.6-alti`
+* Spark 1.6.2 => `spark` branch `branch-1.6.2-alti` : `sparkbuild` branch `branch-1.6.2-alti`
+* Spark 1.6.3 => `spark` branch `branch-1.6.3-alti` : `sparkbuild` branch `branch-1.6.3-alti`
+* Spark 2.0.0 => `spark` branch `branch-2.0-alti` : `sparkbuild` branch `branch-2.0-alti`
+* Spark 2.0.2 => `spark` branch `branch-2.0.2-alti` : `sparkbuild` branch `branch-2.0.2-alti`
+* Spark 2.1.0 => `spark` branch `branch-2.1-alti` : `sparkbuild` branch `branch-2.1-alti`
+* Spark 2.1.1 => `spark` branch `branch-2.1.1-alti` : `sparkbuild` branch `branch-2.1.1-alti`
+
+and only the first Spark x.y version offering will have the `breanch-x.y-alti` without the patch version.
+(Spark 1.6.1 branch `branch-1.6-alti` was the only exception due to legacy, and for Spark2 onward, we will follow this pattern)
+
 How to build Spark locally in your VM
 ==========
 
