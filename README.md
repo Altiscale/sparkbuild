@@ -14,7 +14,7 @@ Note: branch name for `spark` and `sparkbuild` repositories align. For example,
 * Spark 2.0.0 => `spark` branch `branch-2.0-alti` : `sparkbuild` branch `branch-2.0-alti`
 * Spark 2.0.2 => `spark` branch `branch-2.0.2-alti` : `sparkbuild` branch `branch-2.0.2-alti`
 * Spark 2.1.0 => `spark` branch `branch-2.1-alti` : `sparkbuild` branch `branch-2.1-alti`
-* Spark 2.1.1 => `spark` branch `branch-2.1.1-alti` : `sparkbuild` branch `branch-2.1i.1-alti`
+* Spark 2.1.1 => `spark` branch `branch-2.1.1-alti` : `sparkbuild` branch `branch-2.1.1-alti`
 
 and only the first Spark x.y version offering will have the `breanch-x.y-alti` without the patch version.
 (Spark 1.6.1 was the only exception due to legacy, and for Spark2 onward, we will follow this pattern)
