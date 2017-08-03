@@ -22,7 +22,7 @@ Requires: %{rpm_package_name}-%{_spark_version}-yarn-shuffle
 # BuildRequires: vcc-hive-%{_hive_version}
 BuildRequires: scala = 2.11.8
 BuildRequires: apache-maven >= 3.3.9
-BuildRequires: jdk >= 1.7.0.51
+BuildRequires: jdk >= 1.8.0_112
 # The whole purpose for this req is just to repackage the JAR with JDK 1.6
 BuildRequires: java-1.6.0-openjdk-devel
 # For SparkR, prefer R 3.1.2, but we only have 3.1.1
@@ -30,9 +30,9 @@ BuildRequires: vcc-R_3.0.3
 
 Url: http://spark.apache.org/
 %description
-Build from https://github.com/Altiscale/spark/tree/branch-2.1.1-hive2-alti with 
-build script https://github.com/Altiscale/sparkbuild/tree/branch-2.1.1-hive2-alti
-Origin source form https://github.com/apache/spark/tree/branch-2.1
+Build from https://github.com/Altiscale/spark/tree/branch-2.2-alti with 
+build script https://github.com/Altiscale/sparkbuild/tree/branch-2.2-alti
+Origin source form https://github.com/apache/spark/tree/branch-2.2
 %{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
 Hadoop 2.7.x with YARN 2.7.x enabled, and hive-2.1.1. This package should work with Altiscale 
 Hadoop 2.7.x and Hive 2.1.1 (alti-hadoop-2.7.x and alti-hive2).
@@ -297,7 +297,7 @@ cp -rp %{_builddir}/%{build_service_name}/R/lib/* %{buildroot}%{install_spark_de
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/common/unsafe/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/common/tags/target/
 %{__mkdir} -p %{buildroot}%{install_spark_dest}/common/sketch/target/
-%{__mkdir} -p %{buildroot}%{install_spark_dest}/yarn/target/
+%{__mkdir} -p %{buildroot}%{install_spark_dest}/resource-managers/yarn/target/
 cp -rp %{_builddir}/%{build_service_name}/core/target/*.jar %{buildroot}%{install_spark_dest}/core/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/catalyst/target/*.jar %{buildroot}%{install_spark_dest}/sql/catalyst/target/
 cp -rp %{_builddir}/%{build_service_name}/sql/core/target/*.jar %{buildroot}%{install_spark_dest}/sql/core/target/
@@ -305,7 +305,7 @@ cp -rp %{_builddir}/%{build_service_name}/launcher/target/*.jar %{buildroot}%{in
 cp -rp %{_builddir}/%{build_service_name}/common/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/common/unsafe/target/
 cp -rp %{_builddir}/%{build_service_name}/common/tags/target/*.jar %{buildroot}%{install_spark_dest}/common/tags/target/
 cp -rp %{_builddir}/%{build_service_name}/common/sketch/target/*.jar %{buildroot}%{install_spark_dest}/common/sketch/target/
-cp -rp %{_builddir}/%{build_service_name}/yarn/target/*.jar %{buildroot}%{install_spark_dest}/yarn/target/
+cp -rp %{_builddir}/%{build_service_name}/resource-managers/yarn/target/*.jar %{buildroot}%{install_spark_dest}/resource-managers/yarn/target/
 
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
@@ -397,7 +397,7 @@ rm -rf %{buildroot}%{install_spark_dest}
 %{install_spark_dest}/common/unsafe
 %{install_spark_dest}/common/tags
 %{install_spark_dest}/common/sketch
-%{install_spark_dest}/yarn
+%{install_spark_dest}/resource-managers/yarn
 
 %files kinesis
 %defattr(0755,root,root,0755)
@@ -494,6 +494,8 @@ if [ "$1" = "0" ]; then
 fi
 
 %changelog
+* Tue Jul 25 2017 Andrew Lee 20170725
+- Applying Spark 2.2 version and Hive 2.1 dependencies
 * Thu Sep 8 2016 Andrew Lee 20160908
 - Remove spark example pkg
 * Wed Feb 24 2016 Andrew Lee 20160224
