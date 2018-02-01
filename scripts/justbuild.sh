@@ -50,7 +50,7 @@ echo "ok - tar zip spark-xxx source file, preparing for build/compile by rpmbuil
 pushd $workspace_rpm_dir
 pushd $spark_git_dir/../
 if [ $INCLUDE_LEGACY_TEST = "true" ] ; then
-  tar --exclude .git --exclude .gitignore -cf $workspace_rpm_dir/spark.tar spark test_spark
+  tar --exclude .git --exclude .gitignore -cf $workspace_rpm_dir/spark.tar spark
 else
   tar --exclude .git --exclude .gitignore -cf $workspace_rpm_dir/spark.tar spark
 fi
@@ -62,10 +62,6 @@ if [ -d alti-spark ] ; then
   rm -rf alti-spark
 fi
 mv spark alti-spark
-# Copy Altiscale test case directory
-if [ $INCLUDE_LEGACY_TEST = "true" ] ; then
-  cp -rp test_spark alti-spark/
-fi
 tar --exclude .git --exclude .gitignore -czf alti-spark.tar.gz alti-spark
 popd
 
