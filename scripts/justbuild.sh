@@ -33,15 +33,15 @@ fi
 
 env | sort
 
-if [ "x${SPARK_BRANCH_NAME}" = "x" ] ; then
-  echo "error - SPARK_BRANCH_NAME is not defined. Please specify the branch explicitly. Exiting!"
+if [ "x${PACKAGE_BRANCH}" = "x" ] ; then
+  echo "error - PACKAGE_BRANCH is not defined. Please specify the branch explicitly. Exiting!"
   exit -9
 fi
 
-echo "ok - extracting git commit label from user defined $SPARK_BRANCH_NAME"
+echo "ok - extracting git commit label from user defined $PACKAGE_BRANCH"
 pushd $spark_git_dir
 git_hash=$(git rev-parse HEAD | tr -d '\n')
-echo "ok - we are compiling spark branch $SPARK_BRANCH_NAME upto commit label $git_hash"
+echo "ok - we are compiling spark branch $PACKAGE_BRANCH upto commit label $git_hash"
 popd
 
 # Get a copy of the source code, and tar ball it, remove .git related files
