@@ -45,7 +45,7 @@ if [[ $HADOOP_VERSION == 2.2.* ]] ; then
 elif [[ $HADOOP_VERSION == 2.4.* ]] ; then
   TARGET_ALTISCALE_RELEASE=3.0.0
 elif [[ $HADOOP_VERSION == 2.[67].* ]] ; then
-  TARGET_ALTISCALE_RELEASE=4.0.0
+  TARGET_ALTISCALE_RELEASE=4.3.0
 elif [[ $HADOOP_VERSION == 2.8.* ]] ; then
   TARGET_ALTISCALE_RELEASE=5.0.0
 else
