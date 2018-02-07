@@ -32,30 +32,6 @@ popd
 # Get a copy of the source code, and tar ball it, remove .git related files
 # Rename directory from spark to alti-spark to distinguish 'spark' just in case.
 echo "ok - preparing to compile, build, and packaging spark"
-pushd $WORKSPACE
-
-ls -al
-
-pushd $spark_git_dir/../
-
-# clean up for *NIX environment only, deleting window's cmd
-find ./bin -type f -name '*.cmd' -exec rm -f {} \;
-
-# Remove launch script AE-579
-# TODO: Review this for K8s and multi-cloud since we may need this for spark standalond cluster
-# later on.
-echo "warn - removing Spark standalone scripts that may be required for Kubernetes"
-rm -f ./sbin/start-slave*
-rm -f ./sbin/start-master.sh
-rm -f ./sbin/start-all.sh
-rm -f ./sbin/stop-slaves.sh
-rm -f ./sbin/stop-master.sh
-rm -f ./sbin/stop-all.sh
-rm -f ./sbin/slaves.sh
-rm -f ./sbin/spark-daemons.sh
-rm -f ./sbin/spark-executor
-rm -f ./sbin/*mesos*.sh
-rm -f ./conf/slaves
 
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
   echo "fatal - HADOOP_VERSION needs to be set, can't build anything, exiting"
@@ -73,9 +49,33 @@ else
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
 
+pushd $WORKSPACE
+pushd $spark_git_dir/
+
+echo "ok - building Spark in directory $(pwd)"
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION scala=scala-${SCALA_VERSION}"
+
+# clean up for *NIX environment only, deleting window's cmd
+rm -f ./bin/*.cmd
+
+# Remove launch script AE-579
+# TODO: Review this for K8s and multi-cloud since we may need this for spark standalond cluster
+# later on.
+echo "warn - removing Spark standalone scripts that may be required for Kubernetes"
+rm -f ./sbin/start-slave*
+rm -f ./sbin/start-master.sh
+rm -f ./sbin/start-all.sh
+rm -f ./sbin/stop-slaves.sh
+rm -f ./sbin/stop-master.sh
+rm -f ./sbin/stop-all.sh
+rm -f ./sbin/slaves.sh
+rm -f ./sbin/spark-daemons.sh
+rm -f ./sbin/spark-executor
+rm -f ./sbin/*mesos*.sh
+rm -f ./conf/slaves
+
 env | sort
 
-echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION scala=scala-${SCALA_VERSION}"
 
 # PURGE LOCAL CACHE for clean build
 # mvn dependency:purge-local-repository
