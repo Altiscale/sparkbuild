@@ -6,8 +6,8 @@
 # Force to use default Java which is JDK 1.7 now
 # export JAVA_HOME=${JAVA_HOME:-"/usr/java/default"}
 export ANT_HOME=${ANT_HOME:-"/opt/apache-ant"}
-export MAVEN_HOME=${MAVEN_HOME:-"/usr/share/apache-maven"}
-export M2_HOME=${M2_HOME:-"/usr/share/apache-maven"}
+export MAVEN_HOME=${MAVEN_HOME:-"/opt/apache-maven"}
+export M2_HOME=${M2_HOME:-"/opt/apache-maven"}
 export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2g -XX:MaxPermSize=1024M -XX:ReservedCodeCacheSize=512m"}
 export SCALA_HOME=${SCALA_HOME:-"/opt/scala"}
 export HADOOP_VERSION=${HADOOP_VERSION:-"2.7.3"}
@@ -21,7 +21,7 @@ else
   echo "ok - R_HOME redefined to $R_HOME based on installed RPM due to AE-1226"
 fi
 
-export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$R_HOME
+export PATH=$PATH:$M2_HOME/bin:$MAVEN_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$R_HOME
 
 # Define default spark uid:gid and build version
 # and all other Spark build related env
