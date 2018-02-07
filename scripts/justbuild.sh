@@ -4,31 +4,16 @@
 
 curr_dir=`dirname $0`
 curr_dir=`cd $curr_dir; pwd`
-workspace_dir=$curr_dir
-workspace_rpm_dir=$workspace_dir/workspace_rpm
-WORKSPACE=${WORKSPACE:-$workspace_rpm_dir}
-mkdir -p $workspace_rpm_dir
-spark_git_dir=$workspace_dir/../spark
-spark_spec="$curr_dir/spark.spec"
+
+WORKSPACE=${WORKSPACE:-"$curr_dir/workspace"}
+mkdir -p $WORKSPACE
+spark_git_dir=$WORKSPACE/spark
 git_hash=""
-mvn_settings="$HOME/.m2/settings.xml"
-mvn_runtime_settings="$curr_dir/settings.xml"
-mvn_macros_def_list=
-additional_mvn_build_args=
-builddir_mvn_settings="/tmp/settings.xml"
-# We are migrating Altiscale spark example to its individual build process
-# Set to false if that process is available and up and running
-INCLUDE_LEGACY_TEST=${INCLUDE_LEGACY_TEST:-"true"}
 
 if [ -f "$curr_dir/setup_env.sh" ]; then
   set -a
   source "$curr_dir/setup_env.sh"
   set +a
-fi
-
-if [ ! -e "$spark_spec" ] ; then
-  echo "fail - missing $spark_spec file, can't continue, exiting"
-  exit -9
 fi
 
 env | sort
@@ -46,74 +31,132 @@ popd
 
 # Get a copy of the source code, and tar ball it, remove .git related files
 # Rename directory from spark to alti-spark to distinguish 'spark' just in case.
-echo "ok - tar zip spark-xxx source file, preparing for build/compile by rpmbuild"
-pushd $workspace_rpm_dir
+echo "ok - preparing to compile, build, and packaging spark"
+pushd $WORKSPACE
+
+ls -al
+
 pushd $spark_git_dir/../
-if [ $INCLUDE_LEGACY_TEST = "true" ] ; then
-  tar --exclude .git --exclude .gitignore -cf $workspace_rpm_dir/spark.tar spark
+
+# clean up for *NIX environment only, deleting window's cmd
+find ./bin -type f -name '*.cmd' -exec rm -f {} \;
+
+# Remove launch script AE-579
+# TODO: Review this for K8s and multi-cloud since we may need this for spark standalond cluster
+# later on.
+echo "warn - removing Spark standalone scripts that may be required for Kubernetes"
+rm -f ./sbin/start-slave*
+rm -f ./sbin/start-master.sh
+rm -f ./sbin/start-all.sh
+rm -f ./sbin/stop-slaves.sh
+rm -f ./sbin/stop-master.sh
+rm -f ./sbin/stop-all.sh
+rm -f ./sbin/slaves.sh
+rm -f ./sbin/spark-daemons.sh
+rm -f ./sbin/spark-executor
+rm -f ./sbin/*mesos*.sh
+rm -f ./conf/slaves
+
+if [ "x${HADOOP_VERSION}" = "x" ] ; then
+  echo "fatal - HADOOP_VERSION needs to be set, can't build anything, exiting"
+  exit -8
 else
-  tar --exclude .git --exclude .gitignore -cf $workspace_rpm_dir/spark.tar spark
+  export SPARK_HADOOP_VERSION=$HADOOP_VERSION
+  echo "ok - applying customized hadoop version $SPARK_HADOOP_VERSION"
 fi
-popd
 
-pushd $workspace_rpm_dir
-tar -xf spark.tar
-if [ -d alti-spark ] ; then
-  rm -rf alti-spark
-fi
-mv spark alti-spark
-tar --exclude .git --exclude .gitignore -czf alti-spark.tar.gz alti-spark
-popd
-
-# Launch mock to build Altiscale Spark
-pushd $workspace_rpm_dir
-rm -rf *.rpm
-echo "ok - producing $SPARK_PKG_NAME spec file"
-cp $spark_spec .
-spec_name=$(basename $spark_spec)
-echo "ok - applying version number $SPARK_VERSION and other env variables to $(pwd)/$spec_name via rpm macros"
-
-if [ -f "$mvn_settings" ] ; then
-  diff -q $mvn_settings $mvn_runtime_settings
-  if [ $? -eq "0" ] ; then
-    echo "ok - $mvn_settings content is the same as local copy, apply local copy due to permission tweak 644"
-    mvn_macros_def_list="_mvn_settings $builddir_mvn_settings"
-    additional_mvn_build_args="--copyin=$mvn_runtime_settings:$builddir_mvn_settings"
-  else
-    echo "ok - $mvn_settings content is different from the local copy, use $mvn_settings for safety"
-    mvn_macros_def_list="_mvn_settings $builddir_mvn_settings"
-    additional_mvn_build_args="--copyin=$mvn_settings:$builddir_mvn_settings"
-  fi
-
-  alti_mock build --root=$BUILD_ROOT \
-    --spec=./$spec_name \
-    -S ./alti-spark.tar.gz \
-    -D "_current_workspace $WORKSPACE"\
-    "_spark_version $SPARK_VERSION" "_scala_build_version $SCALA_VERSION" "_git_hash_release $git_hash"\
-    "_hadoop_version $HADOOP_VERSION" "_hive_version $HIVE_VERSION" "_altiscale_release_ver $ALTISCALE_RELEASE"\
-    "_apache_name $SPARK_PKG_NAME"\
-    "_build_release $BUILD_TIME" "_production_release $PRODUCTION_RELEASE"\
-    "$mvn_macros_def_list"\
-    "$additional_mvn_build_args"
+if [ "x${HIVE_VERSION}" = "x" ] ; then
+  echo "fatal - HIVE_VERSION needs to be set, can't build anything, exiting"
+  exit -8
 else
-  2>&1 echo "warn - $mvn_settings not found, env is incorrect and may expose to public repo directly!!!!!"
-  alti_mock build --root=$BUILD_ROOT \
-    --spec=./$spec_name \
-    -S ./alti-spark.tar.gz \
-    -D "_current_workspace $WORKSPACE"\
-    "_spark_version $SPARK_VERSION" "_scala_build_version $SCALA_VERSION" "_git_hash_release $git_hash"\
-    "_hadoop_version $HADOOP_VERSION" "_hive_version $HIVE_VERSION" "_altiscale_release_ver $ALTISCALE_RELEASE"\
-    "_apache_name $SPARK_PKG_NAME"\
-    "_build_release $BUILD_TIME" "_production_release $PRODUCTION_RELEASE"
+  export SPARK_HIVE_VERSION=$HIVE_VERSION
+  echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
+
+env | sort
+
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION scala=scala-${SCALA_VERSION}"
+
+# PURGE LOCAL CACHE for clean build
+# mvn dependency:purge-local-repository
+
+########################
+# BUILD ENTIRE PACKAGE #
+########################
+# This will build the overall JARs we need in each folder
+# and install them locally for further reference. We assume the build
+# environment is clean, so we don't need to delete ~/.ivy2 and ~/.m2
+# Default JDK version applied is 1.7 here.
+
+# hadoop.version, yarn.version, and hive.version are all defined in maven profile now
+# they are tied to each profile.
+# hadoop-2.2 No longer supported, removed.
+# hadoop-2.4 hadoop.version=2.4.1 yarn.version=2.4.1 hive.version=0.13.1a hive.short.version=0.13.1
+# hadoop-2.6 hadoop.version=2.6.0 yarn.version=2.6.0 hive.version=1.2.1.spark hive.short.version=1.2.1
+# hadoop-2.7 hadoop.version=2.7.1 yarn.version=2.7.1 hive.version=1.2.1.spark hive.short.version=1.2.1
+
+hadoop_profile_str=""
+testcase_hadoop_profile_str=""
+if [[ %{_hadoop_version} == 2.4.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.4"
+  testcase_hadoop_profile_str="-Phadoop24-provided"
+elif [[ %{_hadoop_version} == 2.6.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.6"
+  testcase_hadoop_profile_str="-Phadoop26-provided"
+elif [[ %{_hadoop_version} == 2.7.* ]] ; then
+  hadoop_profile_str="-Phadoop-2.7"
+  testcase_hadoop_profile_str="-Phadoop27-provided"
+else
+  echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
+  exit -9
+fi
+xml_setting_str=""
+
+if [ -f %{_mvn_settings} ] ; then
+  echo "ok - picking up %{_mvn_settings}"
+  xml_setting_str="--settings %{_mvn_settings} --global-settings %{_mvn_settings}"
+elif [ -f %{_builddir}/.m2/settings.xml ] ; then
+  echo "ok - picking up %{_builddir}/.m2/settings.xml"
+  xml_setting_str="--settings %{_builddir}/.m2/settings.xml --global-settings %{_builddir}/.m2/settings.xml"
+elif [ -f /etc/alti-maven-settings/settings.xml ] ; then
+  echo "ok - applying local installed maven repo settings.xml for first priority"
+  xml_setting_str="--settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml"
+else
+  echo "ok - applying default repository from pom.xml"
+  xml_setting_str=""
+fi
+
+# TODO: This needs to align with Maven settings.xml, however, Maven looks for
+# -SNAPSHOT in pom.xml to determine which repo to use. This creates a chain reaction on 
+# legacy pom.xml design on other application since they are not implemented in the Maven way.
+# :-( 
+# Will need to create a work around with different repo URL and use profile Id to activate them accordingly
+# mvn_release_flag=""
+# if [ "x%{_production_release}" == "xtrue" ] ; then
+#   mvn_release_flag="-Preleases"
+# else
+#   mvn_release_flag="-Psnapshots"
+# fi
+
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phive-thriftserver -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+echo "$mvn_cmd"
+$mvn_cmd
 
 if [ $? -ne "0" ] ; then
-  echo "fail - $spec_name SRPM build failed"
+  echo "fail - spark build failed!"
   popd
   exit -99
 fi
+
+# AE-1369
+echo "ok - start packging a sparkr.zip for YARN distributed cache, this assumes user isn't going to customize this file"
+pushd R/lib/
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf %{_builddir}/%{build_service_name}/R/lib/sparkr.zip SparkR
 popd
 
-echo "ok - build Completed successfully!"
+popd
+
+echo "ok - build completed successfully!"
+popd
 
 exit 0

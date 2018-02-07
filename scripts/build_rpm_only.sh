@@ -25,7 +25,6 @@ fi
 
 if [ ! -f "$maven_settings" ]; then
   echo "fatal - $maven_settings DOES NOT EXIST!!!! YOU MAY PULLING IN UNTRUSTED artifact and BREACH SECURITY!!!!!!"
-  exit -9
 fi
 
 if [ ! -e "$spark_spec" ] ; then
@@ -87,16 +86,18 @@ if [ -f "$maven_settings" ] ; then
   cp "$maven_settings" alti-maven-settings/
   tar -cvzf alti-maven-settings.tar.gz alti-maven-settings
   cp "$maven_settings_spec" $WORKSPACE/rpmbuild/SPECS/
+
+  # Build alti-maven-settings RPM separately so it doesn't get exposed to spark's SRPM or any external trace
+  rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/alti-maven-settings.spec \
+		--define "_topdir $WORKSPACE/rpmbuild" \
+		--buildroot $WORKSPACE/rpmbuild/BUILDROOT/
+  if [ $? -ne "0" ] ; then
+    echo "fail - alti-maven-settings SRPM build failed"
+    cleanup_secrets
+    exit -95
+  fi
 fi
 popd
-
-# Build alti-maven-settings RPM separately so it doesn't get exposed to spark's SRPM or any external trace
-rpmbuild -vv -ba $WORKSPACE/rpmbuild/SPECS/alti-maven-settings.spec --define "_topdir $WORKSPACE/rpmbuild" --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
-if [ $? -ne "0" ] ; then
-  echo "fail - alti-maven-settings SRPM build failed"
-  cleanup_secrets
-  exit -95
-fi
 
 # The patches is no longer needed since we merge the results into a branch on github.
 # cp $WORKSPACE/patches/* $WORKSPACE/rpmbuild/SOURCES/
