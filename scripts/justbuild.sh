@@ -32,30 +32,6 @@ popd
 # Get a copy of the source code, and tar ball it, remove .git related files
 # Rename directory from spark to alti-spark to distinguish 'spark' just in case.
 echo "ok - preparing to compile, build, and packaging spark"
-pushd $WORKSPACE
-
-ls -al
-
-pushd $spark_git_dir/../
-
-# clean up for *NIX environment only, deleting window's cmd
-find ./bin -type f -name '*.cmd' -exec rm -f {} \;
-
-# Remove launch script AE-579
-# TODO: Review this for K8s and multi-cloud since we may need this for spark standalond cluster
-# later on.
-echo "warn - removing Spark standalone scripts that may be required for Kubernetes"
-rm -f ./sbin/start-slave*
-rm -f ./sbin/start-master.sh
-rm -f ./sbin/start-all.sh
-rm -f ./sbin/stop-slaves.sh
-rm -f ./sbin/stop-master.sh
-rm -f ./sbin/stop-all.sh
-rm -f ./sbin/slaves.sh
-rm -f ./sbin/spark-daemons.sh
-rm -f ./sbin/spark-executor
-rm -f ./sbin/*mesos*.sh
-rm -f ./conf/slaves
 
 if [ "x${HADOOP_VERSION}" = "x" ] ; then
   echo "fatal - HADOOP_VERSION needs to be set, can't build anything, exiting"
@@ -73,9 +49,33 @@ else
   echo "ok - applying customized hive version $SPARK_HIVE_VERSION"
 fi
 
+pushd $WORKSPACE
+pushd $spark_git_dir/
+
+echo "ok - building Spark in directory $(pwd)"
+echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION scala=scala-${SCALA_VERSION}"
+
+# clean up for *NIX environment only, deleting window's cmd
+rm -f ./bin/*.cmd
+
+# Remove launch script AE-579
+# TODO: Review this for K8s and multi-cloud since we may need this for spark standalond cluster
+# later on.
+echo "warn - removing Spark standalone scripts that may be required for Kubernetes"
+rm -f ./sbin/start-slave*
+rm -f ./sbin/start-master.sh
+rm -f ./sbin/start-all.sh
+rm -f ./sbin/stop-slaves.sh
+rm -f ./sbin/stop-master.sh
+rm -f ./sbin/stop-all.sh
+rm -f ./sbin/slaves.sh
+rm -f ./sbin/spark-daemons.sh
+rm -f ./sbin/spark-executor
+rm -f ./sbin/*mesos*.sh
+rm -f ./conf/slaves
+
 env | sort
 
-echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERSION=$SPARK_HIVE_VERSION scala=scala-${SCALA_VERSION}"
 
 # PURGE LOCAL CACHE for clean build
 # mvn dependency:purge-local-repository
@@ -97,33 +97,18 @@ echo "ok - building assembly with HADOOP_VERSION=$SPARK_HADOOP_VERSION HIVE_VERS
 
 hadoop_profile_str=""
 testcase_hadoop_profile_str=""
-if [[ %{_hadoop_version} == 2.4.* ]] ; then
+if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
   hadoop_profile_str="-Phadoop-2.4"
   testcase_hadoop_profile_str="-Phadoop24-provided"
-elif [[ %{_hadoop_version} == 2.6.* ]] ; then
+elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
   hadoop_profile_str="-Phadoop-2.6"
   testcase_hadoop_profile_str="-Phadoop26-provided"
-elif [[ %{_hadoop_version} == 2.7.* ]] ; then
+elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
   hadoop_profile_str="-Phadoop-2.7"
   testcase_hadoop_profile_str="-Phadoop27-provided"
 else
   echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
   exit -9
-fi
-xml_setting_str=""
-
-if [ -f %{_mvn_settings} ] ; then
-  echo "ok - picking up %{_mvn_settings}"
-  xml_setting_str="--settings %{_mvn_settings} --global-settings %{_mvn_settings}"
-elif [ -f %{_builddir}/.m2/settings.xml ] ; then
-  echo "ok - picking up %{_builddir}/.m2/settings.xml"
-  xml_setting_str="--settings %{_builddir}/.m2/settings.xml --global-settings %{_builddir}/.m2/settings.xml"
-elif [ -f /etc/alti-maven-settings/settings.xml ] ; then
-  echo "ok - applying local installed maven repo settings.xml for first priority"
-  xml_setting_str="--settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml"
-else
-  echo "ok - applying default repository from pom.xml"
-  xml_setting_str=""
 fi
 
 # TODO: This needs to align with Maven settings.xml, however, Maven looks for
@@ -138,7 +123,7 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U -X $hadoop_profile_str -Phive-thriftserver -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phive-thriftserver -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
@@ -151,7 +136,7 @@ fi
 # AE-1369
 echo "ok - start packging a sparkr.zip for YARN distributed cache, this assumes user isn't going to customize this file"
 pushd R/lib/
-/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf %{_builddir}/%{build_service_name}/R/lib/sparkr.zip SparkR
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf sparkr.zip SparkR
 popd
 
 popd
