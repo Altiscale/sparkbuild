@@ -97,33 +97,18 @@ env | sort
 
 hadoop_profile_str=""
 testcase_hadoop_profile_str=""
-if [[ %{_hadoop_version} == 2.4.* ]] ; then
+if [[ $SPARK_HADOOP_VERSION == 2.4.* ]] ; then
   hadoop_profile_str="-Phadoop-2.4"
   testcase_hadoop_profile_str="-Phadoop24-provided"
-elif [[ %{_hadoop_version} == 2.6.* ]] ; then
+elif [[ $SPARK_HADOOP_VERSION == 2.6.* ]] ; then
   hadoop_profile_str="-Phadoop-2.6"
   testcase_hadoop_profile_str="-Phadoop26-provided"
-elif [[ %{_hadoop_version} == 2.7.* ]] ; then
+elif [[ $SPARK_HADOOP_VERSION == 2.7.* ]] ; then
   hadoop_profile_str="-Phadoop-2.7"
   testcase_hadoop_profile_str="-Phadoop27-provided"
 else
   echo "fatal - Unrecognize hadoop version $SPARK_HADOOP_VERSION, can't continue, exiting, no cleanup"
   exit -9
-fi
-xml_setting_str=""
-
-if [ -f %{_mvn_settings} ] ; then
-  echo "ok - picking up %{_mvn_settings}"
-  xml_setting_str="--settings %{_mvn_settings} --global-settings %{_mvn_settings}"
-elif [ -f %{_builddir}/.m2/settings.xml ] ; then
-  echo "ok - picking up %{_builddir}/.m2/settings.xml"
-  xml_setting_str="--settings %{_builddir}/.m2/settings.xml --global-settings %{_builddir}/.m2/settings.xml"
-elif [ -f /etc/alti-maven-settings/settings.xml ] ; then
-  echo "ok - applying local installed maven repo settings.xml for first priority"
-  xml_setting_str="--settings /etc/alti-maven-settings/settings.xml --global-settings /etc/alti-maven-settings/settings.xml"
-else
-  echo "ok - applying default repository from pom.xml"
-  xml_setting_str=""
 fi
 
 # TODO: This needs to align with Maven settings.xml, however, Maven looks for
@@ -138,7 +123,7 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U -X $hadoop_profile_str -Phive-thriftserver -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -U -X $hadoop_profile_str -Phive-thriftserver -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
@@ -151,7 +136,7 @@ fi
 # AE-1369
 echo "ok - start packging a sparkr.zip for YARN distributed cache, this assumes user isn't going to customize this file"
 pushd R/lib/
-/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf %{_builddir}/%{build_service_name}/R/lib/sparkr.zip SparkR
+/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf sparkr.zip SparkR
 popd
 
 popd
