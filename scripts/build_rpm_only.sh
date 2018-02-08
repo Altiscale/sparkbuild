@@ -116,6 +116,7 @@ rpmbuild -vv \
   --define "_apache_name $SPARK_PKG_NAME" \
   --define "_build_release $BUILD_TIME" \
   --define "_production_release $PRODUCTION_RELEASE" \
+  --define "_mvn_debug $MAVEN_DEBUG" \
   --buildroot $WORKSPACE/rpmbuild/BUILDROOT/
 
 if [ $? -ne "0" ] ; then
@@ -141,7 +142,8 @@ rpmbuild -vv --bi $WORKSPACE/rpmbuild/SPECS/spark.spec --short-circuit --buildro
   --define "_altiscale_release_ver $ALTISCALE_RELEASE" \
   --define "_apache_name $SPARK_PKG_NAME" \
   --define "_build_release $BUILD_TIME" \
-  --define "_production_release $PRODUCTION_RELEASE"
+  --define "_production_release $PRODUCTION_RELEASE" \
+  --define "_mvn_debug $MAVEN_DEBUG" \
 
 if [ $? -ne "0" ] ; then
   echo "fail - mock RPM build failed"
