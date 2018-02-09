@@ -20,6 +20,8 @@ export RPM_NAME=`echo alti-spark-${SPARK_VERSION}`
 export RPM_DESCRIPTION="Apache Spark ${SPARK_VERSION}\n\n${DESCRIPTION}"
 export RPM_DEVEL_NAME=`echo alti-spark-${SPARK_VERSION}-devel`
 export RPM_DEVEL_DESCRIPTION="Apache Spark ${SPARK_VERSION} individual module and JARs and libraries compiled by maven\n\n${DESCRIPTION}"
+export RPM_YARNSHUFFLE_NAME=`echo alti-spark-${SPARK_VERSION}-yarn-shuffle`
+export RPM_YARNSHUFFLE_DESCRIPTION="The Apache Spark ${SPARK_VERSION} pluggable spark_shuffle RPM to install spark_shuffle JAR compiled by maven\n\n${DESCRIPTION}\nThis package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath."
 
 ##################
 # Spark Core RPM #
@@ -50,7 +52,6 @@ mkdir --mode=0755 -p licenses/
 mkdir --mode=0755 -p mllib/target/
 mkdir --mode=0755 -p common/network-common/target/
 mkdir --mode=0755 -p common/network-shuffle/target/
-mkdir --mode=0755 -p common/network-yarn/target/scala-${SCALA_VERSION}/
 mkdir --mode=0755 -p repl/target/
 mkdir --mode=0755 -p streaming/target/
 mkdir --mode=0755 -p sql/hive/target/
@@ -85,8 +86,6 @@ cp -rp $spark_git_dir/external/flume-sink/target/*.jar ./external/flume-sink/tar
 cp -rp $spark_git_dir/external/flume-assembly/target/*.jar ./external/flume-assembly/target/
 cp -rp $spark_git_dir/common/network-common/target/*.jar ./common/network-common/target/
 cp -rp $spark_git_dir/common/network-shuffle/target/*.jar ./common/network-shuffle/target/
-cp -rp $spark_git_dir/common/network-yarn/target/*.jar ./common/network-yarn/target/
-cp -rp $spark_git_dir/common/network-yarn/target/scala-${SCALA_VERSION}/*.jar ./common/network-yarn/target/scala-${SCALA_VERSION}/
 cp -rp $spark_git_dir/sql/hive/target/*.jar ./sql/hive/target/
 cp -rp $spark_git_dir/sql/hive-thriftserver/target/*.jar ./sql/hive-thriftserver/target/
 cp -rp $spark_git_dir/data/* ./data/
@@ -117,6 +116,45 @@ if [ $? -ne 0 ] ; then
 	echo "FATAL: spark core rpm build fail!"
 	popd
 	exit -1
+fi
+popd
+
+##########################
+# Spark YARN SHUFFLE RPM #
+##########################
+export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
+# Generate RPM based on where spark artifacts are placed from previous steps
+rm -rf "${RPM_BUILD_DIR}"
+mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
+
+mkdir --mode=0755 -p common/network-yarn/target/scala-${SCALA_VERSION}/
+cp -rp $spark_git_dir/common/network-yarn/target/*.jar ./common/network-yarn/target/
+cp -rp $spark_git_dir/common/network-yarn/target/scala-${SCALA_VERSION}/*.jar ./common/network-yarn/target/scala-${SCALA_VERSION}/
+
+pushd ${RPM_DIR}
+fpm --verbose \
+--maintainer andrew.lee02@sap.com \
+--vendor SAP \
+--provides ${RPM_YARNSHUFFLE_NAME} \
+--description "$(printf "${RPM_YARNSHUFFLE_DESCRIPTION}")" \
+--replaces alti-spark-${ARTIFACT_VERSION} \
+--url "${GITREPO}" \
+--license "Apache License v2" \
+--epoch 1 \
+-s dir \
+-t rpm \
+-n ${RPM_YARNSHUFFLE_NAME} \
+-v ${ALTISCALE_RELEASE} \
+--iteration ${DATE_STRING} \
+--rpm-user root \
+--rpm-group root \
+-C ${INSTALL_DIR} \
+opt
+
+if [ $? -ne 0 ] ; then
+  echo "FATAL: spark yarn-shuffle rpm build fail!"
+  popd
+  exit -1
 fi
 popd
 
@@ -167,6 +205,12 @@ fpm --verbose \
 -C ${INSTALL_DIR} \
 opt
 
+if [ $? -ne 0 ] ; then
+  echo "FATAL: spark devel rpm build fail!"
+  popd
+  exit -1
+fi
+popd
 
 exit 0
 
