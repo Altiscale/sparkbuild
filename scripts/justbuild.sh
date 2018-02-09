@@ -142,7 +142,7 @@ fi
 # AE-1369
 echo "ok - start packging a sparkr.zip for YARN distributed cache, this assumes user isn't going to customize this file"
 pushd R/lib/
-/usr/lib/jvm/java-1.6.0-openjdk.x86_64/bin/jar cvMf sparkr.zip SparkR
+/usr/lib/jvm/java-openjdk/bin/jar cvMf sparkr.zip SparkR
 popd
 
 popd
