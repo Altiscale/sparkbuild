@@ -23,6 +23,9 @@ echo "Packaging spark rpm with name ${RPM_NAME} with version ${ALTISCALE_VERSION
 export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
 mkdir --mode=0755 -p ${RPM_BUILD_DIR}
 mkdir --mode=0755 -p ${INSTALL_DIR}/etc/alti-spark-${SPARK_VERSION}
+mkdir --mode=0755 -p ${INSTALL_DIR}/service/log/alti-spark-${SPARK_VERSION}
+
+# Init local directories within spark pkg
 pushd ${RPM_BUILD_DIR}
 mkdir --mode=0755 -p assembly/target/scala-${SCALA_VERSION}/jars
 mkdir --mode=0755 -p data/
@@ -48,7 +51,6 @@ mkdir --mode=0755 -p tools/target/
 mkdir --mode=0755 -p R/lib/
 # Added due to AE-1219 to support Hive 1.2.0+ with Hive on Spark
 mkdir --mode=0755 -p lib/
-mkdir --mode=0755 -p /service/log/alti-spark-${SPARK_VERSION}
 cp -rp $spark_git_dir/assembly/target/scala-${SCALA_VERSION}/jars/*.jar ./assembly/target/scala-${SCALA_VERSION}/jars/
 cp -rp $spark_git_dir/examples/target/*.jar ./examples/target/
 cp -rp $spark_git_dir/examples/target/scala-${SCALA_VERSION}/jars/*.jar ./examples/target/scala-${SCALA_VERSION}/jars/
