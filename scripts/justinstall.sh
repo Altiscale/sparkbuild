@@ -18,6 +18,12 @@ env | sort
 ALTISCALE_RELEASE=${ALTISCALE_RELEASE:-"4.3.0"}
 export RPM_NAME=`echo alti-spark-${SPARK_VERSION}`
 export RPM_DESCRIPTION="Apache Spark ${SPARK_VERSION}\n\n${DESCRIPTION}"
+export RPM_DEVEL_NAME=`echo alti-spark-${SPARK_VERSION}-devel`
+export RPM_DEVEL_DESCRIPTION="Apache Spark ${SPARK_VERSION} individual module and JARs and libraries compiled by maven\n\n${DESCRIPTION}"
+
+##################
+# Spark Core RPM #
+##################
 echo "Packaging spark rpm with name ${RPM_NAME} with version ${ALTISCALE_VERSION}-${DATE_STRING}"
 
 export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
@@ -87,10 +93,10 @@ cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
 popd
 
-cd ${RPM_DIR}
+pushd ${RPM_DIR}
 fpm --verbose \
---maintainer support@altiscale.com \
---vendor Altiscale \
+--maintainer andrew.lee02@sap.com \
+--vendor SAP \
 --provides ${RPM_NAME} \
 --description "$(printf "${RPM_DESCRIPTION}")" \
 --replaces alti-spark-${ARTIFACT_VERSION} \
@@ -106,6 +112,61 @@ fpm --verbose \
 --rpm-group root \
 -C ${INSTALL_DIR} \
 opt etc
+
+if [ $? -ne 0 ] ; then
+	echo "FATAL: spark core rpm build fail!"
+	popd
+	exit -1
+fi
+popd
+
+###################
+# Spark DEVEL RPM #
+###################
+export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
+# Generate RPM based on where spark artifacts are placed from previous steps
+rm -rf "${RPM_BUILD_DIR}"
+mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
+
+pushd "$RPM_BUILD_DIR"
+mkdir --mode=0755 -p core/target
+mkdir --mode=0755 -p sql/catalyst/target
+mkdir --mode=0755 -p sql/core/target
+mkdir --mode=0755 -p launcher/target
+mkdir --mode=0755 -p common/unsafe/target
+mkdir --mode=0755 -p common/tags/target
+mkdir --mode=0755 -p common/sketch/target
+mkdir --mode=0755 -p resource-managers/yarn/target
+cp -rp $spark_git_dir/core/target/*.jar ./core/target/
+cp -rp $spark_git_dir/sql/catalyst/target/*.jar ./sql/catalyst/target/
+cp -rp $spark_git_dir/sql/core/target/*.jar ./sql/core/target/
+cp -rp $spark_git_dir/launcher/target/*.jar ./launcher/target/
+cp -rp $spark_git_dir/common/unsafe/target/*.jar ./common/unsafe/target/
+cp -rp $spark_git_dir/common/tags/target/*.jar ./common/tags/target/
+cp -rp $spark_git_dir/common/sketch/target/*.jar ./common/sketch/target/
+cp -rp $spark_git_dir/resource-managers/yarn/target/*.jar ./resource-managers/yarn/target/
+popd
+
+pushd ${RPM_DIR}
+fpm --verbose \
+--maintainer andrew.lee02@sap.com \
+--vendor SAP \
+--provides ${RPM_DEVEL_NAME} \
+--description "$(printf "${RPM_DEVEL_DESCRIPTION}")" \
+--replaces alti-spark-${ARTIFACT_VERSION} \
+--url "${GITREPO}" \
+--license "Apache License v2" \
+--epoch 1 \
+-s dir \
+-t rpm \
+-n ${RPM_DEVEL_NAME} \
+-v ${ALTISCALE_RELEASE} \
+--iteration ${DATE_STRING} \
+--rpm-user root \
+--rpm-group root \
+-C ${INSTALL_DIR} \
+opt
+
 
 exit 0
 
