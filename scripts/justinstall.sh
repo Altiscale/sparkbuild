@@ -22,6 +22,8 @@ export RPM_DEVEL_NAME=`echo alti-spark-${SPARK_VERSION}-devel`
 export RPM_DEVEL_DESCRIPTION="Apache Spark ${SPARK_VERSION} individual module and JARs and libraries compiled by maven\n\n${DESCRIPTION}"
 export RPM_YARNSHUFFLE_NAME=`echo alti-spark-${SPARK_VERSION}-yarn-shuffle`
 export RPM_YARNSHUFFLE_DESCRIPTION="The Apache Spark ${SPARK_VERSION} pluggable spark_shuffle RPM to install spark_shuffle JAR compiled by maven\n\n${DESCRIPTION}\nThis package contains the yarn-shuffle JAR to enable spark_shuffle on YARN node managers when it is added to NM classpath."
+export RPM_KINESIS_NAME=`echo alti-spark-${SPARK_VERSION}-kinesis`
+export RPM_KINESIS_DESCRIPTION="This package provides the artifact for kinesis integration for Spark. Aware, this is under Amazon Software License (ASL), see: https://aws.amazon.com/asl/ for more information. \n\n${DESCRIPTION}"
 
 ##################
 # Spark Core RPM #
@@ -45,8 +47,6 @@ mkdir --mode=0755 -p external/kafka-0-8-assembly/target/
 mkdir --mode=0755 -p external/flume/target/
 mkdir --mode=0755 -p external/flume-sink/target/
 mkdir --mode=0755 -p external/flume-assembly/target/
-mkdir --mode=0755 -p external/kinesis-asl/target/
-mkdir --mode=0755 -p external/kinesis-asl-assembly/target/
 mkdir --mode=0755 -p graphx/target/
 mkdir --mode=0755 -p licenses/
 mkdir --mode=0755 -p mllib/target/
@@ -65,8 +65,6 @@ cp -rp $spark_git_dir/examples/target/*.jar ./examples/target/
 cp -rp $spark_git_dir/examples/target/scala-${SCALA_VERSION}/jars/*.jar ./examples/target/scala-${SCALA_VERSION}/jars/
 # required for python and SQL
 cp -rp $spark_git_dir/examples/src ./examples/
-cp -rp $spark_git_dir/external/kinesis-asl/target/*.jar ./external/kinesis-asl/target/
-cp -rp $spark_git_dir/external/kinesis-asl-assembly/target/*.jar ./external/kinesis-asl-assembly/target/
 cp -rp $spark_git_dir/tools/target/*.jar ./tools/target/
 cp -rp $spark_git_dir/mllib/data ./mllib/
 cp -rp $spark_git_dir/mllib/target/*.jar ./mllib/target/
@@ -207,6 +205,46 @@ opt
 
 if [ $? -ne 0 ] ; then
   echo "FATAL: spark devel rpm build fail!"
+  popd
+  exit -1
+fi
+popd
+
+#####################
+# Spark KINESIS RPM #
+#####################
+export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
+# Generate RPM based on where spark artifacts are placed from previous steps
+rm -rf "${RPM_BUILD_DIR}"
+mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
+
+mkdir --mode=0755 -p external/kinesis-asl/target/
+mkdir --mode=0755 -p external/kinesis-asl-assembly/target/
+cp -rp $spark_git_dir/external/kinesis-asl/target/*.jar ./external/kinesis-asl/target/
+cp -rp $spark_git_dir/external/kinesis-asl-assembly/target/*.jar ./external/kinesis-asl-assembly/target/
+
+pushd ${RPM_DIR}
+fpm --verbose \
+--maintainer andrew.lee02@sap.com \
+--vendor SAP \
+--provides ${RPM_KINESIS_NAME} \
+--description "$(printf "${RPM_KINESIS_DESCRIPTION}")" \
+--replaces alti-spark-${ARTIFACT_VERSION} \
+--url "${GITREPO}" \
+--license "Amazon Software License" \
+--epoch 1 \
+-s dir \
+-t rpm \
+-n ${RPM_KINESIS_NAME} \
+-v ${ALTISCALE_RELEASE} \
+--iteration ${DATE_STRING} \
+--rpm-user root \
+--rpm-group root \
+-C ${INSTALL_DIR} \
+opt
+
+if [ $? -ne 0 ] ; then
+  echo "FATAL: spark yarn-shuffle rpm build fail!"
   popd
   exit -1
 fi
