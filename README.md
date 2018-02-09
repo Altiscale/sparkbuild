@@ -1,20 +1,28 @@
 sparkbuild
 ==========
 
-Init sparkbuild wrapper repo for Spark-1.6.0 official release.
-This branch tracks the upstream branch-1.6 branch.
+The sparkbuild wrapper repo for Spark-2.2.1 official release.
+This build script here is independent to the build environment used by SAP.
 
 How to Install Spark RPM for this build
 ==========
 ```
-# Install on Hadoop 2.7.1
-yum install alti-spark-1.6.0 alti-spark-1.6.0-example alti-spark-1.6.0-yarn-shuffle
-
-# Install on Hadoop 2.4.1
-yum install alti-spark-1.4.2.hadoop24.hive13 alti-spark-1.4.2.hadoop24.hive13-example
+# Install on Hadoop 2.7.x
+yum install alti-spark-2.2.1 alti-spark-2.2.1-example alti-spark-2.2.1-yarn-shuffle
 ```
 
-Deployment now relies on Chef server. See the alti_spark_app-cookbook and alti_spark_role-cookbook
+For development purposes, you can install the devel package.
+```
+yum install alti-spark-2.2.1-devel
+```
+
+and to use Amazon Kinesis, you can install the kinesis artifacts.
+```
+# TODO: This has not yet been implemented
+yum install alti-spark-2.2.1-kinesis
+```
+
+Deployment now relies on Chef server. See the `alti_spark_app-cookbook` and `alti_spark_role-cookbook`
 for more information.
 
 Run Test Case
@@ -28,7 +36,10 @@ HDFS first, test case doesn't write to the current local direectory.
 Login to remote workbench.
 ```
 ssh workbench_hostname
-cp -rp /opt/spark/test_spark /tmp/
+# define SPARK_VERSION as necessary or source it from /etc/alti-spark-x.y.z/spark-env.sh
+spark_version=2.2.1
+source /etc/alti-spark-${spark_version}/spark-env.sh
+cp -rp /opt/alti-spark-${spark_version}/test_spark /tmp/
 cd /tmp/test_spark/
 # For non-Kerberos cluster
 ./run_all_test.nokerberos.sh
