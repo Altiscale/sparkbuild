@@ -87,8 +87,6 @@ cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
 popd
 
-source /root/.bash_profile
-
 cd ${RPM_DIR}
 fpm --verbose \
 --maintainer support@altiscale.com \
