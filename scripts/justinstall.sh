@@ -88,14 +88,15 @@ popd
 # Generate RPM based on where spark artifacts are placed from previous steps
 rm -rf ${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
 
+source /root/.bash_profile
+
 cd ${RPM_DIR}
 fpm --verbose \
 --maintainer support@altiscale.com \
 --vendor Altiscale \
 --provides ${RPM_NAME} \
 --description "$(printf "${RPM_DESCRIPTION}")" \
---replaces alti-tez-${ARTIFACT_VERSION} \
---replaces vcc-tez \
+--replaces alti-spark-${ARTIFACT_VERSION} \
 --url "${GITREPO}" \
 --license "Apache License v2" \
 --epoch 1 \
