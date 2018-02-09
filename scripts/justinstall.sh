@@ -21,9 +21,11 @@ export RPM_DESCRIPTION="Apache Spark ${SPARK_VERSION}\n\n${DESCRIPTION}"
 echo "Packaging spark rpm with name ${RPM_NAME} with version ${ALTISCALE_VERSION}-${DATE_STRING}"
 
 export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
-mkdir --mode=0755 -p ${RPM_BUILD_DIR}
-mkdir --mode=0755 -p ${INSTALL_DIR}/etc/alti-spark-${SPARK_VERSION}
-mkdir --mode=0755 -p ${INSTALL_DIR}/service/log/alti-spark-${SPARK_VERSION}
+# Generate RPM based on where spark artifacts are placed from previous steps
+rm -rf "${RPM_BUILD_DIR}"
+mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
+mkdir --mode=0755 -p "${INSTALL_DIR}/etc/alti-spark-${SPARK_VERSION}"
+mkdir --mode=0755 -p "${INSTALL_DIR}/service/log/alti-spark-${SPARK_VERSION}"
 
 # Init local directories within spark pkg
 pushd ${RPM_BUILD_DIR}
@@ -84,9 +86,6 @@ cp -rp $spark_git_dir/sql/hive-thriftserver/target/*.jar ./sql/hive-thriftserver
 cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
 popd
-
-# Generate RPM based on where spark artifacts are placed from previous steps
-rm -rf ${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
 
 source /root/.bash_profile
 
