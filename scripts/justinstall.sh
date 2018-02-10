@@ -125,9 +125,11 @@ export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
 rm -rf "${RPM_BUILD_DIR}"
 mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
 
+pushd "$RPM_BUILD_DIR"
 mkdir --mode=0755 -p common/network-yarn/target/scala-${SCALA_VERSION}/
 cp -rp $spark_git_dir/common/network-yarn/target/*.jar ./common/network-yarn/target/
 cp -rp $spark_git_dir/common/network-yarn/target/scala-${SCALA_VERSION}/*.jar ./common/network-yarn/target/scala-${SCALA_VERSION}/
+popd
 
 pushd ${RPM_DIR}
 fpm --verbose \
@@ -218,10 +220,12 @@ export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
 rm -rf "${RPM_BUILD_DIR}"
 mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
 
+pushd "$RPM_BUILD_DIR"
 mkdir --mode=0755 -p external/kinesis-asl/target/
 mkdir --mode=0755 -p external/kinesis-asl-assembly/target/
 cp -rp $spark_git_dir/external/kinesis-asl/target/*.jar ./external/kinesis-asl/target/
 cp -rp $spark_git_dir/external/kinesis-asl-assembly/target/*.jar ./external/kinesis-asl-assembly/target/
+popd
 
 pushd ${RPM_DIR}
 fpm --verbose \
@@ -251,15 +255,3 @@ fi
 popd
 
 exit 0
-
-
-
-
-
-
-
-
-
-
-
-
