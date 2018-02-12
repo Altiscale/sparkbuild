@@ -22,4 +22,4 @@ ln -vsf /opt/alti-spark-${SPARK_VERSION}/common/network-yarn/target/scala-${SCAL
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive/target/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive_${SCALA_VERSION}.jar
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive-thriftserver/target/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive-thriftserver_${SCALA_VERSION}.jar
 
-exit 0
+# Do NOT put exit here, this will trigger an exit all the way to the parent script hadoop_ecosystem_component_build.rb and justinstall.sh
