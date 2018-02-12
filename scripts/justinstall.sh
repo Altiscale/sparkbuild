@@ -111,7 +111,7 @@ fpm --verbose \
 --rpm-user root \
 --rpm-group root \
 --rpm-auto-add-directories \
---after-install "./rpm_scripts/alti-spark-after_install.sh" \
+--after-install ../rpm_scripts/alti-spark-after_install.sh \
 -C ${INSTALL_DIR} \
 opt etc
 
