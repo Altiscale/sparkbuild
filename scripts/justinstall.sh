@@ -96,10 +96,13 @@ fpm --verbose \
 --vendor SAP \
 --provides ${RPM_NAME} \
 --description "$(printf "${RPM_DESCRIPTION}")" \
---replaces alti-spark-${ARTIFACT_VERSION} \
+--replaces ${RPM_NAME} \
 --url "${GITREPO}" \
 --license "Apache License v2" \
 --epoch 1 \
+--rpm-os linux \
+--architecture all \
+--category "Development/Libraries" \
 -s dir \
 -t rpm \
 -n ${RPM_NAME} \
@@ -107,6 +110,8 @@ fpm --verbose \
 --iteration ${DATE_STRING} \
 --rpm-user root \
 --rpm-group root \
+--rpm-auto-add-directories \
+--after-install $curr_dir/rpm_scripts/alti-spark-after_install.sh \
 -C ${INSTALL_DIR} \
 opt etc
 
@@ -137,10 +142,13 @@ fpm --verbose \
 --vendor SAP \
 --provides ${RPM_YARNSHUFFLE_NAME} \
 --description "$(printf "${RPM_YARNSHUFFLE_DESCRIPTION}")" \
---replaces alti-spark-${ARTIFACT_VERSION} \
+--replaces ${RPM_YARNSHUFFLE_NAME} \
 --url "${GITREPO}" \
 --license "Apache License v2" \
 --epoch 1 \
+--rpm-os linux \
+--architecture all \
+--category "Development/Libraries" \
 -s dir \
 -t rpm \
 -n ${RPM_YARNSHUFFLE_NAME} \
@@ -152,7 +160,7 @@ fpm --verbose \
 opt
 
 if [ $? -ne 0 ] ; then
-  echo "FATAL: spark yarn-shuffle rpm build fail!"
+  echo "FATAL: spark $RPM_YARNSHUFFLE_NAME rpm build fail!"
   popd
   exit -1
 fi
@@ -191,10 +199,13 @@ fpm --verbose \
 --vendor SAP \
 --provides ${RPM_DEVEL_NAME} \
 --description "$(printf "${RPM_DEVEL_DESCRIPTION}")" \
---replaces alti-spark-${ARTIFACT_VERSION} \
+--replaces ${RPM_DEVEL_NAME} \
 --url "${GITREPO}" \
 --license "Apache License v2" \
 --epoch 1 \
+--rpm-os linux \
+--architecture all \
+--category "Development/Libraries" \
 -s dir \
 -t rpm \
 -n ${RPM_DEVEL_NAME} \
@@ -206,7 +217,7 @@ fpm --verbose \
 opt
 
 if [ $? -ne 0 ] ; then
-  echo "FATAL: spark devel rpm build fail!"
+  echo "FATAL: spark $RPM_DEVEL_NAME rpm build fail!"
   popd
   exit -1
 fi
@@ -233,10 +244,13 @@ fpm --verbose \
 --vendor SAP \
 --provides ${RPM_KINESIS_NAME} \
 --description "$(printf "${RPM_KINESIS_DESCRIPTION}")" \
---replaces alti-spark-${ARTIFACT_VERSION} \
+--replaces ${RPM_KINESIS_NAME} \
 --url "${GITREPO}" \
 --license "Amazon Software License" \
 --epoch 1 \
+--rpm-os linux \
+--architecture all \
+--category "Development/Libraries" \
 -s dir \
 -t rpm \
 -n ${RPM_KINESIS_NAME} \
@@ -248,7 +262,7 @@ fpm --verbose \
 opt
 
 if [ $? -ne 0 ] ; then
-  echo "FATAL: spark yarn-shuffle rpm build fail!"
+  echo "FATAL: spark $RPM_KINESIS_NAME rpm build fail!"
   popd
   exit -1
 fi
