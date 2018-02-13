@@ -111,6 +111,10 @@ fpm --verbose \
 --rpm-user root \
 --rpm-group root \
 --rpm-auto-add-directories \
+--template-scripts \
+--template-value version=$SPARK_VERSION \
+--template-value scala_version=$SCALA_VERSION \
+--template-value pkgname=$RPM_NAME \
 --after-install $curr_dir/rpm_scripts/alti-spark-after_install.sh \
 -C ${INSTALL_DIR} \
 opt etc
@@ -156,6 +160,11 @@ fpm --verbose \
 --iteration ${DATE_STRING} \
 --rpm-user root \
 --rpm-group root \
+--template-scripts \
+--template-value version=$SPARK_VERSION \
+--template-value scala_version=$SCALA_VERSION \
+--template-value pkgname=$RPM_YARNSHUFFLE_NAME \
+--after-install $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_install.sh \
 -C ${INSTALL_DIR} \
 opt
 
@@ -213,6 +222,10 @@ fpm --verbose \
 --iteration ${DATE_STRING} \
 --rpm-user root \
 --rpm-group root \
+--template-value version=$SPARK_VERSION \
+--template-value scala_version=$SCALA_VERSION \
+--template-value pkgname=$RPM_DEVEL_NAME \
+--after-remove $curr_dir/rpm_scripts/alti-spark-devel-after_remove.sh \
 -C ${INSTALL_DIR} \
 opt
 
@@ -258,6 +271,10 @@ fpm --verbose \
 --iteration ${DATE_STRING} \
 --rpm-user root \
 --rpm-group root \
+--template-value version=$SPARK_VERSION \
+--template-value scala_version=$SCALA_VERSION \
+--template-value pkgname=$RPM_KINESIS_NAME \
+--after-remove $curr_dir/rpm_scripts/alti-spark-kinesis-after_remove.sh \
 -C ${INSTALL_DIR} \
 opt
 

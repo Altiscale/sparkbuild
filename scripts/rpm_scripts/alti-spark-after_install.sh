@@ -1,16 +1,9 @@
 #!bin/bash
 
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
+SPARK_VERSION=<%= version %>
+SCALA_VERSION=<%= scala_version %>
 
-if [ -f "$curr_dir/../setup_env.sh" ]; then
-  set -a
-  source "$curr_dir/../setup_env.sh"
-  set +a
-else
-  echo "FATAL: missing critical env script for post-installation script"
-  exit -1
-fi
+echo "ok - post-install script for <%= pkgname %> triggered"
 
 for f in `find /opt/alti-spark-${SPARK_VERSION}/assembly/target/scala-${SCALA_VERSION}/jars/ -name "*.jar"`
 do
@@ -18,7 +11,6 @@ do
 done
 
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/examples/target/scala-${SCALA_VERSION}/jars/spark-examples_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/
-ln -vsf /opt/alti-spark-${SPARK_VERSION}/common/network-yarn/target/scala-${SCALA_VERSION}/spark-${SPARK_VERSION}-yarn-shuffle.jar /opt/alti-spark-${SPARK_VERSION}/lib/
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive/target/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive_${SCALA_VERSION}.jar
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive-thriftserver/target/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive-thriftserver_${SCALA_VERSION}.jar
 
