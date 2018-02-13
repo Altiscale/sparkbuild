@@ -1,18 +1,9 @@
 #!bin/bash
 
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
+SPARK_VERSION=<%= version %>
+SCALA_VERSION=<%= scala_version %>
 
-if [ -f "$curr_dir/../setup_env.sh" ]; then
-  set -a
-  source "$curr_dir/../setup_env.sh"
-  set +a
-else
-  echo "FATAL: missing critical env script for post-uninstallation script"
-  exit -1
-fi
-
-echo "ok - post-uninstall script for alti-spark-${SPARK_VERSION}-devel triggered"
+echo "ok - post-uninstall script for <%= pkgname %> triggered"
 
 rm -vrf /opt/alti-spark-${SPARK_VERSION}/core
 rm -vrf /opt/alti-spark-${SPARK_VERSION}/sql/catalyst

@@ -8,7 +8,10 @@ echo "ok - post-install script for <%= pkgname %> triggered"
 for f in `find /opt/alti-spark-${SPARK_VERSION}/assembly/target/scala-${SCALA_VERSION}/jars/ -name "*.jar"`
 do
   ln -vsf $f /opt/alti-spark-${SPARK_VERSION}/lib/
+  echo "/opt/alti-spark-${SPARK_VERSION}/lib/$(basename $f)" >> /opt/alti-spark-${SPARK_VERSION}/postinstall.do_NOT_modify.${SPARK_VERSION}.txt
 done
+
+chmod 444 /opt/alti-spark-${SPARK_VERSION}/postinstall.do_NOT_modify.${SPARK_VERSION}.txt
 
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/examples/target/scala-${SCALA_VERSION}/jars/spark-examples_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive/target/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive_${SCALA_VERSION}.jar
