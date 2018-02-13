@@ -1,18 +1,9 @@
 #!bin/bash
 
-curr_dir=`dirname $0`
-curr_dir=`cd $curr_dir; pwd`
+SPARK_VERSION=<%= version %>
+SCALA_VERSION=<%= scala_version %>
 
-if [ -f "$curr_dir/../setup_env.sh" ]; then
-  set -a
-  source "$curr_dir/../setup_env.sh"
-  set +a
-else
-  echo "FATAL: missing critical env script for post-installation script"
-  exit -1
-fi
-
-echo "ok - post-install script for alti-spark-${SPARK_VERSION} triggered"
+echo "ok - post-install script for <%= pkgname %> triggered"
 
 for f in `find /opt/alti-spark-${SPARK_VERSION}/assembly/target/scala-${SCALA_VERSION}/jars/ -name "*.jar"`
 do
