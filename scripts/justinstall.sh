@@ -116,6 +116,7 @@ fpm --verbose \
 --template-value scala_version=$SCALA_VERSION \
 --template-value pkgname=$RPM_NAME \
 --after-install $curr_dir/rpm_scripts/alti-spark-after_install.sh \
+--after-remove $curr_dir/rpm_scripts/alti-spark-after_remove.sh \
 -C ${INSTALL_DIR} \
 opt etc
 
@@ -165,6 +166,7 @@ fpm --verbose \
 --template-value scala_version=$SCALA_VERSION \
 --template-value pkgname=$RPM_YARNSHUFFLE_NAME \
 --after-install $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_install.sh \
+--after-remove $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_remove.sh \
 -C ${INSTALL_DIR} \
 opt
 
