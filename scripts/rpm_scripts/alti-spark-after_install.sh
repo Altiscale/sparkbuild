@@ -11,7 +11,6 @@ do
 done
 
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/examples/target/scala-${SCALA_VERSION}/jars/spark-examples_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/
-ln -vsf /opt/alti-spark-${SPARK_VERSION}/common/network-yarn/target/scala-${SCALA_VERSION}/spark-${SPARK_VERSION}-yarn-shuffle.jar /opt/alti-spark-${SPARK_VERSION}/lib/
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive/target/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive_${SCALA_VERSION}.jar
 ln -vsf /opt/alti-spark-${SPARK_VERSION}/sql/hive-thriftserver/target/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive-thriftserver_${SCALA_VERSION}.jar
 
