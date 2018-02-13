@@ -12,6 +12,8 @@ else
   exit -1
 fi
 
+echo "ok - post-install script for alti-spark-${SPARK_VERSION} triggered"
+
 for f in `find /opt/alti-spark-${SPARK_VERSION}/assembly/target/scala-${SCALA_VERSION}/jars/ -name "*.jar"`
 do
   ln -vsf $f /opt/alti-spark-${SPARK_VERSION}/lib/
