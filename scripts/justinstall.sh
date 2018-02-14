@@ -218,6 +218,7 @@ fpm --verbose \
 --rpm-os linux \
 --architecture all \
 --category "Development/Libraries" \
+-d ${RPM_NAME} \
 -s dir \
 -t rpm \
 -n ${RPM_DEVEL_NAME} \

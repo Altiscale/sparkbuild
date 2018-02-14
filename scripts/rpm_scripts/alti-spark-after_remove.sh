@@ -20,6 +20,8 @@ rm -vf /opt/alti-spark-${SPARK_VERSION}/postinstall.do_NOT_modify.${SPARK_VERSIO
 rm -vrf /opt/alti-spark-${SPARK_VERSION}/lib/spark-examples_${SCALA_VERSION}-${SPARK_VERSION}.jar
 rm -vrf /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive_${SCALA_VERSION}.jar
 rm -vrf /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive-thriftserver_${SCALA_VERSION}.jar
+
+# Safety check, redundant.
 if [ ! -f /opt/alti-spark-${SPARK_VERSION}/lib/spark-${SPARK_VERSION}-yarn-shuffle.jar ] ; then
   rm -vrf /opt/alti-spark-${SPARK_VERSION}/lib
 fi
