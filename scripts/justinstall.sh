@@ -162,6 +162,7 @@ fpm --verbose \
 --iteration ${DATE_STRING} \
 --rpm-user root \
 --rpm-group root \
+--rpm-auto-add-directories \
 --template-scripts \
 --template-value version=$SPARK_VERSION \
 --template-value scala_version=$SCALA_VERSION \
@@ -226,6 +227,7 @@ fpm --verbose \
 --iteration ${DATE_STRING} \
 --rpm-user root \
 --rpm-group root \
+--rpm-auto-add-directories \
 --template-value version=$SPARK_VERSION \
 --template-value scala_version=$SCALA_VERSION \
 --template-value pkgname=$RPM_DEVEL_NAME \
