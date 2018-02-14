@@ -103,6 +103,7 @@ fpm --verbose \
 --rpm-os linux \
 --architecture all \
 --category "Development/Libraries" \
+-d ${RPM_YARNSHUFFLE_NAME} \
 -s dir \
 -t rpm \
 -n ${RPM_NAME} \
