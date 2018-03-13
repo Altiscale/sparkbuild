@@ -195,7 +195,6 @@ mkdir --mode=0755 -p launcher/target
 mkdir --mode=0755 -p common/unsafe/target
 mkdir --mode=0755 -p common/tags/target
 mkdir --mode=0755 -p common/sketch/target
-mkdir --mode=0755 -p resource-managers/yarn/target
 cp -rp $spark_git_dir/core/target/*.jar ./core/target/
 cp -rp $spark_git_dir/sql/catalyst/target/*.jar ./sql/catalyst/target/
 cp -rp $spark_git_dir/sql/core/target/*.jar ./sql/core/target/
@@ -203,7 +202,6 @@ cp -rp $spark_git_dir/launcher/target/*.jar ./launcher/target/
 cp -rp $spark_git_dir/common/unsafe/target/*.jar ./common/unsafe/target/
 cp -rp $spark_git_dir/common/tags/target/*.jar ./common/tags/target/
 cp -rp $spark_git_dir/common/sketch/target/*.jar ./common/sketch/target/
-cp -rp $spark_git_dir/resource-managers/yarn/target/*.jar ./resource-managers/yarn/target/
 popd
 
 pushd ${RPM_DIR}
