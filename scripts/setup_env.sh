@@ -6,12 +6,12 @@
 # Force to use default Java which is JDK 1.7 now
 export JAVA_HOME=${JAVA_HOME:-"/usr/java/default"}
 export ANT_HOME=${ANT_HOME:-"/opt/apache-ant"}
-export MAVEN_HOME=${MAVEN_HOME:-"/usr/share/apache-maven"}
-export M2_HOME=${M2_HOME:-"/usr/share/apache-maven"}
+export MAVEN_HOME=${MAVEN_HOME:-"/opt/apache-maven"}
+export M2_HOME=${M2_HOME:-"/opt/apache-maven"}
 export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2g -XX:MaxPermSize=1024M -XX:ReservedCodeCacheSize=512m"}
 export SCALA_HOME=${SCALA_HOME:-"/opt/scala"}
-export HADOOP_VERSION=${HADOOP_VERSION:-"2.7.1"}
-# Spark 1.5+ default Hive starts with 1.2.1, backward compatible with Hive 1.2.0
+export HADOOP_VERSION=${HADOOP_VERSION:-"2.7.3"}
+# Spark 2.2 default is still Hive 2.1.x. Testing against Hive 2.1.1 here.
 export HIVE_VERSION=${HIVE_VERSION:-"1.2.1"}
 # AE-1226 temp fix on the R PATH
 export R_HOME=${R_HOME:-$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep -o .*bin | head -n 1))}
@@ -21,7 +21,7 @@ else
   echo "ok - R_HOME redefined to $R_HOME based on installed RPM due to AE-1226"
 fi
 
-export PATH=$PATH:$M2_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$JAVA_HOME/bin:$R_HOME
+export PATH=$PATH:$M2_HOME/bin:$MAVEN_HOME/bin:$SCALA_HOME/bin:$ANT_HOME/bin:$R_HOME
 
 # Define default spark uid:gid and build version
 # and all other Spark build related env
@@ -39,13 +39,13 @@ if [[ $SPARK_VERSION == 2.* ]] ; then
 fi
 
 # Defines which Hadoop version to build against. Always use the latest as default.
-export ALTISCALE_RELEASE=${ALTISCALE_RELEASE:-"4.0.0"}
+export ALTISCALE_RELEASE=${ALTISCALE_RELEASE:-"4.3.0"}
 if [[ $HADOOP_VERSION == 2.2.* ]] ; then
   TARGET_ALTISCALE_RELEASE=2.0.0
 elif [[ $HADOOP_VERSION == 2.4.* ]] ; then
   TARGET_ALTISCALE_RELEASE=3.0.0
 elif [[ $HADOOP_VERSION == 2.[67].* ]] ; then
-  TARGET_ALTISCALE_RELEASE=4.0.0
+  TARGET_ALTISCALE_RELEASE=4.3.0
 else
   2>&1 echo "error - can't recognize altiscale's HADOOP_VERSION=$HADOOP_VERSION for $ALTISCALE_RELEASE"
   2>&1 echo "error - $SPARK_VERSION has not yet been tested nor endorsed by Altiscale on $HADOOP_VERSION"
@@ -68,3 +68,6 @@ export BUILD_TIME=$(date +%Y%m%d%H%M)
 # Customize build OPTS for MVN
 export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2048m -XX:MaxPermSize=1024m"}
 export PRODUCTION_RELEASE=${PRODUCTION_RELEASE:-"false"}
+
+export PACKAGE_BRANCH=${PACKAGE_BRANCH:-"branch-${SPARK_VERSION}-alti"}
+DEBUG_MAVEN=${DEBUG_MAVEN:-"false"}
