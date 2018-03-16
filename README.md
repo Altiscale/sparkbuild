@@ -60,8 +60,13 @@ popd
 the package.
 
 ```
+export HADOOP_VERSION=2.7.4
+export SPARK_VERSION=2.1.2
+export HIVE_VERSION=1.2.1
 export PATCH_DIR=dev_images/docker
 export PACKAGE_NAME=spark
+export PACKAGE_BRANCH=branch-2.1.2-alti
+export DEBUG_MAVEN=false
 # You can override this to use your own local/remote base image if you want
 export DOCKER_BASE_IMAGE_NAME=docker-dev.artifactory.service.altiscale.com/sparkbase
 
