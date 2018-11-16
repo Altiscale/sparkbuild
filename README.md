@@ -1,38 +1,29 @@
 sparkbuild
 ==========
 
-Init sparkbuild wrapper repo for one of the spark branch (e.g. branch-1.6-alti) for official release.
-You will need to select the build script branch (sparkbuild) and spark branch (spark) to build it.
-Specify them in the jenkin job as part of the parameters.
+The sparkbuild wrapper repo for Spark-2.3.2 official release.
+This build script here is independent to the build environment used by SAP.
 
-How to Install Spark RPM (e.g. spark 1.6.1)
+How to Install Spark RPM for this build
 ==========
 ```
-# Install on Hadoop 2.7.1
-yum install alti-spark-1.6.1 alti-spark-1.6.1-example alti-spark-1.6.1-yarn-shuffle
-
-# Install on Hadoop 2.4.1
-yum install alti-spark-1.4.2.hadoop24.hive13 alti-spark-1.4.2.hadoop24.hive13-example
+# Install on Hadoop 2.7.x
+yum install alti-spark-2.3.2 alti-spark-2.3.2-example alti-spark-2.3.2-yarn-shuffle
 ```
 
-Deployment now relies on Chef server. See the alti_spark_app-cookbook and alti_spark_role-cookbook
+For development purposes, you can install the devel package.
+```
+yum install alti-spark-2.3.2-devel
+```
+
+and to use Amazon Kinesis, you can install the kinesis artifacts.
+```
+# TODO: This has not yet been implemented
+yum install alti-spark-2.3.2-kinesis
+```
+
+Deployment now relies on Chef server. See the `alti_spark_app-cookbook` and `alti_spark_role-cookbook`
 for more information.
-
-Be aware that in Spark 1.6.1, Hadoop and Hive JARs are no longer embed in the assembly JAR.
-Read https://documentation.altiscale.com/spark-sql-how-to$sparksqlquickstart for more information
-on how to include Hive JARs for SparkSQL if you need to run SparkSQL.
-
-Apply different version of Maven
-==========
-
-Since building Spark requires different version of Maven from time to time, to apply a different
-version of Maven, make sure
-- apache-maven RPM are populated and deployed to yum repo that you are testing.
-- update altiscale-spark-centos-6-x86_64.cfg `chroot_setup_cmd` option to install the correct version
-of apache-maven in mock environment.
-- Make sure `setup_env.sh` env variables `M2_HOME`, `MAVEN_HOME`, `MAVEN_OPTS` are updated to point to
-the correct location and specifying with the proper values.
-
 
 Run Test Case
 ==========
@@ -45,7 +36,10 @@ HDFS first, test case doesn't write to the current local direectory.
 Login to remote workbench.
 ```
 ssh workbench_hostname
-cp -rp /opt/spark/test_spark /tmp/
+# define SPARK_VERSION as necessary or source it from /etc/alti-spark-x.y.z/spark-env.sh
+spark_version=2.3.2
+source /etc/alti-spark-${spark_version}/spark-env.sh
+cp -rp /opt/alti-spark-${spark_version}/test_spark /tmp/
 cd /tmp/test_spark/
 # For non-Kerberos cluster
 ./run_all_test.nokerberos.sh
@@ -61,9 +55,4 @@ command is sufficient.
 
 The test should exit with 0 if everything completes correctly.
 
-Applying Different Version of Spark
-==========
-
-To apply a different version of Spark, please read: https://documentation.altiscale.com/spark-upgrade-tips$upgradespark
-Basically, the idea is to override `SPARK_HOME` and `SPARK_CONF_DIR` to point to the version you want.
 
