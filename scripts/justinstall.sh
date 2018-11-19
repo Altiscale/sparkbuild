@@ -77,11 +77,11 @@ cp -rp $spark_git_dir/python ./
 cp -rp $spark_git_dir/project ./
 cp -rp $spark_git_dir/docs ./
 cp -rp $spark_git_dir/dev ./
-cp -rp $spark_git_dir/external/kafka-0-8/target/*.jar ./external/kafka-0-8/target/
-cp -rp $spark_git_dir/external/kafka-0-8-assembly/target/*.jar ./external/kafka-0-8-assembly/target/
-cp -rp $spark_git_dir/external/flume/target/*.jar ./external/flume/target/
-cp -rp $spark_git_dir/external/flume-sink/target/*.jar ./external/flume-sink/target/
-cp -rp $spark_git_dir/external/flume-assembly/target/*.jar ./external/flume-assembly/target/
+cp -rp $spark_git_dir/external/kafka-0-10/target/*.jar ./external/kafka-0-8/target/
+cp -rp $spark_git_dir/external/kafka-0-10-assembly/target/*.jar ./external/kafka-0-8-assembly/target/
+# cp -rp $spark_git_dir/external/flume/target/*.jar ./external/flume/target/
+# cp -rp $spark_git_dir/external/flume-sink/target/*.jar ./external/flume-sink/target/
+# cp -rp $spark_git_dir/external/flume-assembly/target/*.jar ./external/flume-assembly/target/
 cp -rp $spark_git_dir/common/network-common/target/*.jar ./common/network-common/target/
 cp -rp $spark_git_dir/common/network-shuffle/target/*.jar ./common/network-shuffle/target/
 cp -rp $spark_git_dir/sql/hive/target/*.jar ./sql/hive/target/
