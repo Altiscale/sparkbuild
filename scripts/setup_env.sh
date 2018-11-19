@@ -69,5 +69,5 @@ export BUILD_TIME=$(date +%Y%m%d%H%M)
 export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2048m -XX:MaxPermSize=1024m"}
 export PRODUCTION_RELEASE=${PRODUCTION_RELEASE:-"false"}
 
-export PACKAGE_BRANCH=${PACKAGE_BRANCH:-"branch-${SPARK_VERSION-alti"}
+export PACKAGE_BRANCH=${PACKAGE_BRANCH:-"branch-${SPARK_VERSION-alti}"
 DEBUG_MAVEN=${DEBUG_MAVEN:-"false"}
