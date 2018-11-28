@@ -14,7 +14,7 @@ export HADOOP_VERSION=${HADOOP_VERSION:-"2.7.3"}
 # Spark 2.2 default is still Hive 2.1.x. Testing against Hive 2.1.1 here.
 export HIVE_VERSION=${HIVE_VERSION:-"2.1.1"}
 # AE-1226 temp fix on the R PATH
-export R_HOME=${R_HOME:-$(dirname $(rpm -ql $(rpm -qa | grep vcc-R_.*-0.2.0- | sort -r | head -n 1 ) | grep -o .*bin | head -n 1))}
+export R_HOME=${R_HOME:-$(dirname $(rpm -ql $(rpm -qa | grep R-3.5.1 | sort -r | head -n 1 ) | grep -o .*bin | head -n 1))}
 if [ "x${R_HOME}" = "x" ] ; then
   echo "warn - R_HOME not defined, CRAN R isn't installed properly in the current env"
 else
