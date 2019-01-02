@@ -66,7 +66,7 @@ cp -rp $spark_git_dir/examples/target/scala-${SCALA_VERSION}/jars/*.jar ./exampl
 # required for python and SQL
 cp -rp $spark_git_dir/examples/src ./examples/
 cp -rp $spark_git_dir/tools/target/*.jar ./tools/target/
-# cp -rp $spark_git_dir/mllib/data ./mllib/
+cp -rp $spark_git_dir/mllib/data ./mllib/
 cp -rp $spark_git_dir/mllib/target/*.jar ./mllib/target/
 cp -rp $spark_git_dir/graphx/target/*.jar ./graphx/target/
 cp -rp $spark_git_dir/streaming/target/*.jar ./streaming/target/
@@ -88,6 +88,7 @@ cp -rp $spark_git_dir/sql/hive/target/*.jar ./sql/hive/target/
 cp -rp $spark_git_dir/sql/hive-thriftserver/target/*.jar ./sql/hive-thriftserver/target/
 cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
+cp -rp $spark_git_dir/lib/*.jar ./lib/*.jar
 popd
 
 pushd ${RPM_DIR}
