@@ -88,6 +88,8 @@ cp -rp $spark_git_dir/sql/hive/target/*.jar ./sql/hive/target/
 cp -rp $spark_git_dir/sql/hive-thriftserver/target/*.jar ./sql/hive-thriftserver/target/
 cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
+
+`find ${RPM_BUILD_DIR} -name "*.jar" -exec ln -s {} "${RPM_BUILD_DIR}/lib" \;`
 popd
 
 pushd ${RPM_DIR}
