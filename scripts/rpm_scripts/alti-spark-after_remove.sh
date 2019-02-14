@@ -23,6 +23,7 @@ rm -vrf /opt/alti-spark-${SPARK_VERSION}/lib/spark-hive-thriftserver_${SCALA_VER
 
 # Safety check, redundant.
 if [ ! -f /opt/alti-spark-${SPARK_VERSION}/lib/spark-${SPARK_VERSION}-yarn-shuffle.jar ] ; then
+  echo "Removing /opt/alti-spark-${SPARK_VERSION}/lib in parent post-remove as it doesn't have spark-${SPARK_VERSION}-yarn-shuffle.jar"
   rm -vrf /opt/alti-spark-${SPARK_VERSION}/lib
 fi
 
