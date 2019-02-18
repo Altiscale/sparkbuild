@@ -25,6 +25,57 @@ export RPM_YARNSHUFFLE_DESCRIPTION="The Apache Spark ${SPARK_VERSION} pluggable 
 export RPM_KINESIS_NAME=`echo alti-spark-${SPARK_VERSION}-kinesis`
 export RPM_KINESIS_DESCRIPTION="This package provides the artifact for kinesis integration for Spark. Aware, this is under Amazon Software License (ASL), see: https://aws.amazon.com/asl/ for more information. \n\n${DESCRIPTION}"
 
+##########################
+# Spark YARN SHUFFLE RPM #
+##########################
+export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
+# Generate RPM based on where spark artifacts are placed from previous steps
+rm -rf "${RPM_BUILD_DIR}"
+mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
+
+pushd "$RPM_BUILD_DIR"
+mkdir --mode=0755 -p common/network-yarn/target/scala-${SCALA_VERSION}/
+cp -rp $spark_git_dir/common/network-yarn/target/*.jar ./common/network-yarn/target/
+cp -rp $spark_git_dir/common/network-yarn/target/scala-${SCALA_VERSION}/*.jar ./common/network-yarn/target/scala-${SCALA_VERSION}/
+popd
+
+pushd ${RPM_DIR}
+fpm --verbose \
+--maintainer andrew.lee02@sap.com \
+--vendor SAP \
+--provides ${RPM_YARNSHUFFLE_NAME} \
+--description "$(printf "${RPM_YARNSHUFFLE_DESCRIPTION}")" \
+--replaces ${RPM_YARNSHUFFLE_NAME} \
+--url "${GITREPO}" \
+--license "Apache License v2" \
+--epoch 1 \
+--rpm-os linux \
+--architecture all \
+--category "Development/Libraries" \
+-s dir \
+-t rpm \
+-n ${RPM_YARNSHUFFLE_NAME} \
+-v ${ALTISCALE_RELEASE} \
+--iteration ${DATE_STRING} \
+--rpm-user root \
+--rpm-group root \
+--rpm-auto-add-directories \
+--template-scripts \
+--template-value version=$SPARK_VERSION \
+--template-value scala_version=$SCALA_VERSION \
+--template-value pkgname=$RPM_YARNSHUFFLE_NAME \
+--after-install $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_install.sh \
+--after-remove $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_remove.sh \
+-C ${INSTALL_DIR} \
+opt
+
+if [ $? -ne 0 ] ; then
+  echo "FATAL: spark $RPM_YARNSHUFFLE_NAME rpm build fail!"
+  popd
+  exit -1
+fi
+popd
+
 ##################
 # Spark Core RPM #
 ##################
@@ -88,8 +139,6 @@ cp -rp $spark_git_dir/sql/hive/target/*.jar ./sql/hive/target/
 cp -rp $spark_git_dir/sql/hive-thriftserver/target/*.jar ./sql/hive-thriftserver/target/
 cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
-
-# `find ${RPM_BUILD_DIR} -name "*.jar" -exec ln -s {} "${RPM_BUILD_DIR}/lib" \;`
 popd
 
 pushd ${RPM_DIR}
@@ -127,57 +176,6 @@ if [ $? -ne 0 ] ; then
 	echo "FATAL: spark core rpm build fail!"
 	popd
 	exit -1
-fi
-popd
-
-##########################
-# Spark YARN SHUFFLE RPM #
-##########################
-export RPM_BUILD_DIR=${INSTALL_DIR}/opt/alti-spark-${SPARK_VERSION}
-# Generate RPM based on where spark artifacts are placed from previous steps
-rm -rf "${RPM_BUILD_DIR}"
-mkdir --mode=0755 -p "${RPM_BUILD_DIR}"
-
-pushd "$RPM_BUILD_DIR"
-mkdir --mode=0755 -p common/network-yarn/target/scala-${SCALA_VERSION}/
-cp -rp $spark_git_dir/common/network-yarn/target/*.jar ./common/network-yarn/target/
-cp -rp $spark_git_dir/common/network-yarn/target/scala-${SCALA_VERSION}/*.jar ./common/network-yarn/target/scala-${SCALA_VERSION}/
-popd
-
-pushd ${RPM_DIR}
-fpm --verbose \
---maintainer andrew.lee02@sap.com \
---vendor SAP \
---provides ${RPM_YARNSHUFFLE_NAME} \
---description "$(printf "${RPM_YARNSHUFFLE_DESCRIPTION}")" \
---replaces ${RPM_YARNSHUFFLE_NAME} \
---url "${GITREPO}" \
---license "Apache License v2" \
---epoch 1 \
---rpm-os linux \
---architecture all \
---category "Development/Libraries" \
--s dir \
--t rpm \
--n ${RPM_YARNSHUFFLE_NAME} \
--v ${ALTISCALE_RELEASE} \
---iteration ${DATE_STRING} \
---rpm-user root \
---rpm-group root \
---rpm-auto-add-directories \
---template-scripts \
---template-value version=$SPARK_VERSION \
---template-value scala_version=$SCALA_VERSION \
---template-value pkgname=$RPM_YARNSHUFFLE_NAME \
---after-install $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_install.sh \
---after-remove $curr_dir/rpm_scripts/alti-spark-yarn-shuffle-after_remove.sh \
--C ${INSTALL_DIR} \
-opt
-
-if [ $? -ne 0 ] ; then
-  echo "FATAL: spark $RPM_YARNSHUFFLE_NAME rpm build fail!"
-  popd
-  exit -1
 fi
 popd
 
