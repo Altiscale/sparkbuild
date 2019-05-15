@@ -139,6 +139,11 @@ cp -rp $spark_git_dir/sql/hive/target/*.jar ./sql/hive/target/
 cp -rp $spark_git_dir/sql/hive-thriftserver/target/*.jar ./sql/hive-thriftserver/target/
 cp -rp $spark_git_dir/data/* ./data/
 cp -rp $spark_git_dir/R/lib/* ./R/lib/
+cp -rp $spark_git_dir/licenses/* ./licenses/
+cp -p $spark_git_dir/README.md ./
+cp -p $spark_git_dir/LICENSE ./
+cp -p $spark_git_dir/NOTICE ./
+cp -p $spark_git_dir/CONTRIBUTING.md ./
 popd
 
 pushd ${RPM_DIR}
