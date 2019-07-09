@@ -30,11 +30,11 @@ BuildRequires: vcc-R_3.0.3
 
 Url: http://spark.apache.org/
 %description
-Build from https://github.com/Altiscale/spark/tree/branch-1.6-alti with 
+Build from https://github.com/Altiscale/spark/tree/branch-1.6-alti with
 build script https://github.com/Altiscale/sparkbuild/tree/branch-1.6-alti
 Origin source form https://github.com/apache/spark/tree/branch-1.6
-%{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's 
-Hadoop 2.7.x with YARN 2.7.x enabled, and hive-1.2.1. This package should work with Altiscale 
+%{spark_folder_name} is a re-compiled and packaged spark distro that is compiled against Altiscale's
+Hadoop 2.7.x with YARN 2.7.x enabled, and hive-1.2.1. This package should work with Altiscale
 Hadoop 2.7.x and Hive 1.2.1 (vcc-hadoop-2.7.1/2 and alti-hive-1.2.0/alti-hive-1.2.1).
 
 %package sparkts
@@ -194,9 +194,9 @@ else
 fi
 
 # TODO: This needs to align with Maven settings.xml, however, Maven looks for
-# -SNAPSHOT in pom.xml to determine which repo to use. This creates a chain reaction on 
+# -SNAPSHOT in pom.xml to determine which repo to use. This creates a chain reaction on
 # legacy pom.xml design on other application since they are not implemented in the Maven way.
-# :-( 
+# :-(
 # Will need to create a work around with different repo URL and use profile Id to activate them accordingly
 # mvn_release_flag=""
 # if [ "x%{_production_release}" == "xtrue" ] ; then
@@ -205,12 +205,12 @@ fi
 #   mvn_release_flag="-Psnapshots"
 # fi
 
-mvn_cmd="mvn -U $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
+mvn_cmd="mvn -Dhttps.protocols=TLSv1.2 -U $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn -Pkinesis-asl $xml_setting_str -DskipTests install"
 echo "$mvn_cmd"
 $mvn_cmd
 
 pushd %{_builddir}/%{build_service_name}/sql/hive-thriftserver/
-mvn_spark_hs2_cmd="mvn -U $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn $xml_setting_str -DskipTests package"
+mvn_spark_hs2_cmd="mvn -Dhttps.protocols=TLSv1.2 -U $hadoop_profile_str -Phadoop-provided -Phive-provided -Psparkr -Pyarn $xml_setting_str -DskipTests package"
 echo "$mvn_spark_hs2_cmd"
 $mvn_spark_hs2_cmd
 popd
@@ -222,7 +222,7 @@ echo "ok - start repackging assembly JAR with jdk 1.6 due to JIRA AE-1112"
 pushd `pwd`
 cd %{_builddir}/%{build_service_name}/
 %{__mkdir} -p %{_builddir}/%{build_service_name}/tmp/
-# AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with 
+# AE-1112 pyspark is packaged with JDK 1.7 which will not work. Need to repackage it with
 # JDK 1.6 while not breaking the bytecode, etc. In other word, only the JAR format matters
 # and we don't want to compile it with JDK 1.6.
 ls -al %{_builddir}/%{build_service_name}/assembly/target/scala-2.10/spark-assembly-%{_spark_version}-hadoop%{_hadoop_version}.jar
@@ -355,7 +355,7 @@ cp -rp %{_builddir}/%{build_service_name}/sql/core/target/*.jar %{buildroot}%{in
 cp -rp %{_builddir}/%{build_service_name}/launcher/target/*.jar %{buildroot}%{install_spark_dest}/launcher/target/
 cp -rp %{_builddir}/%{build_service_name}/unsafe/target/*.jar %{buildroot}%{install_spark_dest}/unsafe/target/
 cp -rp %{_builddir}/%{build_service_name}/yarn/target/*.jar %{buildroot}%{install_spark_dest}/yarn/target/
- 
+
 # test deploy the config folder
 cp -rp %{_builddir}/%{build_service_name}/conf %{buildroot}/%{install_spark_conf}
 
@@ -562,7 +562,7 @@ fi
 * Fri Aug 21 2015 Andrew Lee 20150821
 - Update RPM file listing
 * Tue Aug 11 2015 Andrew Lee 20150811
-- Update spark version to 1.5 
+- Update spark version to 1.5
 * Wed Jul 29 2015 Andrew Lee 20150729
 - Update install section with new directories lib for AE-1219
 * Mon Jul 6 2015 Andrew Lee 20150706
